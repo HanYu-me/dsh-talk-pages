@@ -456,6 +456,7 @@ var zh = {
   "toast.needUiWorkspace": "界面服务还没就绪，稍等一下再试",
   "menu.importWs": "导入工作区",
   "menu.importSession": "导入对话",
+  "menu.toggleSessions": "显示 / 隐藏对话",
   "menu.moveGroup": "移动到分组（仅地图）",
   "menu.noGroup": "移出分组（自由卡片）",
   "menu.open": "打开对话",
@@ -686,6 +687,7 @@ var en = {
   "toast.needUiWorkspace": "The UI services are still starting up — try again in a moment",
   "menu.importWs": "Import workspace",
   "menu.importSession": "Import conversation",
+  "menu.toggleSessions": "Show / hide conversations",
   "menu.moveGroup": "Move to group (map only)",
   "menu.noGroup": "Remove from group (free card)",
   "menu.open": "Open conversation",
@@ -15754,6 +15756,27 @@ function CanvasInner(props) {
           }
         });
       }
+    } else if (menu.view === "toggle-session") {
+      title = t("menu.toggleSessions");
+      const archivedIds = new Set(workspaces.archivedSessionIds ?? []);
+      const candidates = placeableSessionIds(sessions).filter((id2) => (sessionWs.get(id2) ?? UNSORTED_PAGE_ID) === activePage).sort((a, b) => (sessions.byId[b]?.updatedAt ?? 0) - (sessions.byId[a]?.updatedAt ?? 0)).slice(0, 300);
+      candidates.forEach((sessionId, index2) => {
+        const onMap = boardSessionIds.has(sessionId);
+        const archivedTag = archivedIds.has(sessionId) ? t("picker.archivedTag") : "";
+        items.push({
+          key: sessionId,
+          label: `${onMap ? "✓ " : "　"}${sessions.byId[sessionId]?.displayTitle ?? sessionId}`,
+          ...archivedTag !== "" ? { hint: archivedTag } : {},
+          onPick: () => {
+            const existing = canvas.cardIdForSession(sessionId);
+            if (existing !== void 0) {
+              canvas.removeCard(existing);
+              return;
+            }
+            importSession(sessionId, menu.flowX + index2 % 5 * 40, menu.flowY + index2 % 5 * 40);
+          }
+        });
+      });
     } else if (menu.view === "import-session") {
       title = t("menu.importSession");
       const candidates = placeableSessionIds(sessions).filter((id2) => !boardSessionIds.has(id2)).slice(0, 200);
@@ -15797,10 +15820,10 @@ function CanvasInner(props) {
         }
       });
       items.push({
-        key: "import-session",
-        label: `${t("menu.importSession")}…`,
+        key: "toggle-session",
+        label: `${t("menu.toggleSessions")}…`,
         onPick: () => {
-          setMenu({ ...menu, view: "import-session" });
+          setMenu({ ...menu, view: "toggle-session" });
         }
       });
     } else if (menu.kind === "card" && menu.targetId !== void 0) {
@@ -16001,7 +16024,7 @@ function CanvasInner(props) {
         }
       });
     }
-    const searchable = menu.view === "import-ws" || menu.view === "import-session";
+    const searchable = menu.view === "import-ws" || menu.view === "import-session" || menu.view === "toggle-session";
     return {
       left: menu.left,
       top: menu.top,
@@ -16009,7 +16032,7 @@ function CanvasInner(props) {
       ...searchable ? { searchable } : {},
       items
     };
-  }, [menu, workspaces.items, sessions, boardSessionIds, boxes, pages, activePage, wsTitles, canvasState.cards, canvasState.edges, canvasState.digests, locale]);
+  }, [menu, workspaces.items, sessions, boardSessionIds, boxes, pages, activePage, wsTitles, canvasState.cards, canvasState.edges, canvasState.digests, workspaces.archivedSessionIds, locale]);
   const savedCamera = canvas.savedCamera(pageCameraKey(activePage));
   const hasContent = Object.keys(visibleCards).length > 0 || Object.keys(frameRects).length > 0;
   return /* @__PURE__ */ (0, import_jsx_runtime16.jsxs)(

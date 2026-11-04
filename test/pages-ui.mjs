@@ -528,6 +528,28 @@ try {
     JSON.stringify(readded))
   await page.screenshot({ path: path.join(SHOTS, 'phase2-after-picker.png') })
 
+  // Right-click on empty canvas → 显示 / 隐藏对话…: toggles conversations of this page.
+  await page.mouse.click(1000, 300, { button: 'right' })
+  await wait(450)
+  check('the canvas menu offers 显示 / 隐藏对话', await clickMenuItem('显示 / 隐藏对话'))
+  const toggleItem = (needle) => page.evaluate((text) => {
+    const target = [...document.querySelectorAll('[role="menuitem"]')].find(el => el.textContent.includes(text))
+    return target === undefined ? null : target.textContent
+  }, needle)
+  const listed = await toggleItem('下周排期草案')
+  check('the list shows this page\'s conversation ticked', listed !== null && listed.includes('✓'), String(listed))
+  const countBeforeToggle = Object.keys((await state()).cards).length
+  await clickMenuItem('下周排期草案')
+  check('picking a ticked conversation hides it (card removed)',
+    Object.keys((await state()).cards).length === countBeforeToggle - 1
+      && (await cardIdForSession(freeSession)) === undefined)
+  check('and the menu stays open, now showing it unticked',
+    !((await toggleItem('下周排期草案')) ?? '✓').includes('✓'), String(await toggleItem('下周排期草案')))
+  await clickMenuItem('下周排期草案')
+  check('picking it again shows it (card created)', (await cardIdForSession(freeSession)) !== undefined)
+  await page.keyboard.press('Escape')
+  await wait(300)
+
   // autoAdd off: the picker's switch is stored.
   await page.click('[data-talkmap-open-picker]')
   await wait(500)

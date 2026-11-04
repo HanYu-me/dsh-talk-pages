@@ -130,7 +130,7 @@ interface MenuContext {
   /** Edge menus: endpoint card ids (set for stored AND lineage edges). */
   edgeFrom?: string
   edgeTo?: string
-  view: 'root' | 'import-ws' | 'import-session' | 'new-ws' | 'box-color'
+  view: 'root' | 'import-ws' | 'import-session' | 'toggle-session' | 'new-ws' | 'box-color'
 }
 
 function CanvasInner(props: RootSlotStandardProps): React.JSX.Element {
@@ -2106,6 +2106,34 @@ function CanvasInner(props: RootSlotStandardProps): React.JSX.Element {
           },
         })
       }
+    } else if (menu.view === 'toggle-session') {
+      // Show / hide conversations of THIS page: every conversation of the
+      // workspace (archived ones included), ticked = has a card. A pick flips it
+      // and the list stays open, so several can be toggled in one go.
+      title = t('menu.toggleSessions')
+      const archivedIds = new Set(workspaces.archivedSessionIds ?? [])
+      const candidates = placeableSessionIds(sessions)
+        .filter(id => (sessionWs.get(id) ?? UNSORTED_PAGE_ID) === activePage)
+        .sort((a, b) => (sessions.byId[b]?.updatedAt ?? 0) - (sessions.byId[a]?.updatedAt ?? 0))
+        .slice(0, 300)
+      candidates.forEach((sessionId, index) => {
+        const onMap = boardSessionIds.has(sessionId)
+        const archivedTag = archivedIds.has(sessionId) ? t('picker.archivedTag') : ''
+        items.push({
+          key: sessionId,
+          label: `${onMap ? '✓ ' : '　'}${sessions.byId[sessionId]?.displayTitle ?? sessionId}`,
+          ...(archivedTag !== '' ? { hint: archivedTag } : {}),
+          onPick: () => {
+            const existing = canvas.cardIdForSession(sessionId)
+            if (existing !== undefined) {
+              canvas.removeCard(existing)
+              return
+            }
+            // New arrivals fan out from the click point instead of stacking.
+            importSession(sessionId, menu.flowX + (index % 5) * 40, menu.flowY + (index % 5) * 40)
+          },
+        })
+      })
     } else if (menu.view === 'import-session') {
       title = t('menu.importSession')
       const candidates = placeableSessionIds(sessions)
@@ -2151,9 +2179,9 @@ function CanvasInner(props: RootSlotStandardProps): React.JSX.Element {
         onPick: () => { setMenu({ ...menu, view: 'import-ws' }) },
       })
       items.push({
-        key: 'import-session',
-        label: `${t('menu.importSession')}…`,
-        onPick: () => { setMenu({ ...menu, view: 'import-session' }) },
+        key: 'toggle-session',
+        label: `${t('menu.toggleSessions')}…`,
+        onPick: () => { setMenu({ ...menu, view: 'toggle-session' }) },
       })
     } else if (menu.kind === 'card' && menu.targetId !== undefined) {
       const cardId = menu.targetId
@@ -2373,7 +2401,7 @@ function CanvasInner(props: RootSlotStandardProps): React.JSX.Element {
         },
       })
     }
-    const searchable = menu.view === 'import-ws' || menu.view === 'import-session'
+    const searchable = menu.view === 'import-ws' || menu.view === 'import-session' || menu.view === 'toggle-session'
     return {
       left: menu.left,
       top: menu.top,
@@ -2382,7 +2410,7 @@ function CanvasInner(props: RootSlotStandardProps): React.JSX.Element {
       items,
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [menu, workspaces.items, sessions, boardSessionIds, boxes, pages, activePage, wsTitles, canvasState.cards, canvasState.edges, canvasState.digests, locale])
+  }, [menu, workspaces.items, sessions, boardSessionIds, boxes, pages, activePage, wsTitles, canvasState.cards, canvasState.edges, canvasState.digests, workspaces.archivedSessionIds, locale])
 
   const savedCamera = canvas.savedCamera(pageCameraKey(activePage))
   const hasContent = Object.keys(visibleCards).length > 0 || Object.keys(frameRects).length > 0

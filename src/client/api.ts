@@ -130,8 +130,10 @@ export const talkMapApi = {
     key: string
     operation: 'put' | 'deleted'
     value?: unknown
-  }) => void): () => void {
+  }) => void, onReload?: () => void): () => void {
     const source = new EventSource('/talk-pages/events')
+    // The host (agent API) changed things behind our back: re-sync everything.
+    source.addEventListener('reload', () => { onReload?.() })
     source.addEventListener('change', (event) => {
       try {
         onChange(JSON.parse((event as MessageEvent).data as string))

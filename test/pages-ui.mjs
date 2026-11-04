@@ -415,6 +415,128 @@ try {
   check('the freed card is still painted', (await paintedCards()).includes(freeCardId), freeCardId)
   await page.screenshot({ path: path.join(SHOTS, 'phase1-box-deleted.png') })
 
+  // ---- 6b. phase 2: free boxes, priority, picker ------------------------
+  // A fresh box is FREE: members keep their positions, and moving the box carries them.
+  await page.click('[data-talkmap-new-box]')
+  await wait(700)
+  const boxes2 = (await globalState()).boxes ?? {}
+  const freeBoxId = Object.keys(boxes2).find(id => boxes2[id].free === true && boxes2[id].pageId === 'ws-plan')
+  check('a new box is created free (members keep their own positions)', freeBoxId !== undefined,
+    JSON.stringify(boxes2))
+  const fr = (await nodeBoxes()).frames[freeBoxId]
+  const zf = await viewportZoom()
+  const cardNow = await cardBox(freeCardId)
+  const dropAt = { x: fr.x + 40 * zf, y: fr.y + 70 * zf }
+  await dragCardBy(freeCardId, { x: dropAt.x - cardNow.x, y: dropAt.y - cardNow.y })
+  const inFree = (await state()).cards[freeCardId]
+  const inFreeBox = await cardBox(freeCardId)
+  check('a card dropped in a free box joins it', inFree.boxId === freeBoxId, String(inFree.boxId))
+  check('and keeps the exact drop position (no slot snapping)',
+    Math.abs(inFreeBox.x - dropAt.x) <= 20 && Math.abs(inFreeBox.y - dropAt.y) <= 20,
+    `${inFreeBox.x},${inFreeBox.y} vs ${dropAt.x},${dropAt.y}`)
+  await wait(1000)
+  const settledFree = await cardBox(freeCardId)
+  check('nothing re-slots a member of a free box',
+    Math.abs(settledFree.x - inFreeBox.x) <= 1 && Math.abs(settledFree.y - inFreeBox.y) <= 1,
+    `${inFreeBox.x},${inFreeBox.y} → ${settledFree.x},${settledFree.y}`)
+
+  // Move the box by its label: the member must travel with it.
+  const lbl = await page.evaluate((boxId) => {
+    const el = document.querySelector(`[data-talkmap-box-label="${boxId}"]`)
+    const rect = el.getBoundingClientRect()
+    return { x: rect.x + rect.width / 2, y: rect.y + rect.height / 2 }
+  }, freeBoxId)
+  const storedBeforeMove = (await state()).cards[freeCardId]
+  const frameBeforeMove = (await globalState()).wsFrames[freeBoxId]
+  await page.mouse.move(lbl.x, lbl.y)
+  await wait(60)
+  await page.mouse.down()
+  await page.mouse.move(lbl.x + 2, lbl.y + 2)
+  await wait(90)
+  for (let i = 1; i <= 14; i += 1) {
+    await page.mouse.move(lbl.x + 2 + (120 * i) / 14, lbl.y + 2 + (60 * i) / 14)
+    await wait(20)
+  }
+  await wait(90)
+  await page.mouse.up()
+  await wait(1100)
+  const storedAfterMove = (await state()).cards[freeCardId]
+  const frameAfterMove = (await globalState()).wsFrames[freeBoxId]
+  const fdx = frameAfterMove.x - frameBeforeMove.x
+  const fdy = frameAfterMove.y - frameBeforeMove.y
+  check('the box moved', Math.abs(fdx) > 20 || Math.abs(fdy) > 20, `${fdx},${fdy}`)
+  check('its member moved by the same delta',
+    Math.abs((storedAfterMove.x - storedBeforeMove.x) - fdx) <= 1
+      && Math.abs((storedAfterMove.y - storedBeforeMove.y) - fdy) <= 1
+      && storedAfterMove.boxId === freeBoxId,
+    `box ${fdx},${fdy}; card ${storedAfterMove.x - storedBeforeMove.x},${storedAfterMove.y - storedBeforeMove.y}`)
+
+  // The box can be switched to the slot grid and back from its menu.
+  const lbl2 = await page.evaluate((boxId) => {
+    const el = document.querySelector(`[data-talkmap-box-label="${boxId}"]`)
+    const rect = el.getBoundingClientRect()
+    return { x: rect.x + rect.width / 2, y: rect.y + rect.height / 2 }
+  }, freeBoxId)
+  await page.mouse.click(lbl2.x, lbl2.y, { button: 'right' })
+  await wait(450)
+  await clickMenuItem('网格排列')
+  check('the box menu switches it to the grid', (await globalState()).boxes[freeBoxId].free === false,
+    JSON.stringify((await globalState()).boxes[freeBoxId]))
+  await page.mouse.click(lbl2.x, lbl2.y, { button: 'right' })
+  await wait(450)
+  await clickMenuItem('自由摆放')
+  check('and back to free placement', (await globalState()).boxes[freeBoxId].free === true)
+
+  // Priority: right-click a card → mark high.
+  const pc = await cardBox(freeCardId)
+  await page.mouse.click(pc.x + 60, pc.y + 30, { button: 'right' })
+  await wait(450)
+  await clickMenuItem('高优先级')
+  check('the card menu marks a high priority', (await state()).cards[freeCardId].priority === 1,
+    String((await state()).cards[freeCardId].priority))
+  check('the card wears its priority chip',
+    await harness(() => document.querySelector('[data-talkmap-priority="1"]') !== null))
+  check('the priority rail counts it',
+    await harness(() => /1/.test(document.querySelector('[class*="statusRailTabCount"]')?.textContent ?? '')))
+  await page.screenshot({ path: path.join(SHOTS, 'phase2-priority-free-box.png') })
+  await page.mouse.click(pc.x + 60, pc.y + 30, { button: 'right' })
+  await wait(450)
+  await clickMenuItem('取消优先级')
+  check('the mark can be cleared', (await state()).cards[freeCardId].priority === undefined)
+
+  // Picker: untick a conversation → its card leaves the map; tick it → it returns free.
+  const cardCountBefore = Object.keys((await state()).cards).length
+  await page.click('[data-talkmap-open-picker]')
+  await wait(500)
+  const rowSel = `[data-talkmap-picker-row="${freeSession}"] input`
+  check('the picker lists the conversation ticked', await page.isChecked(rowSel))
+  await page.click(rowSel)
+  await page.click('[data-talkmap-picker-apply]')
+  await wait(800)
+  check('unticking removes the card from the map',
+    (await state()).cards[freeCardId] === undefined
+      && Object.keys((await state()).cards).length === cardCountBefore - 1,
+    String(Object.keys((await state()).cards).length))
+  await page.click('[data-talkmap-open-picker]')
+  await wait(500)
+  check('the picker lists it unticked now', !(await page.isChecked(rowSel)))
+  await page.click(rowSel)
+  await page.click('[data-talkmap-picker-apply]')
+  await wait(800)
+  const readded = Object.values((await state()).cards).find(card => card.sessionId === freeSession)
+  check('ticking brings it back as a free card', readded !== undefined && readded.boxId === undefined,
+    JSON.stringify(readded))
+  await page.screenshot({ path: path.join(SHOTS, 'phase2-after-picker.png') })
+
+  // autoAdd off: the picker's switch is stored.
+  await page.click('[data-talkmap-open-picker]')
+  await wait(500)
+  await page.click('[class*="pickerAuto"] input')
+  await wait(500)
+  check('auto-add can be switched off', (await globalState()).autoAdd === false,
+    String((await globalState()).autoAdd))
+  await page.click('[class*="pickerCancel"]')
+
   // ---- 7. no uncaught errors ----------------------------------------
   check('no uncaught page errors', pageErrors.length === 0, pageErrors.slice(0, 3).join(' | '))
 } finally {

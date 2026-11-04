@@ -20,6 +20,7 @@ import type {
 } from './host/dsh-host.ts'
 import { textOfBlocks } from './host/digest/extract.ts'
 import { DigestPipeline, DIGEST_DEFAULTS } from './host/digest/pipeline.ts'
+import { startAgentApi } from './host/agent-api.ts'
 import { mountTalkMapRoutes, type TalkMapRuntime } from './host/routes.ts'
 import { Spawner } from './host/spawn.ts'
 import { openTalkMapStore, DOMAIN_NAME, type Digest, type TalkMapStore } from './host/store.ts'
@@ -61,8 +62,17 @@ export function apply(ctx: OuterContext): void {
         rejectStore(error)
       })
       const unmountRoutes = mountTalkMapRoutes(services, storeReady, runtime)
+      // Files-as-API: a snapshot to read and an inbox to write (docs/AGENT.md).
+      const stopAgentApi = startAgentApi(
+        storeReady,
+        message => services.logger?.info?.(message),
+        listener => services.on('domain/changed', (...args: unknown[]) => {
+          if ((args[0] as { domain?: string } | undefined)?.domain === DOMAIN_NAME) listener()
+        }),
+      )
       return () => {
         disposed = true
+        stopAgentApi()
         unmountRoutes()
         void store?.domain.close()
       }
@@ -110,13 +120,13 @@ export function apply(ctx: OuterContext): void {
         return set
       }
       runtime.autoPushSessions = new Set<string>()
-      void refreshAutoSources()
+      void refreshAutoSources().catch(() => undefined)
       // Edges can be switched on while the host runs: keep the trigger set
       // honest instead of freezing the mount-time snapshot.
       const offEdgeChanges = services.on('domain/changed', (...args: unknown[]) => {
         const change = args[0] as { domain?: string; table?: string } | undefined
         if (change?.domain !== DOMAIN_NAME || change.table !== 'edges') return
-        void refreshAutoSources()
+        void refreshAutoSources().catch(() => undefined)
       })
       const pipeline = new DigestPipeline(
         services,
@@ -226,7 +236,12 @@ export function apply(ctx: OuterContext): void {
         }).filter(entry => entry.sessionId !== '')
         // Verify the strongest hits against the visible transcript (in
         // parallel, capped) and take the snippet from there.
-        const verified = await Promise.all(candidates.slice(0, 6).map(async (entry) => {
+        interface SearchItem {
+          sessionId: string
+          blocks: string[][]
+          seqs: (number | null)[]
+        }
+        const verified = await Promise.all(candidates.slice(0, 6).map(async (entry): Promise<SearchItem | null> => {
           if (entry.type !== '' && !searchable.has(entry.type)) return null
           try {
             const match = await visibleMatch(corpus, entry.sessionId, query)
@@ -238,7 +253,7 @@ export function apply(ctx: OuterContext): void {
               : { sessionId: entry.sessionId, blocks: [[entry.line]], seqs: [entry.seq] }
           }
         }))
-        const items = verified.filter((item): item is NonNullable<typeof item> => item !== null)
+        const items = verified.filter((item): item is SearchItem => item !== null)
         return { items, hasMore: page?.nextCursor !== undefined }
       }
       /** Every extra hit inside ONE conversation (asked for explicitly). */

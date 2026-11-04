@@ -393,6 +393,7 @@
     wsFrames: frames,
     wsColors: { 'ws-medkit': 'blue' },
     locale: 'zh',
+    autoAdd: true,
   }
 
   const payload = {

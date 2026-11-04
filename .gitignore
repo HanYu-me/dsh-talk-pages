@@ -3,3 +3,4 @@ package-lock.json
 client/client.dev.js
 client/.client.check.js
 *.bak-*
+test/shots/

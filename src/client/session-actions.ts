@@ -8,6 +8,7 @@
  * map and the sidebar in sync in both directions.
  */
 import { uiWorkspaceService } from './map-state.ts'
+import { callRpc } from './rpc.ts'
 
 const RECYCLE_BIN_ROUTE = 'dsh-session-recycle-bin/api'
 

@@ -10,7 +10,7 @@
 import { useEffect, useState } from 'react'
 import { talkMapApi } from './api.ts'
 import { canvas, INBOX_BOARD_ID, newCardId } from './canvas-store.ts'
-import { buildInjectionText } from './digest-text.ts'
+import { buildInjectionText, digestIsEmpty } from './digest-text.ts'
 import { closeMapPanel, forkSessionInUi, getServices, mapUi, openSessionInUi } from './map-state.ts'
 import { callRpc } from './rpc.ts'
 import { t } from './i18n.ts'

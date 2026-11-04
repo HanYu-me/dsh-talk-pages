@@ -63,28 +63,28 @@ var require_use_sync_external_store_shim_production = __commonJS({
       return x === y && (0 !== x || 1 / x === 1 / y) || x !== x && y !== y;
     }
     var objectIs = "function" === typeof Object.is ? Object.is : is;
-    var useState9 = React.useState;
+    var useState10 = React.useState;
     var useEffect12 = React.useEffect;
-    var useLayoutEffect4 = React.useLayoutEffect;
+    var useLayoutEffect3 = React.useLayoutEffect;
     var useDebugValue2 = React.useDebugValue;
-    function useSyncExternalStore$2(subscribe2, getSnapshot2) {
-      var value2 = getSnapshot2(), _useState = useState9({ inst: { value: value2, getSnapshot: getSnapshot2 } }), inst = _useState[0].inst, forceUpdate = _useState[1];
-      useLayoutEffect4(
+    function useSyncExternalStore$2(subscribe3, getSnapshot2) {
+      var value2 = getSnapshot2(), _useState = useState10({ inst: { value: value2, getSnapshot: getSnapshot2 } }), inst = _useState[0].inst, forceUpdate = _useState[1];
+      useLayoutEffect3(
         function() {
           inst.value = value2;
           inst.getSnapshot = getSnapshot2;
           checkIfSnapshotChanged(inst) && forceUpdate({ inst });
         },
-        [subscribe2, value2, getSnapshot2]
+        [subscribe3, value2, getSnapshot2]
       );
       useEffect12(
         function() {
           checkIfSnapshotChanged(inst) && forceUpdate({ inst });
-          return subscribe2(function() {
+          return subscribe3(function() {
             checkIfSnapshotChanged(inst) && forceUpdate({ inst });
           });
         },
-        [subscribe2]
+        [subscribe3]
       );
       useDebugValue2(value2);
       return value2;
@@ -99,7 +99,7 @@ var require_use_sync_external_store_shim_production = __commonJS({
         return true;
       }
     }
-    function useSyncExternalStore$1(subscribe2, getSnapshot2) {
+    function useSyncExternalStore$1(subscribe3, getSnapshot2) {
       return getSnapshot2();
     }
     var shim = "undefined" === typeof window || "undefined" === typeof window.document || "undefined" === typeof window.document.createElement ? useSyncExternalStore$1 : useSyncExternalStore$2;
@@ -130,12 +130,12 @@ var require_with_selector_production = __commonJS({
     }
     var objectIs = "function" === typeof Object.is ? Object.is : is;
     var useSyncExternalStore7 = shim.useSyncExternalStore;
-    var useRef8 = React.useRef;
+    var useRef7 = React.useRef;
     var useEffect12 = React.useEffect;
     var useMemo5 = React.useMemo;
     var useDebugValue2 = React.useDebugValue;
-    exports.useSyncExternalStoreWithSelector = function(subscribe2, getSnapshot2, getServerSnapshot, selector2, isEqual) {
-      var instRef = useRef8(null);
+    exports.useSyncExternalStoreWithSelector = function(subscribe3, getSnapshot2, getServerSnapshot, selector2, isEqual) {
+      var instRef = useRef7(null);
       if (null === instRef.current) {
         var inst = { hasValue: false, value: null };
         instRef.current = inst;
@@ -174,7 +174,7 @@ var require_with_selector_production = __commonJS({
         },
         [getSnapshot2, getServerSnapshot, selector2, isEqual]
       );
-      var value2 = useSyncExternalStore7(subscribe2, instRef[0], instRef[1]);
+      var value2 = useSyncExternalStore7(subscribe3, instRef[0], instRef[1]);
       useEffect12(
         function() {
           inst.hasValue = true;
@@ -305,8 +305,11 @@ var talkMapApi = {
    * Subscribe to host-side domain changes (multi-tab sync, digest arrivals).
    * @returns disposer closing the EventSource.
    */
-  subscribeChanges(onChange) {
+  subscribeChanges(onChange, onReload) {
     const source = new EventSource("/talk-pages/events");
+    source.addEventListener("reload", () => {
+      onReload?.();
+    });
     source.addEventListener("change", (event) => {
       try {
         onChange(JSON.parse(event.data));
@@ -325,7 +328,7 @@ var zh = {
   "map.close": "关闭地图（Esc）",
   "map.back": "返回",
   "map.toggle": "对话地图",
-  "map.empty": "这一页还是空的 —— 右键导入对话，或双击空白直接开新对话；也可以点右上角「＋ 新建框」",
+  "map.empty": "这一页还是空的 —— 点右上角「选择对话」挑选要放上来的对话，或双击空白直接开新对话",
   "statusRail.title": "队列中的任务",
   "confirm.removeGroup.title": "删除这个分组？",
   "confirm.removeGroup.body": "分组里的 {n} 个会话会被移入回收站（可在回收站恢复），卡片和分组框同时从地图上移除。仍在运行的会话会先被停止。",
@@ -505,6 +508,35 @@ var zh = {
   "menu.newBox": "新建框",
   "menu.renameBox": "重命名框",
   "menu.deleteBox": "删除框（卡片保留）",
+  "menu.boxFree": "自由摆放成员",
+  "menu.boxGrid": "网格排列成员（自动对齐）",
+  "menu.priority1": "标记为 高优先级",
+  "menu.priority2": "标记为 中优先级",
+  "menu.priority3": "标记为 低优先级",
+  "menu.priorityClear": "取消优先级",
+  "card.priority1": "高",
+  "card.priority2": "中",
+  "card.priority3": "低",
+  "priorityRail.title": "重点对话",
+  "priorityRail.empty": "还没有标记。右键卡片，选「标记为 高/中/低优先级」",
+  "priorityRail.open": "展开重点对话",
+  "priorityRail.close": "收起重点对话",
+  "picker.button": "选择对话",
+  "picker.title": "选择放在地图上的对话",
+  "picker.search": "搜索标题…",
+  "picker.filterAll": "全部",
+  "picker.filterOnMap": "已在地图",
+  "picker.filterOff": "未在地图",
+  "picker.filterArchived": "已归档",
+  "picker.archivedTag": "已归档",
+  "picker.selected": "已选 {n} 个",
+  "picker.apply": "应用",
+  "picker.cancel": "取消",
+  "picker.selectShown": "选中当前列表",
+  "picker.clearShown": "取消选中当前列表",
+  "picker.autoAdd": "自动加入新对话",
+  "picker.added": "已加入 {a} 个，移出 {r} 个",
+  "picker.empty": "没有匹配的对话",
   "menu.pages": "页面",
   "menu.currentPage": "当前页",
   "toast.boxCreated": "已新建框，把卡片拖进来即可归入",
@@ -526,7 +558,7 @@ var en = {
   "map.close": "Close map (Esc)",
   "map.back": "Back",
   "map.toggle": "Talk Map",
-  "map.empty": "This page is empty — right-click to import a conversation, double-click to start a chat, or use “+ New box” above",
+  "map.empty": "This page is empty — use “Choose conversations” above to pick what goes here, or double-click to start a chat",
   "statusRail.title": "Tasks in the queue",
   "confirm.removeGroup.title": "Delete this group?",
   "confirm.removeGroup.body": "Its {n} conversations go to the recycle bin (restorable from there) and the cards and frame leave the map. Anything still running is stopped first.",
@@ -699,6 +731,35 @@ var en = {
   "menu.newBox": "New box",
   "menu.renameBox": "Rename box",
   "menu.deleteBox": "Delete box (keep cards)",
+  "menu.boxFree": "Free placement of members",
+  "menu.boxGrid": "Arrange members on a grid",
+  "menu.priority1": "Mark as high priority",
+  "menu.priority2": "Mark as medium priority",
+  "menu.priority3": "Mark as low priority",
+  "menu.priorityClear": "Clear priority",
+  "card.priority1": "High",
+  "card.priority2": "Med",
+  "card.priority3": "Low",
+  "priorityRail.title": "Key conversations",
+  "priorityRail.empty": "Nothing marked yet. Right-click a card and choose a priority.",
+  "priorityRail.open": "Show key conversations",
+  "priorityRail.close": "Hide key conversations",
+  "picker.button": "Choose conversations",
+  "picker.title": "Choose what stays on the map",
+  "picker.search": "Search titles…",
+  "picker.filterAll": "All",
+  "picker.filterOnMap": "On the map",
+  "picker.filterOff": "Not on the map",
+  "picker.filterArchived": "Archived",
+  "picker.archivedTag": "Archived",
+  "picker.selected": "{n} selected",
+  "picker.apply": "Apply",
+  "picker.cancel": "Cancel",
+  "picker.selectShown": "Select listed",
+  "picker.clearShown": "Deselect listed",
+  "picker.autoAdd": "Add new conversations automatically",
+  "picker.added": "Added {a}, removed {r}",
+  "picker.empty": "No matching conversations",
   "menu.pages": "Pages",
   "menu.currentPage": "current page",
   "toast.boxCreated": "Box created — drop cards into it to group them",
@@ -910,6 +971,8 @@ var canvas = {
         else digests[change.key] = change.value;
         setState({ digests });
       }
+    }, () => {
+      canvas.refresh();
     });
   },
   moveCard(id2, x, y) {
@@ -1032,6 +1095,32 @@ var canvas = {
       console.error("[dsh-talk-pages] card box save failed:", error);
     });
   },
+  /** Mark a card's importance (1 high, 2 medium, 3 low; undefined clears it). */
+  setCardPriority(id2, priority) {
+    const card = state.cards[id2];
+    if (card === void 0 || card.priority === priority) return;
+    pushUndo();
+    const next = { ...card };
+    if (priority === void 0) delete next.priority;
+    else next.priority = priority;
+    setState({ cards: { ...state.cards, [id2]: next } });
+    trackCardWrite(talkMapApi.upsertCards({ [id2]: next }).catch((error) => {
+      console.error("[dsh-talk-pages] card priority save failed:", error);
+    }));
+  },
+  /** Switch a box between the slot grid and free placement of its members. */
+  setBoxFree(boxId, free) {
+    if (state.global === null) return;
+    const box = state.global.boxes?.[boxId];
+    if (box === void 0 || box.free === true === free) return;
+    pushUndo();
+    const global = {
+      ...state.global,
+      boxes: { ...state.global.boxes, [boxId]: { ...box, free } }
+    };
+    setState({ global });
+    void persistGlobal(global, "box");
+  },
   /** Switch the rendered page (each page keeps its own camera). */
   setActivePage(pageId) {
     if (state.global === null || state.global.activePage === pageId) return;
@@ -1053,7 +1142,7 @@ var canvas = {
     pushUndo();
     const global = {
       ...state.global,
-      boxes: { ...state.global.boxes, [boxId]: { pageId, title } },
+      boxes: { ...state.global.boxes, [boxId]: { pageId, title, free: true } },
       wsFrames: { ...state.global.wsFrames, [boxId]: rect }
     };
     setState({ global });
@@ -1422,7 +1511,7 @@ function allCards() {
 }
 
 // src/client/MapOverlay.tsx
-var import_react16 = require("react");
+var import_react17 = require("react");
 
 // src/client/font-scale.ts
 var STORAGE_KEY = "dsh.talk-pages.font-step";
@@ -1540,7 +1629,7 @@ function cleanSnippet(raw, query) {
 
 // dsh-css: dsh-css:src/client/talk-pages.module.css
 var __tagId = "dsh-talk-pages/talk-pages.module.css";
-var __css = `.tm_toggleButton { display: flex; align-items: center; justify-content: center; gap: 6px; width: 32px; height: 32px; padding: 0; border: none; border-radius: 8px; background: transparent; color: var(--dsw-alias-label-secondary); cursor: pointer; } .tm_toggleButton:hover { background: var(--dsw-alias-interactive-bg-hover); color: var(--dsw-alias-label-primary); } .tm_toggleButtonActive { background: var(--dsw-alias-interactive-bg-active); color: var(--dsw-alias-brand-primary); } .tm_toggleRow { display: flex; align-items: center; gap: 8px; width: 100%; padding: 6px 10px; border: none; border-radius: 8px; background: transparent; color: var(--dsw-alias-label-secondary); font-size: calc(13px + var(--tm-font-step, 0px)); cursor: pointer; text-align: left; } .tm_toggleRow:hover { background: var(--dsw-alias-interactive-bg-hover); color: var(--dsw-alias-label-primary); } .tm_toggleLabel { white-space: nowrap; } .tm_toggleIcon { width: 18px; height: 18px; flex: none; } .tm_panel { height: 100%; min-height: 0; box-sizing: border-box; display: flex; flex-direction: column; background: var(--dsw-alias-bg-base); color: var(--dsw-alias-label-primary); } .tm_header { display: flex; align-items: center; gap: 10px; padding: 10px 14px; border-bottom: 1px solid var(--dsw-alias-border-l1); background: var(--dsw-alias-bg-layer-1); flex: none; } .tm_backButton { display: inline-flex; align-items: center; gap: 6px; flex: none; height: 38px; padding: 0 18px 0 12px; border: 1px solid var(--dsw-alias-border-l2); border-radius: 999px; background: transparent; color: var(--dsw-alias-label-secondary); font-size: calc(14px + var(--tm-font-step, 0px)); font-weight: 600; line-height: 1; cursor: pointer; } .tm_backButton:hover { background: var(--dsw-alias-interactive-bg-hover); color: var(--dsw-alias-label-primary); } .tm_globalSearch { position: relative; display: flex; align-items: center; gap: 6px; margin-right: 8px; } .tm_globalSearchInput { width: 200px; font: inherit; font-size: calc(12px + var(--tm-font-step, 0px)); color: var(--dsw-alias-label-primary); background: var(--dsw-alias-bg-layer-2, rgba(255, 255, 255, 0.06)); border: 1px solid var(--dsw-alias-border-l2); border-radius: 8px; padding: 5px 9px; outline: none; } .tm_globalSearchInput:focus { border-color: var(--dsw-alias-border-l3, rgba(255, 255, 255, 0.3)); } .tm_globalSearchButton { font: inherit; font-size: calc(11.5px + var(--tm-font-step, 0px)); color: var(--dsw-alias-label-secondary); background: transparent; border: 1px solid var(--dsw-alias-border-l2); border-radius: 8px; padding: 5px 10px; cursor: pointer; } .tm_globalSearchButton:hover { color: var(--dsw-alias-label-primary); } .tm_globalSearchBackdrop { position: fixed; inset: 0; z-index: 70; background: rgba(0, 0, 0, 0.45); display: flex; align-items: flex-start; justify-content: center; padding-top: 9vh; } .tm_globalSearchPanel { width: min(980px, 92vw); max-height: 76vh; display: flex; flex-direction: column; border-radius: 14px; border: 1px solid var(--dsw-alias-border-l2); background: var(--dsw-alias-bg-layer-1); box-shadow: 0 22px 60px rgba(0, 0, 0, 0.5); overflow: hidden; } .tm_globalSearchHead { display: flex; align-items: center; gap: 10px; padding: 12px 16px; border-bottom: 1px solid var(--dsw-alias-border-l2); } .tm_globalSearchTitle { font-size: calc(13px + var(--tm-font-step, 0px)); font-weight: 600; color: var(--dsw-alias-label-primary); } .tm_globalSearchBody { padding: 0 16px 14px; overflow-y: auto; overscroll-behavior: contain; } .tm_searchInlineLoading { display: flex; align-items: center; padding: 4px 0 2px 10px; } .tm_searchInlineLoading > span { width: 62%; } .tm_drawerScrollSensor { width: 100%; height: 1px; opacity: 0; } .tm_fontGroup { display: flex; align-items: center; gap: 4px; margin-right: 6px; } .tm_fontButton { display: inline-flex; align-items: center; justify-content: center; gap: 3px; min-width: 46px; height: 28px; padding: 0 8px; line-height: 1; border: 1px solid var(--dsw-alias-border-l2); border-radius: 8px; background: transparent; color: var(--dsw-alias-label-secondary); font: inherit; font-size: calc(12px + var(--tm-font-step, 0px)); cursor: pointer; } .tm_fontButton:hover:not(:disabled) { color: var(--dsw-alias-label-primary); border-color: var(--dsw-alias-border-l3, rgba(255, 255, 255, 0.3)); } .tm_fontButton:disabled { opacity: 0.4; cursor: default; } .tm_fontGlyphSmall, .tm_fontGlyphLarge { display: inline-block; width: calc(9px + 0px); text-align: center; line-height: 1; } .tm_fontGlyphSmall, .tm_fontGlyphLarge { font-size: calc(13px + var(--tm-font-step, 0px)); } .tm_fontSign { display: inline-block; font-size: calc(10px + var(--tm-font-step, 0px)); line-height: 1; transform: translateY(-3px); } .tm_fontReset { min-width: 50px; } .tm_fontReset { min-width: 44px; } .tm_headerSpace { flex: 1; } .tm_langButton { flex: none; min-width: 72px; height: 34px; padding: 0 14px; border: 1px solid var(--dsw-alias-border-l2); border-radius: 999px; background: transparent; color: var(--dsw-alias-label-secondary); font-size: calc(13px + var(--tm-font-step, 0px)); cursor: pointer; white-space: nowrap; } .tm_langButton:hover { background: var(--dsw-alias-interactive-bg-hover); color: var(--dsw-alias-label-primary); } .tm_closeButton { display: inline-flex; align-items: center; justify-content: center; flex: none; width: 38px; height: 38px; padding: 0; border: 1px solid var(--dsw-alias-border-l2); border-radius: 999px; background: transparent; color: var(--dsw-alias-label-secondary); cursor: pointer; } .tm_closeButton:hover { background: var(--dsw-alias-interactive-bg-hover); color: var(--dsw-alias-label-primary); } .tm_zoomResetLabel { font-size: calc(9px + var(--tm-font-step, 0px)); font-weight: 700; letter-spacing: -0.5px; } .tm_pageTabs { display: flex; align-items: center; gap: 8px; flex: none; min-height: 40px; padding: 6px 14px; border-bottom: 1px solid var(--dsw-alias-border-l1); background: var(--dsw-alias-bg-base); overflow: hidden; } .tm_pageTabScroll { display: flex; align-items: center; gap: 6px; min-width: 0; overflow-x: auto; overflow-y: hidden; scrollbar-width: thin; } .tm_pageTab { display: inline-flex; align-items: center; gap: 6px; flex: none; max-width: 220px; height: 28px; padding: 0 10px; border: 1px solid transparent; border-radius: 999px; background: transparent; color: var(--dsw-alias-label-secondary); font-size: calc(12px + var(--tm-font-step, 0px)); font-weight: 600; cursor: pointer; white-space: nowrap; } .tm_pageTab:hover { background: var(--dsw-alias-interactive-bg-hover); color: var(--dsw-alias-label-primary); } .tm_pageTabActive { border-color: var(--dsw-alias-border-l2); background: var(--dsw-alias-bg-layer-1); color: var(--dsw-alias-label-primary); } .tm_pageTabTitle { overflow: hidden; text-overflow: ellipsis; } .tm_pageTabCount { flex: none; min-width: 18px; padding: 0 5px; border-radius: 999px; background: var(--dsw-alias-interactive-bg-hover); color: var(--dsw-alias-label-tertiary); font-size: calc(10px + var(--tm-font-step, 0px)); font-weight: 600; line-height: 16px; text-align: center; } .tm_pageTabsSpace { flex: 1; min-width: 8px; } .tm_pageAction { flex: none; height: 28px; padding: 0 12px; border: 1px solid var(--dsw-alias-border-l2); border-radius: 999px; background: transparent; color: var(--dsw-alias-label-secondary); font-size: calc(12px + var(--tm-font-step, 0px)); font-weight: 600; cursor: pointer; white-space: nowrap; } .tm_pageAction:hover { background: var(--dsw-alias-interactive-bg-hover); color: var(--dsw-alias-label-primary); } .tm_pageActionOn { border-color: var(--dsw-alias-brand-primary); color: var(--dsw-alias-brand-primary); } .tm_canvas { flex: 1; min-height: 0; position: relative; } @media (prefers-reduced-motion: reduce) { .tm_canvas .react-flow__edge circle { opacity: 0.28; } } .tm_canvas .react-flow__node { transition: transform 200ms cubic-bezier(0.2, 0.8, 0.25, 1); } .tm_canvas .react-flow__node.dragging, .tm_canvas .react-flow__node.tmDragging { transition: none; } .tm_canvas .react-flow__nodesselection, .tm_canvas .react-flow__nodesselection-rect { display: none !important; pointer-events: none !important; } .tm_card { position: relative; width: 224px; min-height: 104px; display: flex; flex-direction: column; gap: 6px; padding: 10px 12px; border: 1px solid var(--dsw-alias-border-l2); border-radius: 10px; background: var(--dsw-alias-bg-layer-1); color: var(--dsw-alias-label-primary); box-shadow: 0 1px 3px var(--dsw-alias-bg-mask-1); font-size: calc(13px + var(--tm-font-step, 0px)); } .tm_cardSelected { border-color: var(--dsw-alias-brand-primary); } .tm_cardGhost { opacity: 0.55; border-style: dashed; } .tm_cardTop { display: flex; align-items: center; gap: 6px; min-width: 0; } .tm_cardTitle { font-weight: 600; font-size: calc(13px + var(--tm-font-step, 0px)); line-height: 1.3; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; word-break: break-word; } .tm_runningDot { flex: none; width: 8px; height: 8px; border-radius: 50%; background: #ffffff; animation: tm_talkmap-pulse 1.6s ease-in-out infinite; } @keyframes tm_talkmap-pulse { 50% { opacity: 0.35; } } .tm_cardNext { display: flex; align-items: baseline; gap: 6px; font-size: calc(12px + var(--tm-font-step, 0px)); color: var(--dsw-alias-label-secondary); min-width: 0; } .tm_cardNextLabel { flex: none; font-size: calc(11px + var(--tm-font-step, 0px)); color: var(--dsw-alias-brand-primary); font-weight: 600; } .tm_cardNextText { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; } .tm_cardStale { flex: none; color: var(--dsw-alias-state-warn-primary); font-size: calc(12px + var(--tm-font-step, 0px)); } .tm_cardFooter { margin-top: auto; display: flex; align-items: center; justify-content: space-between; gap: 8px; font-size: calc(11px + var(--tm-font-step, 0px)); color: var(--dsw-alias-label-tertiary); } .tm_cardTime { flex: none; } .tm_cardChip { display: inline-flex; align-items: center; gap: 5px; padding: 1px 8px; border-radius: 999px; font-size: calc(10px + var(--tm-font-step, 0px)); font-weight: 600; white-space: nowrap; border: 1px solid transparent; } .tm_cardChipRunning { color: #ffffff; background: rgba(255, 255, 255, 0.14); border-color: rgba(255, 255, 255, 0.35); } .tm_cardChipWaiting { color: rgb(245, 178, 46); background: rgba(245, 178, 46, 0.14); border-color: rgba(245, 178, 46, 0.42); } .tm_cardChipDone { color: rgb(52, 199, 89); background: rgba(52, 199, 89, 0.14); border-color: rgba(52, 199, 89, 0.42); } .tm_cardChipError { color: rgb(242, 78, 78); background: rgba(242, 78, 78, 0.14); border-color: rgba(242, 78, 78, 0.45); } .tm_cardChipDraft { color: rgb(255, 197, 61); background: rgba(255, 197, 61, 0.18); border-color: rgba(255, 197, 61, 0.5); } .tm_cardChipInterrupted { color: rgb(214, 158, 92); background: rgba(214, 158, 92, 0.14); border-color: rgba(214, 158, 92, 0.42); } .tm_cardSummary { font-size: calc(12px + var(--tm-font-step, 0px)); line-height: 1.45; color: var(--dsw-alias-label-secondary); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; word-break: break-word; } .tm_cardBadgeWaiting { padding: 1px 7px; border-radius: 999px; font-size: calc(10px + var(--tm-font-step, 0px)); color: var(--dsw-alias-state-warn-label); background: var(--dsw-alias-state-warn-tertiary); } .tm_cardBadgeDone { padding: 1px 7px; border-radius: 999px; font-size: calc(10px + var(--tm-font-step, 0px)); color: var(--dsw-alias-state-success-primary); background: var(--dsw-alias-state-success-tertiary); } .tm_cardLampRunning { box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.34), 0 0 16px 2px rgba(255, 255, 255, 0.2), 0 0 40px 9px rgba(255, 255, 255, 0.1); } .tm_dialogBackdrop { position: fixed; inset: 0; z-index: 80; display: flex; align-items: center; justify-content: center; background: rgba(0, 0, 0, 0.45); backdrop-filter: blur(2px); animation: tm_tmFadeIn 140ms ease-out; } .tm_digestDialog { width: min(720px, 86vw); max-height: 82vh; display: flex; flex-direction: column; gap: 8px; padding: 16px 18px 14px; border-radius: 14px; background: var(--dsw-alias-bg-elevated, #232323); border: 1px solid rgba(255, 255, 255, 0.09); box-shadow: 0 24px 60px rgba(0, 0, 0, 0.45); animation: tm_tmRiseIn 200ms cubic-bezier(0.16, 1, 0.3, 1); } .tm_digestDialogHead { display: flex; align-items: baseline; gap: 8px; min-width: 0; } .tm_digestDialogTitle { font-size: calc(13px + var(--tm-font-step, 0px)); font-weight: 600; color: var(--dsw-alias-label-primary); } .tm_digestDialogFrom { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: calc(11px + var(--tm-font-step, 0px)); color: var(--dsw-alias-label-secondary); } .tm_digestLabel { margin-top: 4px; font-size: calc(10.5px + var(--tm-font-step, 0px)); color: var(--dsw-alias-label-tertiary, rgba(255, 255, 255, 0.5)); } .tm_digestText { width: 100%; min-height: 96px; max-height: 30vh; padding: 10px 12px; border-radius: 10px; border: 1px solid rgba(255, 255, 255, 0.08); background: rgba(255, 255, 255, 0.04); color: var(--dsw-alias-label-primary); font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: calc(11.5px + var(--tm-font-step, 0px)); line-height: 1.62; resize: none; } .tm_digestEmpty { padding: 18px 4px; font-size: calc(12px + var(--tm-font-step, 0px)); color: var(--dsw-alias-label-secondary); } .tm_digestActions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 4px; } .tm_renameBackdrop { position: fixed; inset: 0; z-index: 40; background: rgba(0, 0, 0, 0.42); display: flex; align-items: flex-start; justify-content: center; padding-top: 22vh; } .tm_renameDialog { width: min(420px, 90vw); background: var(--dsw-alias-bg-layer-1); border: 1px solid var(--dsw-alias-border-l2); border-radius: 12px; box-shadow: 0 18px 42px rgba(0, 0, 0, 0.42); padding: 16px 16px 12px; display: flex; flex-direction: column; gap: 10px; } .tm_renameHeading { font-size: calc(13px + var(--tm-font-step, 0px)); font-weight: 600; color: var(--dsw-alias-label-primary); } .tm_renameInput { width: 100%; box-sizing: border-box; font: inherit; font-size: calc(13px + var(--tm-font-step, 0px)); color: var(--dsw-alias-label-primary); background: var(--dsw-alias-bg-layer-2, rgba(255, 255, 255, 0.06)); border: 1px solid var(--dsw-alias-border-l2); border-radius: 8px; padding: 8px 10px; outline: none; } .tm_renameInput:focus { border-color: var(--dsw-alias-border-l3, rgba(255, 255, 255, 0.35)); } .tm_renameError { font-size: calc(12px + var(--tm-font-step, 0px)); color: rgb(242, 78, 78); } .tm_renameActions { display: flex; justify-content: flex-end; gap: 8px; } .tm_renameButton { font: inherit; font-size: calc(12.5px + var(--tm-font-step, 0px)); color: var(--dsw-alias-label-secondary); background: transparent; border: 1px solid var(--dsw-alias-border-l2); border-radius: 8px; padding: 6px 12px; cursor: pointer; } .tm_renameButton:hover { color: var(--dsw-alias-label-primary); } .tm_renamePrimary { color: #0b0b0c; background: rgb(255, 214, 106); border-color: rgb(255, 214, 106); } .tm_renamePrimary:disabled { opacity: 0.5; cursor: default; } .tm_cardPin { display: inline-flex; align-items: center; flex: none; color: rgb(255, 214, 106); filter: drop-shadow(0 0 5px rgba(255, 214, 106, 0.85)); animation: tm_talkmap-pin-glow 2.6s ease-in-out infinite; } @keyframes tm_talkmap-pin-glow { 0%, 100% { filter: drop-shadow(0 0 4px rgba(255, 214, 106, 0.6)); opacity: 0.92; } 50% { filter: drop-shadow(0 0 9px rgba(255, 214, 106, 1)); opacity: 1; } } .tm_cardReticle { position: absolute; inset: -5px; pointer-events: none; filter: drop-shadow(0 0 5px rgba(255, 255, 255, 0.45)); } .tm_cardReticle i { position: absolute; width: 13px; height: 13px; border: 2px solid rgba(255, 255, 255, 0.9); } .tm_cardReticle i:nth-child(1) { left: 0; top: 0; border-right: 0; border-bottom: 0; border-top-left-radius: 4px; } .tm_cardReticle i:nth-child(2) { right: 0; top: 0; border-left: 0; border-bottom: 0; border-top-right-radius: 4px; } .tm_cardReticle i:nth-child(3) { left: 0; bottom: 0; border-right: 0; border-top: 0; border-bottom-left-radius: 4px; } .tm_cardReticle i:nth-child(4) { right: 0; bottom: 0; border-left: 0; border-top: 0; border-bottom-right-radius: 4px; } .tm_cardQuiet { opacity: 0.62; transition: opacity 140ms ease; } .tm_cardQuiet:hover { opacity: 1; } .tm_stackBadgeBusy { color: rgb(255, 197, 61); border-color: rgba(255, 197, 61, 0.5); } @property --tm-ring-angle { syntax: "<angle>"; initial-value: 0deg; inherits: false; } .tm_cardLampRunning::after { content: ''; position: absolute; inset: -2px; border-radius: 12px; padding: 2px; background: conic-gradient( from var(--tm-ring-angle), rgba(255, 255, 255, 0) 0deg, rgba(255, 255, 255, 0) 190deg, rgba(255, 255, 255, 0.18) 250deg, rgba(255, 255, 255, 0.55) 292deg, rgba(255, 255, 255, 1) 325deg, rgba(255, 255, 255, 0.4) 352deg, rgba(255, 255, 255, 0) 360deg ); -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite: xor; mask-composite: exclude; animation: tm_talkmap-ring-sweep 1.8s linear infinite; pointer-events: none; } @keyframes tm_talkmap-ring-sweep { to { --tm-ring-angle: 360deg; } } .tm_cardLampDone { animation: tm_talkmap-lamp-green 2.8s ease-in-out infinite; } .tm_cardLampError { animation: tm_talkmap-lamp-red 1.9s ease-in-out infinite; } .tm_cardLampWaiting { animation: tm_talkmap-lamp-amber 3.4s ease-in-out infinite; } @keyframes tm_talkmap-lamp-green { 0%, 100% { box-shadow: inset 0 0 0 1px rgba(52, 199, 89, 0.40), 0 0 14px 1px rgba(52, 199, 89, 0.26), 0 0 34px 8px rgba(52, 199, 89, 0.11); } 50% { box-shadow: inset 0 0 0 1px rgba(52, 199, 89, 0.72), 0 0 24px 5px rgba(52, 199, 89, 0.46), 0 0 62px 20px rgba(52, 199, 89, 0.22); } } @keyframes tm_talkmap-lamp-amber { 0%, 100% { box-shadow: inset 0 0 0 1px rgba(245, 178, 46, 0.42), 0 0 14px 1px rgba(245, 178, 46, 0.24), 0 0 34px 8px rgba(245, 178, 46, 0.11); } 50% { box-shadow: inset 0 0 0 1px rgba(245, 178, 46, 0.72), 0 0 24px 5px rgba(245, 178, 46, 0.44), 0 0 60px 19px rgba(245, 178, 46, 0.20); } } @keyframes tm_talkmap-lamp-red { 0%, 100% { box-shadow: inset 0 0 0 1px rgba(242, 78, 78, 0.46), 0 0 14px 1px rgba(242, 78, 78, 0.28), 0 0 34px 8px rgba(242, 78, 78, 0.12); } 50% { box-shadow: inset 0 0 0 1px rgba(242, 78, 78, 0.80), 0 0 26px 6px rgba(242, 78, 78, 0.52), 0 0 66px 22px rgba(242, 78, 78, 0.26); } } .tm_cardRemove { align-self: flex-start; padding: 3px 8px; border: 1px solid var(--dsw-alias-border-l2); border-radius: 6px; background: transparent; color: var(--dsw-alias-label-secondary); font-size: calc(12px + var(--tm-font-step, 0px)); cursor: pointer; } .tm_cardRemove:hover { background: var(--dsw-alias-interactive-bg-hover-danger); color: var(--dsw-alias-state-error-primary); } .tm_cardHandle { width: 10px; height: 10px; background: var(--dsw-alias-border-l3); border: 2px solid var(--dsw-alias-bg-layer-1); opacity: 0; } .tm_card:hover .tm_cardHandle, .tm_canvasConnecting .tm_cardHandle { opacity: 1; } .tm_cardHandle:hover { background: var(--dsw-alias-brand-primary); } .tm_cardRefresh { flex: none; margin-left: auto; width: 22px; height: 22px; padding: 0; border: none; border-radius: 6px; background: transparent; color: var(--dsw-alias-label-tertiary); font-size: calc(13px + var(--tm-font-step, 0px)); line-height: 1; cursor: pointer; opacity: 0; transition: opacity 120ms ease; } .tm_card:hover .tm_cardRefresh { opacity: 1; } .tm_cardRefresh:hover { background: var(--dsw-alias-interactive-bg-hover); color: var(--dsw-alias-label-primary); } .tm_cardRefreshBusy { opacity: 1; animation: tm_talkmap-spin 1s linear infinite; } @keyframes tm_talkmap-spin { to { transform: rotate(360deg); } } .tm_spawnPanel { position: absolute; right: 24px; top: 24px; z-index: 6; width: 420px; max-width: calc(100% - 48px); display: flex; flex-direction: column; gap: 8px; padding: 16px; border: 1px solid var(--dsw-alias-border-l2); border-radius: 12px; background: var(--dsw-alias-bg-layer-1); box-shadow: 0 8px 30px var(--dsw-alias-bg-mask-2); } .tm_spawnHeading { font-size: calc(14px + var(--tm-font-step, 0px)); font-weight: 600; color: var(--dsw-alias-label-primary); } .tm_spawnFrom { font-size: calc(12px + var(--tm-font-step, 0px)); color: var(--dsw-alias-label-secondary); } .tm_spawnModes { display: flex; gap: 6px; } .tm_spawnModeBtn { flex: 1; padding: 5px 0; border: 1px solid var(--dsw-alias-border-l2); border-radius: 8px; background: transparent; color: var(--dsw-alias-label-secondary); font-size: calc(12px + var(--tm-font-step, 0px)); cursor: pointer; } .tm_spawnModeBtn:hover { background: var(--dsw-alias-interactive-bg-hover); } .tm_spawnModeActive { border-color: var(--dsw-alias-brand-primary); color: var(--dsw-alias-brand-primary); background: var(--dsw-alias-interactive-bg-active); } .tm_spawnHint { font-size: calc(12px + var(--tm-font-step, 0px)); color: var(--dsw-alias-label-tertiary); } .tm_spawnTextarea { width: 100%; resize: vertical; min-height: 140px; padding: 10px; border: 1px solid var(--dsw-alias-border-l2); border-radius: 8px; background: var(--dsw-alias-bg-base); color: var(--dsw-alias-label-primary); font-size: calc(13px + var(--tm-font-step, 0px)); line-height: 1.5; font-family: inherit; } .tm_spawnError { font-size: calc(12px + var(--tm-font-step, 0px)); color: var(--dsw-alias-state-error-primary); word-break: break-all; } .tm_spawnActions { display: flex; justify-content: flex-end; gap: 8px; } .tm_spawnBtnPrimary { padding: 6px 16px; border: none; border-radius: 8px; background: var(--dsw-alias-button-primary-fill); color: var(--dsw-alias-label-primary-foreground); font-size: calc(13px + var(--tm-font-step, 0px)); cursor: pointer; } .tm_spawnBtnPrimary:hover { background: var(--dsw-alias-button-primary-hover); } .tm_spawnBtnPrimary:disabled { background: var(--dsw-alias-button-primary-dimmed); cursor: default; } .tm_spawnBtnGhost { padding: 6px 16px; border: 1px solid var(--dsw-alias-border-l2); border-radius: 8px; background: transparent; color: var(--dsw-alias-label-secondary); font-size: calc(13px + var(--tm-font-step, 0px)); cursor: pointer; } .tm_spawnBtnGhost:hover { background: var(--dsw-alias-interactive-bg-hover); } .tm_wsFrame { position: relative; border: 1.5px dashed var(--dsw-alias-border-l2); border-radius: 16px; background: transparent; } .tm_wsFrameBlocked { border-color: rgb(242, 78, 78) !important; box-shadow: 0 0 0 1px rgba(242, 78, 78, 0.45) inset; } .tm_wsFrameSelected { border-style: solid; border-color: var(--dsw-alias-brand-primary); } .tm_wsFrameLabel { position: absolute; top: -12px; left: 14px; display: flex; align-items: center; gap: 6px; padding: 2px 10px; border-radius: 999px; border: 1px solid var(--dsw-alias-border-l1); background: var(--dsw-alias-bg-layer-1); font-size: calc(12px + var(--tm-font-step, 0px)); font-weight: 600; color: var(--dsw-alias-label-secondary); white-space: nowrap; pointer-events: auto; cursor: grab; z-index: 5; } .tm_wsFrameLabel:active { cursor: grabbing; } .tm_wsFrameEdge { position: absolute; pointer-events: auto; cursor: grab; } .tm_wsFrameEdge:active { cursor: grabbing; } .tm_wsFrameCount { font-weight: 400; color: var(--dsw-alias-label-tertiary); } .tm_menu { position: absolute; z-index: 60; min-width: 200px; max-width: 280px; max-height: 380px; overflow-y: auto; display: flex; flex-direction: column; padding: 6px; border: 1px solid var(--dsw-alias-border-l1); border-radius: 10px; background: var(--dsw-alias-bg-layer-1); box-shadow: 0 8px 30px var(--dsw-alias-bg-mask-2); } .tm_menuTitle { flex: none; padding: 4px 10px 6px; font-size: calc(11px + var(--tm-font-step, 0px)); color: var(--dsw-alias-label-tertiary); } .tm_menuSearch { flex: none; box-sizing: border-box; width: calc(100% - 8px); margin: 2px 4px 6px; padding: 5px 8px; border: 1px solid var(--dsw-alias-border-l2); border-radius: 7px; background: var(--dsw-alias-bg-base); color: var(--dsw-alias-label-primary); font-size: calc(12px + var(--tm-font-step, 0px)); font-family: inherit; } .tm_menuHint { font-size: calc(11px + var(--tm-font-step, 0px)); color: var(--dsw-alias-label-dimmed); } .tm_menuPreview { flex: none; padding: 0 10px 4px; font-size: calc(11px + var(--tm-font-step, 0px)); color: var(--dsw-alias-label-tertiary); word-break: break-all; } .tm_menuError { flex: none; padding: 0 10px 4px; font-size: calc(11px + var(--tm-font-step, 0px)); color: var(--dsw-alias-state-error-primary); word-break: break-all; } .tm_menuEmpty { padding: 8px 10px; font-size: calc(12px + var(--tm-font-step, 0px)); color: var(--dsw-alias-label-tertiary); } .tm_menuItem { flex: none; display: flex; align-items: center; gap: 8px; width: 100%; text-align: left; padding: 6px 10px; border: none; border-radius: 7px; background: transparent; color: var(--dsw-alias-label-primary); font-size: calc(13px + var(--tm-font-step, 0px)); cursor: pointer; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; } .tm_menuIcon { flex: none; width: 14px; height: 14px; color: var(--dsw-alias-label-secondary); } .tm_menuItemDanger { color: rgb(242, 78, 78); } .tm_menuItemDanger .tm_menuIcon { color: rgb(242, 78, 78); } .tm_menuItem:hover:not(:disabled) { background: var(--dsw-alias-interactive-bg-hover); } .tm_menuItem:disabled { color: var(--dsw-alias-label-dimmed); cursor: default; } .tm_wsFrameHidden { font-weight: 400; color: var(--dsw-alias-state-warn-primary); } .tm_emptyHint { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); font-size: calc(13px + var(--tm-font-step, 0px)); color: var(--dsw-alias-label-tertiary); pointer-events: none; z-index: 4; } .tm_toast { position: absolute; left: 50%; bottom: 28px; transform: translateX(-50%); z-index: 8; max-width: 70%; padding: 7px 16px; border: 1px solid var(--dsw-alias-border-l1); border-radius: 999px; background: var(--dsw-alias-bg-layer-1); box-shadow: 0 4px 16px var(--dsw-alias-bg-mask-2); font-size: calc(12px + var(--tm-font-step, 0px)); color: var(--dsw-alias-label-primary); pointer-events: none; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; } .tm_stackCell { position: relative; width: 224px; height: 104px; cursor: pointer; } .tm_stackSheetBack, .tm_stackSheetMid { position: absolute; inset: 0; border-radius: 12px; border: 1px solid var(--dsw-alias-border-l2); background: var(--dsw-alias-bg-layer-1); } .tm_stackSheetBack { transform: translate(11px, 11px) scale(0.95); opacity: 0.35; } .tm_stackSheetMid { transform: translate(5px, 5px) scale(0.977); opacity: 0.6; } .tm_stackFace { position: absolute; inset: 0; box-sizing: border-box; display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; padding: 12px; border: 1px solid var(--dsw-alias-border-l2); border-radius: 12px; background: var(--dsw-alias-bg-layer-1); transition: border-color 140ms ease, transform 140ms ease; } .tm_stackCell:hover .tm_stackFace { border-color: var(--dsw-alias-brand-primary); transform: translateY(-1px); } .tm_stackFaceTitle { font-size: calc(13px + var(--tm-font-step, 0px)); font-weight: 600; color: var(--dsw-alias-label-primary); overflow: hidden; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; } .tm_stackBadge { flex: none; padding: 1px 8px; border-radius: 999px; border: 1px solid var(--dsw-alias-border-l2); color: var(--dsw-alias-label-secondary); font-size: calc(11px + var(--tm-font-step, 0px)); font-variant-numeric: tabular-nums; } .tm_drawerBackdrop { position: absolute; inset: 0; z-index: 30; display: flex; align-items: center; justify-content: center; background: var(--dsw-alias-bg-mask-2); } .tm_drawer { width: min(1120px, 94%); max-height: 84%; box-sizing: border-box; display: flex; flex-direction: column; border: 1px solid var(--dsw-alias-border-l1); border-radius: 16px; background: var(--dsw-alias-bg-layer-1); box-shadow: 0 18px 48px var(--dsw-alias-bg-mask-2); overflow: hidden; } .tm_drawerHead { display: flex; align-items: center; gap: 10px; flex: none; padding: 12px 14px; border-bottom: 1px solid var(--dsw-alias-border-l1); } .tm_drawerTitle { font-size: calc(14px + var(--tm-font-step, 0px)); font-weight: 600; color: var(--dsw-alias-label-primary); } .tm_drawerCount { font-size: calc(12px + var(--tm-font-step, 0px)); color: var(--dsw-alias-label-tertiary); } .tm_drawerSpace { flex: 1; } .tm_drawerHint { font-size: calc(11px + var(--tm-font-step, 0px)); color: var(--dsw-alias-label-tertiary); } .tm_drawerClose { flex: none; width: 30px; height: 30px; padding: 0; border: 1px solid var(--dsw-alias-border-l2); border-radius: 999px; background: transparent; color: var(--dsw-alias-label-secondary); font-size: calc(16px + var(--tm-font-step, 0px)); line-height: 1; cursor: pointer; } .tm_drawerClose:hover { background: var(--dsw-alias-interactive-bg-hover); color: var(--dsw-alias-label-primary); } .tm_drawerHits > .tm_drawerHit { animation: tm_tmPopIn 240ms cubic-bezier(0.16, 1, 0.3, 1) both; } .tm_drawerHits > .tm_drawerHit:nth-child(1) { animation-delay: 20ms; } .tm_drawerHits > .tm_drawerHit:nth-child(2) { animation-delay: 34ms; } .tm_drawerHits > .tm_drawerHit:nth-child(3) { animation-delay: 48ms; } .tm_drawerHits > .tm_drawerHit:nth-child(4) { animation-delay: 62ms; } .tm_drawerHits > .tm_drawerHit:nth-child(5) { animation-delay: 76ms; } .tm_drawerHits > .tm_drawerHit:nth-child(n+6) { animation-delay: 90ms; } .tm_searchLoading { display: flex; flex-direction: column; gap: 8px; padding: 6px 0 2px; } .tm_searchLoadingBar { position: relative; height: 2px; border-radius: 2px; overflow: hidden; background: rgba(255, 255, 255, 0.07); } .tm_searchLoadingBar > i { position: absolute; inset: 0 auto 0 0; width: 34%; border-radius: 2px; background: linear-gradient(90deg, transparent, var(--dsw-alias-brand-primary), transparent); animation: tm_tmSlideBar 1150ms cubic-bezier(0.4, 0, 0.2, 1) infinite; } @keyframes tm_tmSlideBar { 0% { transform: translateX(-100%); } 100% { transform: translateX(320%); } } .tm_searchSkeletonRow { display: flex; flex-direction: column; gap: 6px; padding: 9px 10px; border: 1px solid var(--dsw-alias-border-l2); border-radius: 9px; } .tm_searchSkeletonTitle, .tm_searchSkeletonLine { display: block; height: 9px; border-radius: 4px; background: linear-gradient(90deg, rgba(255,255,255,0.05), rgba(255,255,255,0.12), rgba(255,255,255,0.05)); background-size: 220% 100%; animation: tm_tmShimmer 1300ms ease-in-out infinite; } .tm_searchSkeletonTitle { width: 38%; } .tm_searchSkeletonLine { width: 78%; } @keyframes tm_tmShimmer { 0% { background-position: 120% 0; } 100% { background-position: -60% 0; } } @media (prefers-reduced-motion: reduce) { .tm_drawerHits > .tm_drawerHit, .tm_searchLoadingBar > i, .tm_searchSkeletonTitle, .tm_searchSkeletonLine { animation: none; } } @keyframes tm_tmFadeIn { from { opacity: 0; } to { opacity: 1; } } @keyframes tm_tmFadeOut { from { opacity: 1; } to { opacity: 0; } } @keyframes tm_tmRiseIn { from { opacity: 0; transform: translateY(26px) scale(0.94); } 60% { opacity: 1; } to { opacity: 1; transform: none; } } @keyframes tm_tmRiseOut { from { opacity: 1; transform: none; } to { opacity: 0; transform: translateY(10px) scale(0.985); } } @keyframes tm_tmPopIn { from { opacity: 0; transform: translateY(6px) scale(0.97); } to { opacity: 1; transform: none; } } @keyframes tm_tmCardIn { from { opacity: 0; transform: translateY(6px) scale(0.99); } to { opacity: 1; transform: none; } } .tm_drawerBackdrop { animation: tm_tmFadeIn 180ms cubic-bezier(0.16, 1, 0.3, 1) both; } .tm_drawerBackdropOut { animation: tm_tmFadeOut 130ms ease-in both; } .tm_drawer { animation: tm_tmRiseIn 260ms cubic-bezier(0.16, 1, 0.3, 1) both; will-change: transform, opacity; } .tm_drawerOut { animation: tm_tmRiseOut 150ms cubic-bezier(0.4, 0, 0.7, 0.2) both; } .tm_globalSearchBackdrop { animation: tm_tmFadeIn 130ms ease-out both; } .tm_globalSearchPanel { animation: tm_tmRiseIn 240ms cubic-bezier(0.16, 1, 0.3, 1) both; will-change: transform, opacity; } .tm_menu { animation: tm_tmPopIn 120ms cubic-bezier(0.2, 0.9, 0.25, 1) both; } .tm_card { transition: transform 120ms ease-out, box-shadow 160ms ease-out, opacity 160ms ease-out; } .tm_card:hover { transform: translateY(-1px); } .tm_reactFlowNodeEnter { animation: tm_tmCardIn 170ms cubic-bezier(0.2, 0.9, 0.25, 1) both; } .tm_stackCell { transition: transform 120ms ease-out, box-shadow 160ms ease-out; } .tm_stackCell:hover { transform: translateY(-2px); } .tm_wsFrameLabel { transition: color 120ms ease-out, background 120ms ease-out, box-shadow 120ms ease-out; } .tm_wsFrameLabel:hover { box-shadow: 0 2px 10px rgba(0, 0, 0, 0.35); } .tm_toast { animation: tm_tmRiseIn 160ms cubic-bezier(0.2, 0.9, 0.25, 1) both; } .tm_snippetCode { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 0.94em; padding: 0 3px; border-radius: 4px; background: rgba(255, 255, 255, 0.08); } .tm_snippetLink { color: var(--dsw-alias-brand-primary); } @media (prefers-reduced-motion: reduce) { .tm_drawerBackdrop, .tm_drawerBackdropOut, .tm_drawer, .tm_drawerOut, .tm_globalSearchBackdrop, .tm_globalSearchPanel, .tm_menu, .tm_toast, .tm_reactFlowNodeEnter { animation: none; } .tm_card, .tm_stackCell, .tm_wsFrameLabel { transition: none; } .tm_card:hover, .tm_stackCell:hover { transform: none; } } .tm_drawerSearchRow { display: flex; align-items: center; gap: 8px; padding: 0 14px 8px; } .tm_drawerSearch { flex: 1; min-width: 0; font: inherit; font-size: calc(12.5px + var(--tm-font-step, 0px)); color: var(--dsw-alias-label-primary); background: var(--dsw-alias-bg-layer-2, rgba(255, 255, 255, 0.06)); border: 1px solid var(--dsw-alias-border-l2); border-radius: 8px; padding: 6px 10px; outline: none; } .tm_drawerSearch:focus { border-color: var(--dsw-alias-border-l3, rgba(255, 255, 255, 0.3)); } .tm_drawerSearchGo { flex: none; font: inherit; font-size: calc(11.5px + var(--tm-font-step, 0px)); color: var(--dsw-alias-label-secondary); background: transparent; border: 1px solid var(--dsw-alias-border-l2); border-radius: 8px; padding: 5px 10px; cursor: pointer; } .tm_drawerSearchGo:hover { color: var(--dsw-alias-label-primary); } .tm_drawerSearchState { font-size: calc(11px + var(--tm-font-step, 0px)); color: var(--dsw-alias-label-secondary); flex: none; } .tm_drawerSearchError { flex: none; max-width: 52%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: calc(11px + var(--tm-font-step, 0px)); color: rgb(242, 78, 78); } .tm_drawerEmpty { grid-column: 1 / -1; padding: 10px 4px; font-size: calc(12px + var(--tm-font-step, 0px)); color: var(--dsw-alias-label-secondary); } .tm_drawerHits { grid-column: 1 / -1; display: flex; flex-direction: column; gap: 6px; margin-top: 6px; padding-top: 10px; border-top: 1px solid var(--dsw-alias-border-l2); } .tm_drawerHitsHead { font-size: calc(11px + var(--tm-font-step, 0px)); color: var(--dsw-alias-label-secondary); letter-spacing: 0.04em; } .tm_drawerHit { display: flex; flex-direction: column; gap: 3px; text-align: left; padding: 8px 10px; border: 1px solid var(--dsw-alias-border-l2); border-radius: 9px; background: transparent; color: var(--dsw-alias-label-primary); font: inherit; cursor: pointer; } .tm_drawerHit:hover { border-color: var(--dsw-alias-border-l3, rgba(255, 255, 255, 0.3)); } .tm_drawerRoleChip { flex: none; margin-right: 6px; padding: 0 5px; border-radius: 4px; font-size: calc(9.5px + var(--tm-font-step, 0px)); line-height: 1.6; color: var(--dsw-alias-label-secondary); background: rgba(255, 255, 255, 0.07); } .tm_drawerRoleChip[data-talkmap-role="user"] { color: rgba(160, 210, 255, 0.95); background: rgba(90, 160, 255, 0.14); } .tm_hitMark { color: #0b0b0c; background: rgb(255, 214, 106); border-radius: 3px; padding: 0 2px; } .tm_drawerHitHead { display: flex; align-items: center; gap: 6px; min-width: 0; } .tm_drawerAgentChip { flex: none; padding: 1px 6px; border-radius: 999px; border: 1px solid var(--dsw-alias-border-l2); font-size: calc(10px + var(--tm-font-step, 0px)); line-height: 1.5; color: var(--dsw-alias-label-secondary); letter-spacing: 0.02em; } .tm_drawerAgentChipSub { color: rgb(255, 214, 106); border-color: rgba(255, 214, 106, 0.5); background: rgba(255, 214, 106, 0.1); } .tm_drawerHitTitle { display: block; width: 100%; text-align: left; font: inherit; font-size: calc(12.5px + var(--tm-font-step, 0px)); font-weight: 600; color: var(--dsw-alias-label-primary); background: transparent; border: none; padding: 0 0 2px; cursor: pointer; } .tm_drawerHitTitle:hover { color: var(--dsw-alias-brand-primary); } .tm_peek { position: fixed; z-index: 80; width: min(500px, 88vw); max-height: 42vh; overflow-y: auto; display: flex; flex-direction: column; gap: 2px; padding: 10px 12px; border-radius: 10px; border: 1px solid var(--dsw-alias-border-l2); background: var(--dsw-alias-bg-layer-1); box-shadow: 0 16px 40px rgba(0, 0, 0, 0.55); } .tm_peekTitle { font-size: calc(11.5px + var(--tm-font-step, 0px)); font-weight: 600; color: var(--dsw-alias-label-secondary); padding-bottom: 4px; margin-bottom: 2px; border-bottom: 1px solid var(--dsw-alias-border-l2); } .tm_peekLine { font-size: calc(12px + var(--tm-font-step, 0px)); line-height: 1.55; color: var(--dsw-alias-label-primary); white-space: pre-wrap; word-break: break-word; } .tm_peekHint { margin-top: 6px; font-size: calc(10.5px + var(--tm-font-step, 0px)); color: var(--dsw-alias-label-secondary); opacity: 0.7; } .tm_drawerHitMore { align-self: flex-start; margin-top: 2px; font: inherit; font-size: calc(11px + var(--tm-font-step, 0px)); color: var(--dsw-alias-label-secondary); background: transparent; border: none; padding: 2px 0 2px 10px; cursor: pointer; } .tm_drawerHitMore:hover { color: var(--dsw-alias-brand-primary); } .tm_drawerHitBlock { display: flex; flex-direction: column; gap: 1px; margin-top: 4px; padding-left: 2px; } .tm_drawerHitLine { display: block; width: 100%; text-align: left; font: inherit; font-size: calc(11.5px + var(--tm-font-step, 0px)); color: var(--dsw-alias-label-secondary); background: transparent; border: none; padding: 2px 0 2px 10px; border-left: 2px solid var(--dsw-alias-border-l2); cursor: pointer; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; } .tm_drawerHitLine:hover { color: var(--dsw-alias-label-primary); border-left-color: var(--dsw-alias-brand-primary); } .tm_drawerScroll { overscroll-behavior: contain; scroll-behavior: auto; flex: 1; min-height: 0; overflow-y: auto; overscroll-behavior: contain; display: grid; grid-template-columns: repeat(auto-fill, 224px); justify-content: center; align-content: start; gap: 12px; padding: 16px; } .tm_drawerCard[draggable="true"] { cursor: grab; } .tm_drawerCard[data-talkmap-drag="1"] { cursor: grabbing; opacity: 0.55; transform: scale(0.98); } .tm_cardLinks { display: flex; flex-wrap: wrap; gap: 4px; margin: 2px 0 4px; } .tm_cardLinkChip { max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; padding: 0 6px; border-radius: 4px; font-size: calc(9.5px + var(--tm-font-step, 0px)); line-height: 1.7; color: var(--dsw-alias-label-secondary); background: rgba(255, 255, 255, 0.06); } .tm_cardLinkChip[data-talkmap-link="out"] { color: rgba(255, 214, 106, 0.9); background: rgba(255, 214, 106, 0.12); } .tm_drawerCard { width: 224px; box-sizing: border-box; text-align: left; font: inherit; cursor: pointer; background: var(--dsw-alias-bg-layer-1); } .tm_drawerCard:hover { border-color: var(--dsw-alias-brand-primary); } .tm_wsFrameResize { position: absolute; z-index: 2; pointer-events: auto; opacity: 0.5; } .tm_wsFrameResize:hover { opacity: 1; border-color: var(--dsw-alias-brand-primary); } .tm_wsFrameResizeN { cursor: ns-resize; border-top: 3px solid var(--dsw-alias-border-l3); border-radius: 14px 14px 0 0; } .tm_wsFrameResizeS { cursor: ns-resize; border-bottom: 3px solid var(--dsw-alias-border-l3); border-radius: 0 0 14px 14px; } .tm_wsFrameResizeW { cursor: ew-resize; border-left: 3px solid var(--dsw-alias-border-l3); border-radius: 14px 0 0 14px; } .tm_wsFrameResizeE { cursor: ew-resize; border-right: 3px solid var(--dsw-alias-border-l3); border-radius: 0 14px 14px 0; } .tm_wsFrameResizeNw, .tm_wsFrameResizeNe, .tm_wsFrameResizeSw, .tm_wsFrameResizeSe { width: 26px; height: 26px; z-index: 3; } .tm_wsFrameResizeNw { cursor: nwse-resize; border-left: 3px solid var(--dsw-alias-border-l3); border-top: 3px solid var(--dsw-alias-border-l3); border-top-left-radius: 14px; } .tm_wsFrameResizeNe { cursor: nesw-resize; border-right: 3px solid var(--dsw-alias-border-l3); border-top: 3px solid var(--dsw-alias-border-l3); border-top-right-radius: 14px; } .tm_wsFrameResizeSw { cursor: nesw-resize; border-left: 3px solid var(--dsw-alias-border-l3); border-bottom: 3px solid var(--dsw-alias-border-l3); border-bottom-left-radius: 14px; } .tm_wsFrameResizeSe { cursor: nwse-resize; border-right: 3px solid var(--dsw-alias-border-l3); border-bottom: 3px solid var(--dsw-alias-border-l3); border-bottom-right-radius: 14px; } .tm_batchBar { position: absolute; left: 50%; bottom: 18px; transform: translateX(-50%); z-index: 20; display: flex; align-items: center; gap: 8px; padding: 8px 14px; border: 1px solid var(--dsw-alias-border-l1); border-radius: 999px; background: var(--dsw-alias-bg-layer-1); box-shadow: 0 8px 24px var(--dsw-alias-bg-mask-2); } .tm_batchCount { font-size: calc(12px + var(--tm-font-step, 0px)); color: var(--dsw-alias-label-secondary); white-space: nowrap; } .tm_batchSpace { width: 6px; } .tm_batchAction { padding: 5px 14px; border: 1px solid var(--dsw-alias-border-l2); border-radius: 999px; background: transparent; color: var(--dsw-alias-label-primary); font-size: calc(12px + var(--tm-font-step, 0px)); cursor: pointer; white-space: nowrap; } .tm_batchAction:hover:not(:disabled) { background: var(--dsw-alias-interactive-bg-hover); } .tm_batchAction:disabled { opacity: 0.5; cursor: default; } .tm_batchDanger { color: var(--dsw-alias-state-error-primary); } .tm_pickBox { position: absolute; top: 6px; right: 6px; width: 16px; height: 16px; display: flex; align-items: center; justify-content: center; border: 1.5px solid var(--dsw-alias-border-l3); border-radius: 4px; background: var(--dsw-alias-bg-base); color: transparent; font-size: calc(11px + var(--tm-font-step, 0px)); line-height: 1; pointer-events: none; } .tm_pickBoxChecked { border-color: var(--dsw-alias-brand-primary); background: var(--dsw-alias-brand-primary); color: #fff; } .tm_colorToolbar { position: absolute; top: 12px; left: 12px; z-index: 20; display: flex; align-items: center; gap: 6px; padding: 6px 10px; border: 1px solid var(--dsw-alias-border-l1); border-radius: 999px; background: var(--dsw-alias-bg-layer-1); box-shadow: 0 6px 20px var(--dsw-alias-bg-mask-2); } .tm_colorToolbarLabel { font-size: calc(11px + var(--tm-font-step, 0px)); color: var(--dsw-alias-label-tertiary); margin-right: 2px; white-space: nowrap; } .tm_colorSwatch { width: 16px; height: 16px; padding: 0; border: 1px solid var(--dsw-alias-border-l2); border-radius: 50%; cursor: pointer; } .tm_colorSwatch:hover { transform: scale(1.15); } .tm_colorSwatchClear { display: flex; align-items: center; justify-content: center; background: transparent; color: var(--dsw-alias-label-secondary); font-size: calc(12px + var(--tm-font-step, 0px)); line-height: 1; } .tm_colorSwatchClear:hover { color: var(--dsw-alias-label-primary); background: var(--dsw-alias-interactive-bg-hover); } .tm_drawerWires { position: absolute; left: 0; top: 0; width: 100%; height: 100%; pointer-events: none; z-index: 0; overflow: visible; } .tm_drawerScroll { position: relative; } .tm_drawerScroll > .tm_card, .tm_drawerScroll > [data-stack-card] { position: relative; z-index: 1; } .tm_canvas .react-flow__edges { z-index: 0 !important; } .tm_canvas .react-flow__nodes { z-index: 1 !important; } .tm_statusRail { position: absolute; left: 0; top: 0; bottom: 0; z-index: 6; pointer-events: none; --rail-card-w: 224px; --rail-pad: 10px; --rail-card-outer: calc(var(--rail-card-w) + 26px); --rail-w: calc(var(--rail-card-outer) + var(--rail-pad) * 2 + 2px); } .tm_statusRailPanel { position: absolute; left: 0; top: 0; bottom: 0; width: var(--rail-w); box-sizing: border-box; padding: var(--rail-pad); display: flex; flex-direction: column; gap: 8px; background: var(--dsw-alias-bg-elevated, rgba(18, 20, 26, 0.94)); border-right: 1px solid var(--dsw-alias-border-secondary); box-shadow: 6px 0 26px rgba(0, 0, 0, 0.32); backdrop-filter: blur(10px); transform: translateX(-101%); transition: transform 320ms cubic-bezier(0.22, 0.61, 0.36, 1), box-shadow 320ms ease; pointer-events: none; } .tm_statusRail[data-open="1"] .tm_statusRailPanel { transform: translateX(0); pointer-events: auto; } .tm_statusRailHead { display: flex; align-items: baseline; gap: 8px; padding: 2px 4px 0; } .tm_statusRailTitle { flex: 1; font-size: 12px; letter-spacing: 0.02em; color: var(--dsw-alias-label-secondary); } .tm_statusRailCount { font-size: 11px; color: var(--dsw-alias-label-tertiary, #6b7280); font-variant-numeric: tabular-nums; } .tm_statusRailList { flex: 1; min-height: 0; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; padding: 2px 0 14px; } .tm_statusRailEmpty { padding: 8px 4px; font-size: 12px; line-height: 1.5; color: var(--dsw-alias-label-secondary); } .tm_statusRailSlot { position: relative; } .tm_statusRailSlot[draggable="true"] { cursor: grab; } .tm_statusRailSlot[draggable="true"]:active { cursor: grabbing; } .tm_statusRailCard { width: var(--rail-card-w); min-height: 84px; cursor: grab; transition: transform 120ms ease, box-shadow 120ms ease; } .tm_statusRailCard:active { cursor: grabbing; } .tm_statusRailSlotFloating { pointer-events: none; } .tm_statusRailCardDragging { cursor: grabbing; transform: scale(1.02) rotate(-0.3deg); box-shadow: 0 18px 40px rgba(0, 0, 0, 0.55); opacity: 0.97; } .tm_statusRailCard:hover { transform: translateY(-1px); } .tm_statusRailTab { position: absolute; top: 50%; left: 0; transform: translateY(-50%); display: flex; flex-direction: column; align-items: center; gap: 5px; min-width: 30px; padding: 13px 7px; border: 1px solid rgba(255, 255, 255, 0.16); border-left: none; border-radius: 0 11px 11px 0; background: rgba(38, 42, 52, 0.42); backdrop-filter: blur(16px) saturate(1.5); -webkit-backdrop-filter: blur(16px) saturate(1.5); box-shadow: 3px 0 14px rgba(0, 0, 0, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.08); color: var(--dsw-alias-label-primary); cursor: pointer; font: inherit; pointer-events: auto; transition: left 320ms cubic-bezier(0.22, 0.61, 0.36, 1), color 140ms ease, background 140ms ease; } .tm_statusRail[data-open="1"] .tm_statusRailTab { left: calc(var(--rail-w) - 1px); } .tm_statusRailTab:hover { color: #ffffff; background: rgba(58, 64, 78, 0.55); } .tm_statusRailTabCount { font-size: 10px; line-height: 1; padding: 2px 4px; border-radius: 999px; background: var(--dsw-alias-brand-primary); color: #0b0d12; font-variant-numeric: tabular-nums; } .tm_dangerBackdrop { position: absolute; inset: 0; z-index: 40; display: flex; align-items: center; justify-content: center; background: rgba(8, 10, 14, 0.55); backdrop-filter: blur(2px); } .tm_dangerDialog { width: min(420px, calc(100% - 48px)); padding: 18px 18px 14px; border: 1px solid var(--dsw-alias-border-secondary); border-radius: 14px; background: var(--dsw-alias-bg-elevated, #16181f); box-shadow: 0 24px 60px rgba(0, 0, 0, 0.55); } .tm_dangerTitle { font-size: 14px; font-weight: 600; color: var(--dsw-alias-label-primary); } .tm_dangerBody { margin-top: 8px; font-size: 12.5px; line-height: 1.6; color: var(--dsw-alias-label-secondary); } .tm_dangerActions { margin-top: 16px; display: flex; justify-content: flex-end; gap: 8px; } .tm_dangerCancel, .tm_dangerOk { padding: 6px 14px; border-radius: 8px; font: inherit; font-size: 12.5px; cursor: pointer; } .tm_dangerCancel { border: 1px solid var(--dsw-alias-border-secondary); background: transparent; color: var(--dsw-alias-label-secondary); } .tm_dangerCancel:hover { color: var(--dsw-alias-label-primary); background: var(--dsw-alias-interactive-bg-hover); } .tm_dangerOk { border: 1px solid rgba(242, 78, 78, 0.55); background: rgba(242, 78, 78, 0.16); color: #ff6b6b; } .tm_dangerOk:hover { background: rgba(242, 78, 78, 0.28); color: #ff8a8a; } .tm_statusRailGhost { visibility: hidden; } .tm_statusRailFloating { position: fixed; z-index: 20; pointer-events: none; }`;
+var __css = `.tm_toggleButton { display: flex; align-items: center; justify-content: center; gap: 6px; width: 32px; height: 32px; padding: 0; border: none; border-radius: 8px; background: transparent; color: var(--dsw-alias-label-secondary); cursor: pointer; } .tm_toggleButton:hover { background: var(--dsw-alias-interactive-bg-hover); color: var(--dsw-alias-label-primary); } .tm_toggleButtonActive { background: var(--dsw-alias-interactive-bg-active); color: var(--dsw-alias-brand-primary); } .tm_toggleRow { display: flex; align-items: center; gap: 8px; width: 100%; padding: 6px 10px; border: none; border-radius: 8px; background: transparent; color: var(--dsw-alias-label-secondary); font-size: calc(13px + var(--tm-font-step, 0px)); cursor: pointer; text-align: left; } .tm_toggleRow:hover { background: var(--dsw-alias-interactive-bg-hover); color: var(--dsw-alias-label-primary); } .tm_toggleLabel { white-space: nowrap; } .tm_toggleIcon { width: 18px; height: 18px; flex: none; } .tm_panel { height: 100%; min-height: 0; box-sizing: border-box; display: flex; flex-direction: column; background: var(--dsw-alias-bg-base); color: var(--dsw-alias-label-primary); } .tm_header { display: flex; align-items: center; gap: 10px; padding: 10px 14px 10px max(14px, calc(var(--dsh-frame-leading-clearance, 0px) + 10px)); border-bottom: 1px solid var(--dsw-alias-border-l1); background: var(--dsw-alias-bg-layer-1); flex: none; } .tm_backButton { display: inline-flex; align-items: center; gap: 6px; flex: none; height: 38px; padding: 0 18px 0 12px; border: 1px solid var(--dsw-alias-border-l2); border-radius: 999px; background: transparent; color: var(--dsw-alias-label-secondary); font-size: calc(14px + var(--tm-font-step, 0px)); font-weight: 600; line-height: 1; cursor: pointer; } .tm_backButton:hover { background: var(--dsw-alias-interactive-bg-hover); color: var(--dsw-alias-label-primary); } .tm_globalSearch { position: relative; display: flex; align-items: center; gap: 6px; margin-right: 8px; } .tm_globalSearchInput { width: 200px; font: inherit; font-size: calc(12px + var(--tm-font-step, 0px)); color: var(--dsw-alias-label-primary); background: var(--dsw-alias-bg-layer-2, rgba(255, 255, 255, 0.06)); border: 1px solid var(--dsw-alias-border-l2); border-radius: 8px; padding: 5px 9px; outline: none; } .tm_globalSearchInput:focus { border-color: var(--dsw-alias-border-l3, rgba(255, 255, 255, 0.3)); } .tm_globalSearchButton { font: inherit; font-size: calc(11.5px + var(--tm-font-step, 0px)); color: var(--dsw-alias-label-secondary); background: transparent; border: 1px solid var(--dsw-alias-border-l2); border-radius: 8px; padding: 5px 10px; cursor: pointer; } .tm_globalSearchButton:hover { color: var(--dsw-alias-label-primary); } .tm_globalSearchBackdrop { position: fixed; inset: 0; z-index: 70; background: rgba(0, 0, 0, 0.45); display: flex; align-items: flex-start; justify-content: center; padding-top: 9vh; } .tm_globalSearchPanel { width: min(980px, 92vw); max-height: 76vh; display: flex; flex-direction: column; border-radius: 14px; border: 1px solid var(--dsw-alias-border-l2); background: var(--dsw-alias-bg-layer-1); box-shadow: 0 22px 60px rgba(0, 0, 0, 0.5); overflow: hidden; } .tm_globalSearchHead { display: flex; align-items: center; gap: 10px; padding: 12px 16px; border-bottom: 1px solid var(--dsw-alias-border-l2); } .tm_globalSearchTitle { font-size: calc(13px + var(--tm-font-step, 0px)); font-weight: 600; color: var(--dsw-alias-label-primary); } .tm_globalSearchBody { padding: 0 16px 14px; overflow-y: auto; overscroll-behavior: contain; } .tm_searchInlineLoading { display: flex; align-items: center; padding: 4px 0 2px 10px; } .tm_searchInlineLoading > span { width: 62%; } .tm_drawerScrollSensor { width: 100%; height: 1px; opacity: 0; } .tm_fontGroup { display: flex; align-items: center; gap: 4px; margin-right: 6px; } .tm_fontButton { display: inline-flex; align-items: center; justify-content: center; gap: 3px; min-width: 46px; height: 28px; padding: 0 8px; line-height: 1; border: 1px solid var(--dsw-alias-border-l2); border-radius: 8px; background: transparent; color: var(--dsw-alias-label-secondary); font: inherit; font-size: calc(12px + var(--tm-font-step, 0px)); cursor: pointer; } .tm_fontButton:hover:not(:disabled) { color: var(--dsw-alias-label-primary); border-color: var(--dsw-alias-border-l3, rgba(255, 255, 255, 0.3)); } .tm_fontButton:disabled { opacity: 0.4; cursor: default; } .tm_fontGlyphSmall, .tm_fontGlyphLarge { display: inline-block; width: calc(9px + 0px); text-align: center; line-height: 1; } .tm_fontGlyphSmall, .tm_fontGlyphLarge { font-size: calc(13px + var(--tm-font-step, 0px)); } .tm_fontSign { display: inline-block; font-size: calc(10px + var(--tm-font-step, 0px)); line-height: 1; transform: translateY(-3px); } .tm_fontReset { min-width: 50px; } .tm_fontReset { min-width: 44px; } .tm_headerSpace { flex: 1; } .tm_langButton { flex: none; min-width: 72px; height: 34px; padding: 0 14px; border: 1px solid var(--dsw-alias-border-l2); border-radius: 999px; background: transparent; color: var(--dsw-alias-label-secondary); font-size: calc(13px + var(--tm-font-step, 0px)); cursor: pointer; white-space: nowrap; } .tm_langButton:hover { background: var(--dsw-alias-interactive-bg-hover); color: var(--dsw-alias-label-primary); } .tm_closeButton { display: inline-flex; align-items: center; justify-content: center; flex: none; width: 38px; height: 38px; padding: 0; border: 1px solid var(--dsw-alias-border-l2); border-radius: 999px; background: transparent; color: var(--dsw-alias-label-secondary); cursor: pointer; } .tm_closeButton:hover { background: var(--dsw-alias-interactive-bg-hover); color: var(--dsw-alias-label-primary); } .tm_zoomResetLabel { font-size: calc(9px + var(--tm-font-step, 0px)); font-weight: 700; letter-spacing: -0.5px; } .tm_pageTabs { display: flex; align-items: center; gap: 8px; flex: none; min-height: 40px; padding: 6px 14px; border-bottom: 1px solid var(--dsw-alias-border-l1); background: var(--dsw-alias-bg-base); overflow: hidden; } .tm_pageTabScroll { display: flex; align-items: center; gap: 6px; min-width: 0; overflow-x: auto; overflow-y: hidden; scrollbar-width: thin; } .tm_pageTab { display: inline-flex; align-items: center; gap: 6px; flex: none; max-width: 220px; height: 28px; padding: 0 10px; border: 1px solid transparent; border-radius: 999px; background: transparent; color: var(--dsw-alias-label-secondary); font-size: calc(12px + var(--tm-font-step, 0px)); font-weight: 600; cursor: pointer; white-space: nowrap; } .tm_pageTab:hover { background: var(--dsw-alias-interactive-bg-hover); color: var(--dsw-alias-label-primary); } .tm_pageTabActive { border-color: var(--dsw-alias-border-l2); background: var(--dsw-alias-bg-layer-1); color: var(--dsw-alias-label-primary); } .tm_pageTabTitle { overflow: hidden; text-overflow: ellipsis; } .tm_pageTabCount { flex: none; min-width: 18px; padding: 0 5px; border-radius: 999px; background: var(--dsw-alias-interactive-bg-hover); color: var(--dsw-alias-label-tertiary); font-size: calc(10px + var(--tm-font-step, 0px)); font-weight: 600; line-height: 16px; text-align: center; } .tm_pageTabsSpace { flex: 1; min-width: 8px; } .tm_pageAction { flex: none; height: 28px; padding: 0 12px; border: 1px solid var(--dsw-alias-border-l2); border-radius: 999px; background: transparent; color: var(--dsw-alias-label-secondary); font-size: calc(12px + var(--tm-font-step, 0px)); font-weight: 600; cursor: pointer; white-space: nowrap; } .tm_pageAction:hover { background: var(--dsw-alias-interactive-bg-hover); color: var(--dsw-alias-label-primary); } .tm_pageActionOn { border-color: var(--dsw-alias-brand-primary); color: var(--dsw-alias-brand-primary); } .tm_canvas { flex: 1; min-height: 0; position: relative; } @media (prefers-reduced-motion: reduce) { .tm_canvas .react-flow__edge circle { opacity: 0.28; } } .tm_canvas .react-flow__node { transition: transform 200ms cubic-bezier(0.2, 0.8, 0.25, 1); } .tm_canvas .react-flow__node.dragging, .tm_canvas .react-flow__node.tmDragging { transition: none; } .tm_canvas .react-flow__nodesselection, .tm_canvas .react-flow__nodesselection-rect { display: none !important; pointer-events: none !important; } .tm_card { position: relative; width: 224px; min-height: 104px; display: flex; flex-direction: column; gap: 6px; padding: 10px 12px; border: 1px solid var(--dsw-alias-border-l2); border-radius: 10px; background: var(--dsw-alias-bg-layer-1); color: var(--dsw-alias-label-primary); box-shadow: 0 1px 3px var(--dsw-alias-bg-mask-1); font-size: calc(13px + var(--tm-font-step, 0px)); } .tm_cardSelected { border-color: var(--dsw-alias-brand-primary); } .tm_cardGhost { opacity: 0.55; border-style: dashed; } .tm_cardTop { display: flex; align-items: center; gap: 6px; min-width: 0; } .tm_cardTitle { font-weight: 600; font-size: calc(13px + var(--tm-font-step, 0px)); line-height: 1.3; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; word-break: break-word; } .tm_runningDot { flex: none; width: 8px; height: 8px; border-radius: 50%; background: #ffffff; animation: tm_talkmap-pulse 1.6s ease-in-out infinite; } @keyframes tm_talkmap-pulse { 50% { opacity: 0.35; } } .tm_cardNext { display: flex; align-items: baseline; gap: 6px; font-size: calc(12px + var(--tm-font-step, 0px)); color: var(--dsw-alias-label-secondary); min-width: 0; } .tm_cardNextLabel { flex: none; font-size: calc(11px + var(--tm-font-step, 0px)); color: var(--dsw-alias-brand-primary); font-weight: 600; } .tm_cardNextText { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; } .tm_cardStale { flex: none; color: var(--dsw-alias-state-warn-primary); font-size: calc(12px + var(--tm-font-step, 0px)); } .tm_cardFooter { margin-top: auto; display: flex; align-items: center; justify-content: space-between; gap: 8px; font-size: calc(11px + var(--tm-font-step, 0px)); color: var(--dsw-alias-label-tertiary); } .tm_cardTime { flex: none; } .tm_cardChip { display: inline-flex; align-items: center; gap: 5px; padding: 1px 8px; border-radius: 999px; font-size: calc(10px + var(--tm-font-step, 0px)); font-weight: 600; white-space: nowrap; border: 1px solid transparent; } .tm_cardChipRunning { color: #ffffff; background: rgba(255, 255, 255, 0.14); border-color: rgba(255, 255, 255, 0.35); } .tm_cardChipWaiting { color: rgb(245, 178, 46); background: rgba(245, 178, 46, 0.14); border-color: rgba(245, 178, 46, 0.42); } .tm_cardChipDone { color: rgb(52, 199, 89); background: rgba(52, 199, 89, 0.14); border-color: rgba(52, 199, 89, 0.42); } .tm_cardChipError { color: rgb(242, 78, 78); background: rgba(242, 78, 78, 0.14); border-color: rgba(242, 78, 78, 0.45); } .tm_cardChipDraft { color: rgb(255, 197, 61); background: rgba(255, 197, 61, 0.18); border-color: rgba(255, 197, 61, 0.5); } .tm_cardChipInterrupted { color: rgb(214, 158, 92); background: rgba(214, 158, 92, 0.14); border-color: rgba(214, 158, 92, 0.42); } .tm_cardSummary { font-size: calc(12px + var(--tm-font-step, 0px)); line-height: 1.45; color: var(--dsw-alias-label-secondary); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; word-break: break-word; } .tm_cardBadgeWaiting { padding: 1px 7px; border-radius: 999px; font-size: calc(10px + var(--tm-font-step, 0px)); color: var(--dsw-alias-state-warn-label); background: var(--dsw-alias-state-warn-tertiary); } .tm_cardBadgeDone { padding: 1px 7px; border-radius: 999px; font-size: calc(10px + var(--tm-font-step, 0px)); color: var(--dsw-alias-state-success-primary); background: var(--dsw-alias-state-success-tertiary); } .tm_cardLampRunning { box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.34), 0 0 16px 2px rgba(255, 255, 255, 0.2), 0 0 40px 9px rgba(255, 255, 255, 0.1); } .tm_dialogBackdrop { position: fixed; inset: 0; z-index: 80; display: flex; align-items: center; justify-content: center; background: rgba(0, 0, 0, 0.45); backdrop-filter: blur(2px); animation: tm_tmFadeIn 140ms ease-out; } .tm_digestDialog { width: min(720px, 86vw); max-height: 82vh; display: flex; flex-direction: column; gap: 8px; padding: 16px 18px 14px; border-radius: 14px; background: var(--dsw-alias-bg-elevated, #232323); border: 1px solid rgba(255, 255, 255, 0.09); box-shadow: 0 24px 60px rgba(0, 0, 0, 0.45); animation: tm_tmRiseIn 200ms cubic-bezier(0.16, 1, 0.3, 1); } .tm_digestDialogHead { display: flex; align-items: baseline; gap: 8px; min-width: 0; } .tm_digestDialogTitle { font-size: calc(13px + var(--tm-font-step, 0px)); font-weight: 600; color: var(--dsw-alias-label-primary); } .tm_digestDialogFrom { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: calc(11px + var(--tm-font-step, 0px)); color: var(--dsw-alias-label-secondary); } .tm_digestLabel { margin-top: 4px; font-size: calc(10.5px + var(--tm-font-step, 0px)); color: var(--dsw-alias-label-tertiary, rgba(255, 255, 255, 0.5)); } .tm_digestText { width: 100%; min-height: 96px; max-height: 30vh; padding: 10px 12px; border-radius: 10px; border: 1px solid rgba(255, 255, 255, 0.08); background: rgba(255, 255, 255, 0.04); color: var(--dsw-alias-label-primary); font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: calc(11.5px + var(--tm-font-step, 0px)); line-height: 1.62; resize: none; } .tm_digestEmpty { padding: 18px 4px; font-size: calc(12px + var(--tm-font-step, 0px)); color: var(--dsw-alias-label-secondary); } .tm_digestActions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 4px; } .tm_renameBackdrop { position: fixed; inset: 0; z-index: 40; background: rgba(0, 0, 0, 0.42); display: flex; align-items: flex-start; justify-content: center; padding-top: 22vh; } .tm_renameDialog { width: min(420px, 90vw); background: var(--dsw-alias-bg-layer-1); border: 1px solid var(--dsw-alias-border-l2); border-radius: 12px; box-shadow: 0 18px 42px rgba(0, 0, 0, 0.42); padding: 16px 16px 12px; display: flex; flex-direction: column; gap: 10px; } .tm_renameHeading { font-size: calc(13px + var(--tm-font-step, 0px)); font-weight: 600; color: var(--dsw-alias-label-primary); } .tm_renameInput { width: 100%; box-sizing: border-box; font: inherit; font-size: calc(13px + var(--tm-font-step, 0px)); color: var(--dsw-alias-label-primary); background: var(--dsw-alias-bg-layer-2, rgba(255, 255, 255, 0.06)); border: 1px solid var(--dsw-alias-border-l2); border-radius: 8px; padding: 8px 10px; outline: none; } .tm_renameInput:focus { border-color: var(--dsw-alias-border-l3, rgba(255, 255, 255, 0.35)); } .tm_renameError { font-size: calc(12px + var(--tm-font-step, 0px)); color: rgb(242, 78, 78); } .tm_renameActions { display: flex; justify-content: flex-end; gap: 8px; } .tm_renameButton { font: inherit; font-size: calc(12.5px + var(--tm-font-step, 0px)); color: var(--dsw-alias-label-secondary); background: transparent; border: 1px solid var(--dsw-alias-border-l2); border-radius: 8px; padding: 6px 12px; cursor: pointer; } .tm_renameButton:hover { color: var(--dsw-alias-label-primary); } .tm_renamePrimary { color: #0b0b0c; background: rgb(255, 214, 106); border-color: rgb(255, 214, 106); } .tm_renamePrimary:disabled { opacity: 0.5; cursor: default; } .tm_cardPin { display: inline-flex; align-items: center; flex: none; color: rgb(255, 214, 106); filter: drop-shadow(0 0 5px rgba(255, 214, 106, 0.85)); animation: tm_talkmap-pin-glow 2.6s ease-in-out infinite; } @keyframes tm_talkmap-pin-glow { 0%, 100% { filter: drop-shadow(0 0 4px rgba(255, 214, 106, 0.6)); opacity: 0.92; } 50% { filter: drop-shadow(0 0 9px rgba(255, 214, 106, 1)); opacity: 1; } } .tm_cardReticle { position: absolute; inset: -5px; pointer-events: none; filter: drop-shadow(0 0 5px rgba(255, 255, 255, 0.45)); } .tm_cardReticle i { position: absolute; width: 13px; height: 13px; border: 2px solid rgba(255, 255, 255, 0.9); } .tm_cardReticle i:nth-child(1) { left: 0; top: 0; border-right: 0; border-bottom: 0; border-top-left-radius: 4px; } .tm_cardReticle i:nth-child(2) { right: 0; top: 0; border-left: 0; border-bottom: 0; border-top-right-radius: 4px; } .tm_cardReticle i:nth-child(3) { left: 0; bottom: 0; border-right: 0; border-top: 0; border-bottom-left-radius: 4px; } .tm_cardReticle i:nth-child(4) { right: 0; bottom: 0; border-left: 0; border-top: 0; border-bottom-right-radius: 4px; } .tm_cardQuiet { opacity: 0.62; transition: opacity 140ms ease; } .tm_cardQuiet:hover { opacity: 1; } .tm_stackBadgeBusy { color: rgb(255, 197, 61); border-color: rgba(255, 197, 61, 0.5); } @property --tm-ring-angle { syntax: "<angle>"; initial-value: 0deg; inherits: false; } .tm_cardLampRunning::after { content: ''; position: absolute; inset: -2px; border-radius: 12px; padding: 2px; background: conic-gradient( from var(--tm-ring-angle), rgba(255, 255, 255, 0) 0deg, rgba(255, 255, 255, 0) 190deg, rgba(255, 255, 255, 0.18) 250deg, rgba(255, 255, 255, 0.55) 292deg, rgba(255, 255, 255, 1) 325deg, rgba(255, 255, 255, 0.4) 352deg, rgba(255, 255, 255, 0) 360deg ); -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite: xor; mask-composite: exclude; animation: tm_talkmap-ring-sweep 1.8s linear infinite; pointer-events: none; } @keyframes tm_talkmap-ring-sweep { to { --tm-ring-angle: 360deg; } } .tm_cardLampDone { animation: tm_talkmap-lamp-green 2.8s ease-in-out infinite; } .tm_cardLampError { animation: tm_talkmap-lamp-red 1.9s ease-in-out infinite; } .tm_cardLampWaiting { animation: tm_talkmap-lamp-amber 3.4s ease-in-out infinite; } @keyframes tm_talkmap-lamp-green { 0%, 100% { box-shadow: inset 0 0 0 1px rgba(52, 199, 89, 0.40), 0 0 14px 1px rgba(52, 199, 89, 0.26), 0 0 34px 8px rgba(52, 199, 89, 0.11); } 50% { box-shadow: inset 0 0 0 1px rgba(52, 199, 89, 0.72), 0 0 24px 5px rgba(52, 199, 89, 0.46), 0 0 62px 20px rgba(52, 199, 89, 0.22); } } @keyframes tm_talkmap-lamp-amber { 0%, 100% { box-shadow: inset 0 0 0 1px rgba(245, 178, 46, 0.42), 0 0 14px 1px rgba(245, 178, 46, 0.24), 0 0 34px 8px rgba(245, 178, 46, 0.11); } 50% { box-shadow: inset 0 0 0 1px rgba(245, 178, 46, 0.72), 0 0 24px 5px rgba(245, 178, 46, 0.44), 0 0 60px 19px rgba(245, 178, 46, 0.20); } } @keyframes tm_talkmap-lamp-red { 0%, 100% { box-shadow: inset 0 0 0 1px rgba(242, 78, 78, 0.46), 0 0 14px 1px rgba(242, 78, 78, 0.28), 0 0 34px 8px rgba(242, 78, 78, 0.12); } 50% { box-shadow: inset 0 0 0 1px rgba(242, 78, 78, 0.80), 0 0 26px 6px rgba(242, 78, 78, 0.52), 0 0 66px 22px rgba(242, 78, 78, 0.26); } } .tm_cardRemove { align-self: flex-start; padding: 3px 8px; border: 1px solid var(--dsw-alias-border-l2); border-radius: 6px; background: transparent; color: var(--dsw-alias-label-secondary); font-size: calc(12px + var(--tm-font-step, 0px)); cursor: pointer; } .tm_cardRemove:hover { background: var(--dsw-alias-interactive-bg-hover-danger); color: var(--dsw-alias-state-error-primary); } .tm_cardHandle { width: 10px; height: 10px; background: var(--dsw-alias-border-l3); border: 2px solid var(--dsw-alias-bg-layer-1); opacity: 0; } .tm_card:hover .tm_cardHandle, .tm_canvasConnecting .tm_cardHandle { opacity: 1; } .tm_cardHandle:hover { background: var(--dsw-alias-brand-primary); } .tm_cardRefresh { flex: none; margin-left: auto; width: 22px; height: 22px; padding: 0; border: none; border-radius: 6px; background: transparent; color: var(--dsw-alias-label-tertiary); font-size: calc(13px + var(--tm-font-step, 0px)); line-height: 1; cursor: pointer; opacity: 0; transition: opacity 120ms ease; } .tm_card:hover .tm_cardRefresh { opacity: 1; } .tm_cardRefresh:hover { background: var(--dsw-alias-interactive-bg-hover); color: var(--dsw-alias-label-primary); } .tm_cardRefreshBusy { opacity: 1; animation: tm_talkmap-spin 1s linear infinite; } @keyframes tm_talkmap-spin { to { transform: rotate(360deg); } } .tm_spawnPanel { position: absolute; right: 24px; top: 24px; z-index: 6; width: 420px; max-width: calc(100% - 48px); display: flex; flex-direction: column; gap: 8px; padding: 16px; border: 1px solid var(--dsw-alias-border-l2); border-radius: 12px; background: var(--dsw-alias-bg-layer-1); box-shadow: 0 8px 30px var(--dsw-alias-bg-mask-2); } .tm_spawnHeading { font-size: calc(14px + var(--tm-font-step, 0px)); font-weight: 600; color: var(--dsw-alias-label-primary); } .tm_spawnFrom { font-size: calc(12px + var(--tm-font-step, 0px)); color: var(--dsw-alias-label-secondary); } .tm_spawnModes { display: flex; gap: 6px; } .tm_spawnModeBtn { flex: 1; padding: 5px 0; border: 1px solid var(--dsw-alias-border-l2); border-radius: 8px; background: transparent; color: var(--dsw-alias-label-secondary); font-size: calc(12px + var(--tm-font-step, 0px)); cursor: pointer; } .tm_spawnModeBtn:hover { background: var(--dsw-alias-interactive-bg-hover); } .tm_spawnModeActive { border-color: var(--dsw-alias-brand-primary); color: var(--dsw-alias-brand-primary); background: var(--dsw-alias-interactive-bg-active); } .tm_spawnHint { font-size: calc(12px + var(--tm-font-step, 0px)); color: var(--dsw-alias-label-tertiary); } .tm_spawnTextarea { width: 100%; resize: vertical; min-height: 140px; padding: 10px; border: 1px solid var(--dsw-alias-border-l2); border-radius: 8px; background: var(--dsw-alias-bg-base); color: var(--dsw-alias-label-primary); font-size: calc(13px + var(--tm-font-step, 0px)); line-height: 1.5; font-family: inherit; } .tm_spawnError { font-size: calc(12px + var(--tm-font-step, 0px)); color: var(--dsw-alias-state-error-primary); word-break: break-all; } .tm_spawnActions { display: flex; justify-content: flex-end; gap: 8px; } .tm_spawnBtnPrimary { padding: 6px 16px; border: none; border-radius: 8px; background: var(--dsw-alias-button-primary-fill); color: var(--dsw-alias-label-primary-foreground); font-size: calc(13px + var(--tm-font-step, 0px)); cursor: pointer; } .tm_spawnBtnPrimary:hover { background: var(--dsw-alias-button-primary-hover); } .tm_spawnBtnPrimary:disabled { background: var(--dsw-alias-button-primary-dimmed); cursor: default; } .tm_spawnBtnGhost { padding: 6px 16px; border: 1px solid var(--dsw-alias-border-l2); border-radius: 8px; background: transparent; color: var(--dsw-alias-label-secondary); font-size: calc(13px + var(--tm-font-step, 0px)); cursor: pointer; } .tm_spawnBtnGhost:hover { background: var(--dsw-alias-interactive-bg-hover); } .tm_wsFrame { position: relative; border: 1.5px dashed var(--dsw-alias-border-l2); border-radius: 16px; background: transparent; } .tm_wsFrameBlocked { border-color: rgb(242, 78, 78) !important; box-shadow: 0 0 0 1px rgba(242, 78, 78, 0.45) inset; } .tm_wsFrameSelected { border-style: solid; border-color: var(--dsw-alias-brand-primary); } .tm_wsFrameLabel { position: absolute; top: -12px; left: 14px; display: flex; align-items: center; gap: 6px; padding: 2px 10px; border-radius: 999px; border: 1px solid var(--dsw-alias-border-l1); background: var(--dsw-alias-bg-layer-1); font-size: calc(12px + var(--tm-font-step, 0px)); font-weight: 600; color: var(--dsw-alias-label-secondary); white-space: nowrap; pointer-events: auto; cursor: grab; z-index: 5; } .tm_wsFrameLabel:active { cursor: grabbing; } .tm_wsFrameEdge { position: absolute; pointer-events: auto; cursor: grab; } .tm_wsFrameEdge:active { cursor: grabbing; } .tm_wsFrameCount { font-weight: 400; color: var(--dsw-alias-label-tertiary); } .tm_menu { position: absolute; z-index: 60; min-width: 200px; max-width: 280px; max-height: 380px; overflow-y: auto; display: flex; flex-direction: column; padding: 6px; border: 1px solid var(--dsw-alias-border-l1); border-radius: 10px; background: var(--dsw-alias-bg-layer-1); box-shadow: 0 8px 30px var(--dsw-alias-bg-mask-2); } .tm_menuTitle { flex: none; padding: 4px 10px 6px; font-size: calc(11px + var(--tm-font-step, 0px)); color: var(--dsw-alias-label-tertiary); } .tm_menuSearch { flex: none; box-sizing: border-box; width: calc(100% - 8px); margin: 2px 4px 6px; padding: 5px 8px; border: 1px solid var(--dsw-alias-border-l2); border-radius: 7px; background: var(--dsw-alias-bg-base); color: var(--dsw-alias-label-primary); font-size: calc(12px + var(--tm-font-step, 0px)); font-family: inherit; } .tm_menuHint { font-size: calc(11px + var(--tm-font-step, 0px)); color: var(--dsw-alias-label-dimmed); } .tm_menuPreview { flex: none; padding: 0 10px 4px; font-size: calc(11px + var(--tm-font-step, 0px)); color: var(--dsw-alias-label-tertiary); word-break: break-all; } .tm_menuError { flex: none; padding: 0 10px 4px; font-size: calc(11px + var(--tm-font-step, 0px)); color: var(--dsw-alias-state-error-primary); word-break: break-all; } .tm_menuEmpty { padding: 8px 10px; font-size: calc(12px + var(--tm-font-step, 0px)); color: var(--dsw-alias-label-tertiary); } .tm_menuItem { flex: none; display: flex; align-items: center; gap: 8px; width: 100%; text-align: left; padding: 6px 10px; border: none; border-radius: 7px; background: transparent; color: var(--dsw-alias-label-primary); font-size: calc(13px + var(--tm-font-step, 0px)); cursor: pointer; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; } .tm_menuIcon { flex: none; width: 14px; height: 14px; color: var(--dsw-alias-label-secondary); } .tm_menuItemDanger { color: rgb(242, 78, 78); } .tm_menuItemDanger .tm_menuIcon { color: rgb(242, 78, 78); } .tm_menuItem:hover:not(:disabled) { background: var(--dsw-alias-interactive-bg-hover); } .tm_menuItem:disabled { color: var(--dsw-alias-label-dimmed); cursor: default; } .tm_wsFrameHidden { font-weight: 400; color: var(--dsw-alias-state-warn-primary); } .tm_emptyHint { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); font-size: calc(13px + var(--tm-font-step, 0px)); color: var(--dsw-alias-label-tertiary); pointer-events: none; z-index: 4; } .tm_toast { position: absolute; left: 50%; bottom: 28px; transform: translateX(-50%); z-index: 8; max-width: 70%; padding: 7px 16px; border: 1px solid var(--dsw-alias-border-l1); border-radius: 999px; background: var(--dsw-alias-bg-layer-1); box-shadow: 0 4px 16px var(--dsw-alias-bg-mask-2); font-size: calc(12px + var(--tm-font-step, 0px)); color: var(--dsw-alias-label-primary); pointer-events: none; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; } .tm_stackCell { position: relative; width: 224px; height: 104px; cursor: pointer; } .tm_stackSheetBack, .tm_stackSheetMid { position: absolute; inset: 0; border-radius: 12px; border: 1px solid var(--dsw-alias-border-l2); background: var(--dsw-alias-bg-layer-1); } .tm_stackSheetBack { transform: translate(11px, 11px) scale(0.95); opacity: 0.35; } .tm_stackSheetMid { transform: translate(5px, 5px) scale(0.977); opacity: 0.6; } .tm_stackFace { position: absolute; inset: 0; box-sizing: border-box; display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; padding: 12px; border: 1px solid var(--dsw-alias-border-l2); border-radius: 12px; background: var(--dsw-alias-bg-layer-1); transition: border-color 140ms ease, transform 140ms ease; } .tm_stackCell:hover .tm_stackFace { border-color: var(--dsw-alias-brand-primary); transform: translateY(-1px); } .tm_stackFaceTitle { font-size: calc(13px + var(--tm-font-step, 0px)); font-weight: 600; color: var(--dsw-alias-label-primary); overflow: hidden; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; } .tm_stackBadge { flex: none; padding: 1px 8px; border-radius: 999px; border: 1px solid var(--dsw-alias-border-l2); color: var(--dsw-alias-label-secondary); font-size: calc(11px + var(--tm-font-step, 0px)); font-variant-numeric: tabular-nums; } .tm_drawerBackdrop { position: absolute; inset: 0; z-index: 30; display: flex; align-items: center; justify-content: center; background: var(--dsw-alias-bg-mask-2); } .tm_drawer { width: min(1120px, 94%); max-height: 84%; box-sizing: border-box; display: flex; flex-direction: column; border: 1px solid var(--dsw-alias-border-l1); border-radius: 16px; background: var(--dsw-alias-bg-layer-1); box-shadow: 0 18px 48px var(--dsw-alias-bg-mask-2); overflow: hidden; } .tm_drawerHead { display: flex; align-items: center; gap: 10px; flex: none; padding: 12px 14px; border-bottom: 1px solid var(--dsw-alias-border-l1); } .tm_drawerTitle { font-size: calc(14px + var(--tm-font-step, 0px)); font-weight: 600; color: var(--dsw-alias-label-primary); } .tm_drawerCount { font-size: calc(12px + var(--tm-font-step, 0px)); color: var(--dsw-alias-label-tertiary); } .tm_drawerSpace { flex: 1; } .tm_drawerHint { font-size: calc(11px + var(--tm-font-step, 0px)); color: var(--dsw-alias-label-tertiary); } .tm_drawerClose { flex: none; width: 30px; height: 30px; padding: 0; border: 1px solid var(--dsw-alias-border-l2); border-radius: 999px; background: transparent; color: var(--dsw-alias-label-secondary); font-size: calc(16px + var(--tm-font-step, 0px)); line-height: 1; cursor: pointer; } .tm_drawerClose:hover { background: var(--dsw-alias-interactive-bg-hover); color: var(--dsw-alias-label-primary); } .tm_drawerHits > .tm_drawerHit { animation: tm_tmPopIn 240ms cubic-bezier(0.16, 1, 0.3, 1) both; } .tm_drawerHits > .tm_drawerHit:nth-child(1) { animation-delay: 20ms; } .tm_drawerHits > .tm_drawerHit:nth-child(2) { animation-delay: 34ms; } .tm_drawerHits > .tm_drawerHit:nth-child(3) { animation-delay: 48ms; } .tm_drawerHits > .tm_drawerHit:nth-child(4) { animation-delay: 62ms; } .tm_drawerHits > .tm_drawerHit:nth-child(5) { animation-delay: 76ms; } .tm_drawerHits > .tm_drawerHit:nth-child(n+6) { animation-delay: 90ms; } .tm_searchLoading { display: flex; flex-direction: column; gap: 8px; padding: 6px 0 2px; } .tm_searchLoadingBar { position: relative; height: 2px; border-radius: 2px; overflow: hidden; background: rgba(255, 255, 255, 0.07); } .tm_searchLoadingBar > i { position: absolute; inset: 0 auto 0 0; width: 34%; border-radius: 2px; background: linear-gradient(90deg, transparent, var(--dsw-alias-brand-primary), transparent); animation: tm_tmSlideBar 1150ms cubic-bezier(0.4, 0, 0.2, 1) infinite; } @keyframes tm_tmSlideBar { 0% { transform: translateX(-100%); } 100% { transform: translateX(320%); } } .tm_searchSkeletonRow { display: flex; flex-direction: column; gap: 6px; padding: 9px 10px; border: 1px solid var(--dsw-alias-border-l2); border-radius: 9px; } .tm_searchSkeletonTitle, .tm_searchSkeletonLine { display: block; height: 9px; border-radius: 4px; background: linear-gradient(90deg, rgba(255,255,255,0.05), rgba(255,255,255,0.12), rgba(255,255,255,0.05)); background-size: 220% 100%; animation: tm_tmShimmer 1300ms ease-in-out infinite; } .tm_searchSkeletonTitle { width: 38%; } .tm_searchSkeletonLine { width: 78%; } @keyframes tm_tmShimmer { 0% { background-position: 120% 0; } 100% { background-position: -60% 0; } } @media (prefers-reduced-motion: reduce) { .tm_drawerHits > .tm_drawerHit, .tm_searchLoadingBar > i, .tm_searchSkeletonTitle, .tm_searchSkeletonLine { animation: none; } } @keyframes tm_tmFadeIn { from { opacity: 0; } to { opacity: 1; } } @keyframes tm_tmFadeOut { from { opacity: 1; } to { opacity: 0; } } @keyframes tm_tmRiseIn { from { opacity: 0; transform: translateY(26px) scale(0.94); } 60% { opacity: 1; } to { opacity: 1; transform: none; } } @keyframes tm_tmRiseOut { from { opacity: 1; transform: none; } to { opacity: 0; transform: translateY(10px) scale(0.985); } } @keyframes tm_tmPopIn { from { opacity: 0; transform: translateY(6px) scale(0.97); } to { opacity: 1; transform: none; } } @keyframes tm_tmCardIn { from { opacity: 0; transform: translateY(6px) scale(0.99); } to { opacity: 1; transform: none; } } .tm_drawerBackdrop { animation: tm_tmFadeIn 180ms cubic-bezier(0.16, 1, 0.3, 1) both; } .tm_drawerBackdropOut { animation: tm_tmFadeOut 130ms ease-in both; } .tm_drawer { animation: tm_tmRiseIn 260ms cubic-bezier(0.16, 1, 0.3, 1) both; will-change: transform, opacity; } .tm_drawerOut { animation: tm_tmRiseOut 150ms cubic-bezier(0.4, 0, 0.7, 0.2) both; } .tm_globalSearchBackdrop { animation: tm_tmFadeIn 130ms ease-out both; } .tm_globalSearchPanel { animation: tm_tmRiseIn 240ms cubic-bezier(0.16, 1, 0.3, 1) both; will-change: transform, opacity; } .tm_menu { animation: tm_tmPopIn 120ms cubic-bezier(0.2, 0.9, 0.25, 1) both; } .tm_card { transition: transform 120ms ease-out, box-shadow 160ms ease-out, opacity 160ms ease-out; } .tm_card:hover { transform: translateY(-1px); } .tm_reactFlowNodeEnter { animation: tm_tmCardIn 170ms cubic-bezier(0.2, 0.9, 0.25, 1) both; } .tm_stackCell { transition: transform 120ms ease-out, box-shadow 160ms ease-out; } .tm_stackCell:hover { transform: translateY(-2px); } .tm_wsFrameLabel { transition: color 120ms ease-out, background 120ms ease-out, box-shadow 120ms ease-out; } .tm_wsFrameLabel:hover { box-shadow: 0 2px 10px rgba(0, 0, 0, 0.35); } .tm_toast { animation: tm_tmRiseIn 160ms cubic-bezier(0.2, 0.9, 0.25, 1) both; } .tm_snippetCode { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 0.94em; padding: 0 3px; border-radius: 4px; background: rgba(255, 255, 255, 0.08); } .tm_snippetLink { color: var(--dsw-alias-brand-primary); } @media (prefers-reduced-motion: reduce) { .tm_drawerBackdrop, .tm_drawerBackdropOut, .tm_drawer, .tm_drawerOut, .tm_globalSearchBackdrop, .tm_globalSearchPanel, .tm_menu, .tm_toast, .tm_reactFlowNodeEnter { animation: none; } .tm_card, .tm_stackCell, .tm_wsFrameLabel { transition: none; } .tm_card:hover, .tm_stackCell:hover { transform: none; } } .tm_drawerSearchRow { display: flex; align-items: center; gap: 8px; padding: 0 14px 8px; } .tm_drawerSearch { flex: 1; min-width: 0; font: inherit; font-size: calc(12.5px + var(--tm-font-step, 0px)); color: var(--dsw-alias-label-primary); background: var(--dsw-alias-bg-layer-2, rgba(255, 255, 255, 0.06)); border: 1px solid var(--dsw-alias-border-l2); border-radius: 8px; padding: 6px 10px; outline: none; } .tm_drawerSearch:focus { border-color: var(--dsw-alias-border-l3, rgba(255, 255, 255, 0.3)); } .tm_drawerSearchGo { flex: none; font: inherit; font-size: calc(11.5px + var(--tm-font-step, 0px)); color: var(--dsw-alias-label-secondary); background: transparent; border: 1px solid var(--dsw-alias-border-l2); border-radius: 8px; padding: 5px 10px; cursor: pointer; } .tm_drawerSearchGo:hover { color: var(--dsw-alias-label-primary); } .tm_drawerSearchState { font-size: calc(11px + var(--tm-font-step, 0px)); color: var(--dsw-alias-label-secondary); flex: none; } .tm_drawerSearchError { flex: none; max-width: 52%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: calc(11px + var(--tm-font-step, 0px)); color: rgb(242, 78, 78); } .tm_drawerEmpty { grid-column: 1 / -1; padding: 10px 4px; font-size: calc(12px + var(--tm-font-step, 0px)); color: var(--dsw-alias-label-secondary); } .tm_drawerHits { grid-column: 1 / -1; display: flex; flex-direction: column; gap: 6px; margin-top: 6px; padding-top: 10px; border-top: 1px solid var(--dsw-alias-border-l2); } .tm_drawerHitsHead { font-size: calc(11px + var(--tm-font-step, 0px)); color: var(--dsw-alias-label-secondary); letter-spacing: 0.04em; } .tm_drawerHit { display: flex; flex-direction: column; gap: 3px; text-align: left; padding: 8px 10px; border: 1px solid var(--dsw-alias-border-l2); border-radius: 9px; background: transparent; color: var(--dsw-alias-label-primary); font: inherit; cursor: pointer; } .tm_drawerHit:hover { border-color: var(--dsw-alias-border-l3, rgba(255, 255, 255, 0.3)); } .tm_drawerRoleChip { flex: none; margin-right: 6px; padding: 0 5px; border-radius: 4px; font-size: calc(9.5px + var(--tm-font-step, 0px)); line-height: 1.6; color: var(--dsw-alias-label-secondary); background: rgba(255, 255, 255, 0.07); } .tm_drawerRoleChip[data-talkmap-role="user"] { color: rgba(160, 210, 255, 0.95); background: rgba(90, 160, 255, 0.14); } .tm_hitMark { color: #0b0b0c; background: rgb(255, 214, 106); border-radius: 3px; padding: 0 2px; } .tm_drawerHitHead { display: flex; align-items: center; gap: 6px; min-width: 0; } .tm_drawerAgentChip { flex: none; padding: 1px 6px; border-radius: 999px; border: 1px solid var(--dsw-alias-border-l2); font-size: calc(10px + var(--tm-font-step, 0px)); line-height: 1.5; color: var(--dsw-alias-label-secondary); letter-spacing: 0.02em; } .tm_drawerAgentChipSub { color: rgb(255, 214, 106); border-color: rgba(255, 214, 106, 0.5); background: rgba(255, 214, 106, 0.1); } .tm_drawerHitTitle { display: block; width: 100%; text-align: left; font: inherit; font-size: calc(12.5px + var(--tm-font-step, 0px)); font-weight: 600; color: var(--dsw-alias-label-primary); background: transparent; border: none; padding: 0 0 2px; cursor: pointer; } .tm_drawerHitTitle:hover { color: var(--dsw-alias-brand-primary); } .tm_peek { position: fixed; z-index: 80; width: min(500px, 88vw); max-height: 42vh; overflow-y: auto; display: flex; flex-direction: column; gap: 2px; padding: 10px 12px; border-radius: 10px; border: 1px solid var(--dsw-alias-border-l2); background: var(--dsw-alias-bg-layer-1); box-shadow: 0 16px 40px rgba(0, 0, 0, 0.55); } .tm_peekTitle { font-size: calc(11.5px + var(--tm-font-step, 0px)); font-weight: 600; color: var(--dsw-alias-label-secondary); padding-bottom: 4px; margin-bottom: 2px; border-bottom: 1px solid var(--dsw-alias-border-l2); } .tm_peekLine { font-size: calc(12px + var(--tm-font-step, 0px)); line-height: 1.55; color: var(--dsw-alias-label-primary); white-space: pre-wrap; word-break: break-word; } .tm_peekHint { margin-top: 6px; font-size: calc(10.5px + var(--tm-font-step, 0px)); color: var(--dsw-alias-label-secondary); opacity: 0.7; } .tm_drawerHitMore { align-self: flex-start; margin-top: 2px; font: inherit; font-size: calc(11px + var(--tm-font-step, 0px)); color: var(--dsw-alias-label-secondary); background: transparent; border: none; padding: 2px 0 2px 10px; cursor: pointer; } .tm_drawerHitMore:hover { color: var(--dsw-alias-brand-primary); } .tm_drawerHitBlock { display: flex; flex-direction: column; gap: 1px; margin-top: 4px; padding-left: 2px; } .tm_drawerHitLine { display: block; width: 100%; text-align: left; font: inherit; font-size: calc(11.5px + var(--tm-font-step, 0px)); color: var(--dsw-alias-label-secondary); background: transparent; border: none; padding: 2px 0 2px 10px; border-left: 2px solid var(--dsw-alias-border-l2); cursor: pointer; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; } .tm_drawerHitLine:hover { color: var(--dsw-alias-label-primary); border-left-color: var(--dsw-alias-brand-primary); } .tm_drawerScroll { overscroll-behavior: contain; scroll-behavior: auto; flex: 1; min-height: 0; overflow-y: auto; overscroll-behavior: contain; display: grid; grid-template-columns: repeat(auto-fill, 224px); justify-content: center; align-content: start; gap: 12px; padding: 16px; } .tm_drawerCard[draggable="true"] { cursor: grab; } .tm_drawerCard[data-talkmap-drag="1"] { cursor: grabbing; opacity: 0.55; transform: scale(0.98); } .tm_cardLinks { display: flex; flex-wrap: wrap; gap: 4px; margin: 2px 0 4px; } .tm_cardLinkChip { max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; padding: 0 6px; border-radius: 4px; font-size: calc(9.5px + var(--tm-font-step, 0px)); line-height: 1.7; color: var(--dsw-alias-label-secondary); background: rgba(255, 255, 255, 0.06); } .tm_cardLinkChip[data-talkmap-link="out"] { color: rgba(255, 214, 106, 0.9); background: rgba(255, 214, 106, 0.12); } .tm_drawerCard { width: 224px; box-sizing: border-box; text-align: left; font: inherit; cursor: pointer; background: var(--dsw-alias-bg-layer-1); } .tm_drawerCard:hover { border-color: var(--dsw-alias-brand-primary); } .tm_wsFrameResize { position: absolute; z-index: 2; pointer-events: auto; opacity: 0.5; } .tm_wsFrameResize:hover { opacity: 1; border-color: var(--dsw-alias-brand-primary); } .tm_wsFrameResizeN { cursor: ns-resize; border-top: 3px solid var(--dsw-alias-border-l3); border-radius: 14px 14px 0 0; } .tm_wsFrameResizeS { cursor: ns-resize; border-bottom: 3px solid var(--dsw-alias-border-l3); border-radius: 0 0 14px 14px; } .tm_wsFrameResizeW { cursor: ew-resize; border-left: 3px solid var(--dsw-alias-border-l3); border-radius: 14px 0 0 14px; } .tm_wsFrameResizeE { cursor: ew-resize; border-right: 3px solid var(--dsw-alias-border-l3); border-radius: 0 14px 14px 0; } .tm_wsFrameResizeNw, .tm_wsFrameResizeNe, .tm_wsFrameResizeSw, .tm_wsFrameResizeSe { width: 26px; height: 26px; z-index: 3; } .tm_wsFrameResizeNw { cursor: nwse-resize; border-left: 3px solid var(--dsw-alias-border-l3); border-top: 3px solid var(--dsw-alias-border-l3); border-top-left-radius: 14px; } .tm_wsFrameResizeNe { cursor: nesw-resize; border-right: 3px solid var(--dsw-alias-border-l3); border-top: 3px solid var(--dsw-alias-border-l3); border-top-right-radius: 14px; } .tm_wsFrameResizeSw { cursor: nesw-resize; border-left: 3px solid var(--dsw-alias-border-l3); border-bottom: 3px solid var(--dsw-alias-border-l3); border-bottom-left-radius: 14px; } .tm_wsFrameResizeSe { cursor: nwse-resize; border-right: 3px solid var(--dsw-alias-border-l3); border-bottom: 3px solid var(--dsw-alias-border-l3); border-bottom-right-radius: 14px; } .tm_batchBar { position: absolute; left: 50%; bottom: 18px; transform: translateX(-50%); z-index: 20; display: flex; align-items: center; gap: 8px; padding: 8px 14px; border: 1px solid var(--dsw-alias-border-l1); border-radius: 999px; background: var(--dsw-alias-bg-layer-1); box-shadow: 0 8px 24px var(--dsw-alias-bg-mask-2); } .tm_batchCount { font-size: calc(12px + var(--tm-font-step, 0px)); color: var(--dsw-alias-label-secondary); white-space: nowrap; } .tm_batchSpace { width: 6px; } .tm_batchAction { padding: 5px 14px; border: 1px solid var(--dsw-alias-border-l2); border-radius: 999px; background: transparent; color: var(--dsw-alias-label-primary); font-size: calc(12px + var(--tm-font-step, 0px)); cursor: pointer; white-space: nowrap; } .tm_batchAction:hover:not(:disabled) { background: var(--dsw-alias-interactive-bg-hover); } .tm_batchAction:disabled { opacity: 0.5; cursor: default; } .tm_batchDanger { color: var(--dsw-alias-state-error-primary); } .tm_pickBox { position: absolute; top: 6px; right: 6px; width: 16px; height: 16px; display: flex; align-items: center; justify-content: center; border: 1.5px solid var(--dsw-alias-border-l3); border-radius: 4px; background: var(--dsw-alias-bg-base); color: transparent; font-size: calc(11px + var(--tm-font-step, 0px)); line-height: 1; pointer-events: none; } .tm_pickBoxChecked { border-color: var(--dsw-alias-brand-primary); background: var(--dsw-alias-brand-primary); color: #fff; } .tm_colorToolbar { position: absolute; top: 12px; left: 12px; z-index: 20; display: flex; align-items: center; gap: 6px; padding: 6px 10px; border: 1px solid var(--dsw-alias-border-l1); border-radius: 999px; background: var(--dsw-alias-bg-layer-1); box-shadow: 0 6px 20px var(--dsw-alias-bg-mask-2); } .tm_colorToolbarLabel { font-size: calc(11px + var(--tm-font-step, 0px)); color: var(--dsw-alias-label-tertiary); margin-right: 2px; white-space: nowrap; } .tm_colorSwatch { width: 16px; height: 16px; padding: 0; border: 1px solid var(--dsw-alias-border-l2); border-radius: 50%; cursor: pointer; } .tm_colorSwatch:hover { transform: scale(1.15); } .tm_colorSwatchClear { display: flex; align-items: center; justify-content: center; background: transparent; color: var(--dsw-alias-label-secondary); font-size: calc(12px + var(--tm-font-step, 0px)); line-height: 1; } .tm_colorSwatchClear:hover { color: var(--dsw-alias-label-primary); background: var(--dsw-alias-interactive-bg-hover); } .tm_drawerWires { position: absolute; left: 0; top: 0; width: 100%; height: 100%; pointer-events: none; z-index: 0; overflow: visible; } .tm_drawerScroll { position: relative; } .tm_drawerScroll > .tm_card, .tm_drawerScroll > [data-stack-card] { position: relative; z-index: 1; } .tm_canvas .react-flow__edges { z-index: 0 !important; } .tm_canvas .react-flow__nodes { z-index: 1 !important; } .tm_statusRail { position: absolute; left: 0; top: 0; bottom: 0; z-index: 6; pointer-events: none; --rail-card-w: 224px; --rail-pad: 10px; --rail-card-outer: calc(var(--rail-card-w) + 26px); --rail-w: calc(var(--rail-card-outer) + var(--rail-pad) * 2 + 2px); } .tm_statusRailPanel { position: absolute; left: 0; top: 0; bottom: 0; width: var(--rail-w); box-sizing: border-box; padding: var(--rail-pad); display: flex; flex-direction: column; gap: 8px; background: var(--dsw-alias-bg-elevated, rgba(18, 20, 26, 0.94)); border-right: 1px solid var(--dsw-alias-border-secondary); box-shadow: 6px 0 26px rgba(0, 0, 0, 0.32); backdrop-filter: blur(10px); transform: translateX(-101%); transition: transform 320ms cubic-bezier(0.22, 0.61, 0.36, 1), box-shadow 320ms ease; pointer-events: none; } .tm_statusRail[data-open="1"] .tm_statusRailPanel { transform: translateX(0); pointer-events: auto; } .tm_statusRailHead { display: flex; align-items: baseline; gap: 8px; padding: 2px 4px 0; } .tm_statusRailTitle { flex: 1; font-size: 12px; letter-spacing: 0.02em; color: var(--dsw-alias-label-secondary); } .tm_statusRailCount { font-size: 11px; color: var(--dsw-alias-label-tertiary, #6b7280); font-variant-numeric: tabular-nums; } .tm_statusRailList { flex: 1; min-height: 0; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; padding: 2px 0 14px; } .tm_statusRailEmpty { padding: 8px 4px; font-size: 12px; line-height: 1.5; color: var(--dsw-alias-label-secondary); } .tm_statusRailSlot { position: relative; } .tm_statusRailSlot[draggable="true"] { cursor: grab; } .tm_statusRailSlot[draggable="true"]:active { cursor: grabbing; } .tm_statusRailCard { width: var(--rail-card-w); min-height: 84px; cursor: grab; transition: transform 120ms ease, box-shadow 120ms ease; } .tm_statusRailCard:active { cursor: grabbing; } .tm_statusRailSlotFloating { pointer-events: none; } .tm_statusRailCardDragging { cursor: grabbing; transform: scale(1.02) rotate(-0.3deg); box-shadow: 0 18px 40px rgba(0, 0, 0, 0.55); opacity: 0.97; } .tm_statusRailCard:hover { transform: translateY(-1px); } .tm_statusRailTab { position: absolute; top: 50%; left: 0; transform: translateY(-50%); display: flex; flex-direction: column; align-items: center; gap: 5px; min-width: 30px; padding: 13px 7px; border: 1px solid rgba(255, 255, 255, 0.16); border-left: none; border-radius: 0 11px 11px 0; background: rgba(38, 42, 52, 0.42); backdrop-filter: blur(16px) saturate(1.5); -webkit-backdrop-filter: blur(16px) saturate(1.5); box-shadow: 3px 0 14px rgba(0, 0, 0, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.08); color: var(--dsw-alias-label-primary); cursor: pointer; font: inherit; pointer-events: auto; transition: left 320ms cubic-bezier(0.22, 0.61, 0.36, 1), color 140ms ease, background 140ms ease; } .tm_statusRail[data-open="1"] .tm_statusRailTab { left: calc(var(--rail-w) - 1px); } .tm_statusRailTab:hover { color: #ffffff; background: rgba(58, 64, 78, 0.55); } .tm_statusRailTabCount { font-size: 10px; line-height: 1; padding: 2px 4px; border-radius: 999px; background: var(--dsw-alias-brand-primary); color: #0b0d12; font-variant-numeric: tabular-nums; } .tm_dangerBackdrop { position: absolute; inset: 0; z-index: 40; display: flex; align-items: center; justify-content: center; background: rgba(8, 10, 14, 0.55); backdrop-filter: blur(2px); } .tm_dangerDialog { width: min(420px, calc(100% - 48px)); padding: 18px 18px 14px; border: 1px solid var(--dsw-alias-border-secondary); border-radius: 14px; background: var(--dsw-alias-bg-elevated, #16181f); box-shadow: 0 24px 60px rgba(0, 0, 0, 0.55); } .tm_dangerTitle { font-size: 14px; font-weight: 600; color: var(--dsw-alias-label-primary); } .tm_dangerBody { margin-top: 8px; font-size: 12.5px; line-height: 1.6; color: var(--dsw-alias-label-secondary); } .tm_dangerActions { margin-top: 16px; display: flex; justify-content: flex-end; gap: 8px; } .tm_dangerCancel, .tm_dangerOk { padding: 6px 14px; border-radius: 8px; font: inherit; font-size: 12.5px; cursor: pointer; } .tm_dangerCancel { border: 1px solid var(--dsw-alias-border-secondary); background: transparent; color: var(--dsw-alias-label-secondary); } .tm_dangerCancel:hover { color: var(--dsw-alias-label-primary); background: var(--dsw-alias-interactive-bg-hover); } .tm_dangerOk { border: 1px solid rgba(242, 78, 78, 0.55); background: rgba(242, 78, 78, 0.16); color: #ff6b6b; } .tm_dangerOk:hover { background: rgba(242, 78, 78, 0.28); color: #ff8a8a; } .tm_statusRailGhost { visibility: hidden; } .tm_statusRailFloating { position: fixed; z-index: 20; pointer-events: none; } .tm_priorityHigh { --tm-priority: #f24e4e; } .tm_priorityMid { --tm-priority: #f5b22e; } .tm_priorityLow { --tm-priority: #4e9bf2; } .tm_priorityHigh, .tm_priorityMid, .tm_priorityLow { box-shadow: inset 4px 0 0 var(--tm-priority); } .tm_priorityChip { margin-left: auto; color: var(--tm-priority); background: color-mix(in srgb, var(--tm-priority) 16%, transparent); border: 1px solid color-mix(in srgb, var(--tm-priority) 46%, transparent); } .tm_pickerMask { position: fixed; inset: 0; z-index: 60; display: flex; align-items: center; justify-content: center; background: rgba(0, 0, 0, 0.45); } .tm_picker { width: min(680px, calc(100vw - 48px)); max-height: min(720px, calc(100vh - 64px)); display: flex; flex-direction: column; border: 1px solid var(--dsw-alias-border-l2); border-radius: 14px; background: var(--dsw-alias-bg-layer-1); color: var(--dsw-alias-label-primary); box-shadow: 0 18px 60px rgba(0, 0, 0, 0.5); font-size: calc(13px + var(--tm-font-step, 0px)); } .tm_pickerHead, .tm_pickerFoot { display: flex; align-items: center; gap: 10px; padding: 12px 16px; flex: none; } .tm_pickerHead { border-bottom: 1px solid var(--dsw-alias-border-l1); } .tm_pickerFoot { border-top: 1px solid var(--dsw-alias-border-l1); } .tm_pickerTitle { font-weight: 600; flex: 1; } .tm_pickerClose { border: 0; background: transparent; color: inherit; cursor: pointer; font-size: 15px; } .tm_pickerTools { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; padding: 10px 16px; flex: none; } .tm_pickerSearch { flex: 1; min-width: 160px; font: inherit; color: inherit; background: var(--dsw-alias-bg-layer-2, rgba(255, 255, 255, 0.06)); border: 1px solid var(--dsw-alias-border-l2); border-radius: 8px; padding: 6px 10px; outline: none; } .tm_pickerFilters { display: flex; gap: 4px; } .tm_pickerFilter, .tm_pickerCancel, .tm_pickerApply { font: inherit; color: var(--dsw-alias-label-secondary); background: transparent; border: 1px solid var(--dsw-alias-border-l2); border-radius: 999px; padding: 4px 12px; cursor: pointer; } .tm_pickerFilterOn { color: var(--dsw-alias-label-primary); border-color: var(--dsw-alias-border-l3, rgba(255, 255, 255, 0.4)); background: var(--dsw-alias-interactive-bg-hover); } .tm_pickerApply { color: var(--dsw-alias-label-primary); border-color: var(--dsw-alias-border-l3, rgba(255, 255, 255, 0.4)); font-weight: 600; } .tm_pickerBulk { display: flex; gap: 10px; } .tm_pickerLink { border: 0; background: transparent; color: var(--dsw-alias-label-secondary); cursor: pointer; font: inherit; text-decoration: underline; padding: 0; } .tm_pickerList { overflow-y: auto; padding: 0 16px 8px; flex: 1; min-height: 120px; } .tm_pickerEmpty { padding: 28px 0; text-align: center; color: var(--dsw-alias-label-secondary); } .tm_pickerGroupTitle { position: sticky; top: 0; padding: 8px 0 4px; font-weight: 600; color: var(--dsw-alias-label-secondary); background: var(--dsw-alias-bg-layer-1); } .tm_pickerRow { display: flex; align-items: center; gap: 10px; padding: 5px 4px; border-radius: 6px; cursor: pointer; } .tm_pickerRow:hover { background: var(--dsw-alias-interactive-bg-hover); } .tm_pickerRowTitle { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; } .tm_pickerTag { font-size: 0.85em; padding: 1px 7px; border-radius: 999px; border: 1px solid var(--dsw-alias-border-l2); color: var(--dsw-alias-label-secondary); } .tm_pickerTime { color: var(--dsw-alias-label-tertiary, var(--dsw-alias-label-secondary)); min-width: 40px; text-align: right; } .tm_pickerAuto { display: flex; align-items: center; gap: 6px; flex: 1; color: var(--dsw-alias-label-secondary); } .tm_pickerCount { color: var(--dsw-alias-label-secondary); }`;
 if (typeof document !== "undefined") {
   const __selector = "style[data-plugin-css=" + JSON.stringify(__tagId) + "]";
   if (document.querySelector(__selector) === null) {
@@ -1551,7 +1640,7 @@ if (typeof document !== "undefined") {
     document.head.appendChild(__tag);
   }
 }
-var talk_pages_default = { "backButton": "tm_backButton", "batchAction": "tm_batchAction", "batchBar": "tm_batchBar", "batchCount": "tm_batchCount", "batchDanger": "tm_batchDanger", "batchSpace": "tm_batchSpace", "canvas": "tm_canvas", "canvasConnecting": "tm_canvasConnecting", "card": "tm_card", "cardBadgeDone": "tm_cardBadgeDone", "cardBadgeWaiting": "tm_cardBadgeWaiting", "cardChip": "tm_cardChip", "cardChipDone": "tm_cardChipDone", "cardChipDraft": "tm_cardChipDraft", "cardChipError": "tm_cardChipError", "cardChipInterrupted": "tm_cardChipInterrupted", "cardChipRunning": "tm_cardChipRunning", "cardChipWaiting": "tm_cardChipWaiting", "cardFooter": "tm_cardFooter", "cardGhost": "tm_cardGhost", "cardHandle": "tm_cardHandle", "cardLampDone": "tm_cardLampDone", "cardLampError": "tm_cardLampError", "cardLampRunning": "tm_cardLampRunning", "cardLampWaiting": "tm_cardLampWaiting", "cardLinkChip": "tm_cardLinkChip", "cardLinks": "tm_cardLinks", "cardNext": "tm_cardNext", "cardNextLabel": "tm_cardNextLabel", "cardNextText": "tm_cardNextText", "cardPin": "tm_cardPin", "cardQuiet": "tm_cardQuiet", "cardRefresh": "tm_cardRefresh", "cardRefreshBusy": "tm_cardRefreshBusy", "cardRemove": "tm_cardRemove", "cardReticle": "tm_cardReticle", "cardSelected": "tm_cardSelected", "cardStale": "tm_cardStale", "cardSummary": "tm_cardSummary", "cardTime": "tm_cardTime", "cardTitle": "tm_cardTitle", "cardTop": "tm_cardTop", "closeButton": "tm_closeButton", "colorSwatch": "tm_colorSwatch", "colorSwatchClear": "tm_colorSwatchClear", "colorToolbar": "tm_colorToolbar", "colorToolbarLabel": "tm_colorToolbarLabel", "dangerActions": "tm_dangerActions", "dangerBackdrop": "tm_dangerBackdrop", "dangerBody": "tm_dangerBody", "dangerCancel": "tm_dangerCancel", "dangerDialog": "tm_dangerDialog", "dangerOk": "tm_dangerOk", "dangerTitle": "tm_dangerTitle", "dialogBackdrop": "tm_dialogBackdrop", "digestActions": "tm_digestActions", "digestDialog": "tm_digestDialog", "digestDialogFrom": "tm_digestDialogFrom", "digestDialogHead": "tm_digestDialogHead", "digestDialogTitle": "tm_digestDialogTitle", "digestEmpty": "tm_digestEmpty", "digestLabel": "tm_digestLabel", "digestText": "tm_digestText", "drawer": "tm_drawer", "drawerAgentChip": "tm_drawerAgentChip", "drawerAgentChipSub": "tm_drawerAgentChipSub", "drawerBackdrop": "tm_drawerBackdrop", "drawerBackdropOut": "tm_drawerBackdropOut", "drawerCard": "tm_drawerCard", "drawerClose": "tm_drawerClose", "drawerCount": "tm_drawerCount", "drawerEmpty": "tm_drawerEmpty", "drawerHead": "tm_drawerHead", "drawerHint": "tm_drawerHint", "drawerHit": "tm_drawerHit", "drawerHitBlock": "tm_drawerHitBlock", "drawerHitHead": "tm_drawerHitHead", "drawerHitLine": "tm_drawerHitLine", "drawerHitMore": "tm_drawerHitMore", "drawerHitTitle": "tm_drawerHitTitle", "drawerHits": "tm_drawerHits", "drawerHitsHead": "tm_drawerHitsHead", "drawerOut": "tm_drawerOut", "drawerRoleChip": "tm_drawerRoleChip", "drawerScroll": "tm_drawerScroll", "drawerScrollSensor": "tm_drawerScrollSensor", "drawerSearch": "tm_drawerSearch", "drawerSearchError": "tm_drawerSearchError", "drawerSearchGo": "tm_drawerSearchGo", "drawerSearchRow": "tm_drawerSearchRow", "drawerSearchState": "tm_drawerSearchState", "drawerSpace": "tm_drawerSpace", "drawerTitle": "tm_drawerTitle", "drawerWires": "tm_drawerWires", "emptyHint": "tm_emptyHint", "fontButton": "tm_fontButton", "fontGlyphLarge": "tm_fontGlyphLarge", "fontGlyphSmall": "tm_fontGlyphSmall", "fontGroup": "tm_fontGroup", "fontReset": "tm_fontReset", "fontSign": "tm_fontSign", "globalSearch": "tm_globalSearch", "globalSearchBackdrop": "tm_globalSearchBackdrop", "globalSearchBody": "tm_globalSearchBody", "globalSearchButton": "tm_globalSearchButton", "globalSearchHead": "tm_globalSearchHead", "globalSearchInput": "tm_globalSearchInput", "globalSearchPanel": "tm_globalSearchPanel", "globalSearchTitle": "tm_globalSearchTitle", "header": "tm_header", "headerSpace": "tm_headerSpace", "hitMark": "tm_hitMark", "langButton": "tm_langButton", "menu": "tm_menu", "menuEmpty": "tm_menuEmpty", "menuError": "tm_menuError", "menuHint": "tm_menuHint", "menuIcon": "tm_menuIcon", "menuItem": "tm_menuItem", "menuItemDanger": "tm_menuItemDanger", "menuPreview": "tm_menuPreview", "menuSearch": "tm_menuSearch", "menuTitle": "tm_menuTitle", "pageAction": "tm_pageAction", "pageActionOn": "tm_pageActionOn", "pageTab": "tm_pageTab", "pageTabActive": "tm_pageTabActive", "pageTabCount": "tm_pageTabCount", "pageTabScroll": "tm_pageTabScroll", "pageTabTitle": "tm_pageTabTitle", "pageTabs": "tm_pageTabs", "pageTabsSpace": "tm_pageTabsSpace", "panel": "tm_panel", "peek": "tm_peek", "peekHint": "tm_peekHint", "peekLine": "tm_peekLine", "peekTitle": "tm_peekTitle", "pickBox": "tm_pickBox", "pickBoxChecked": "tm_pickBoxChecked", "reactFlowNodeEnter": "tm_reactFlowNodeEnter", "renameActions": "tm_renameActions", "renameBackdrop": "tm_renameBackdrop", "renameButton": "tm_renameButton", "renameDialog": "tm_renameDialog", "renameError": "tm_renameError", "renameHeading": "tm_renameHeading", "renameInput": "tm_renameInput", "renamePrimary": "tm_renamePrimary", "runningDot": "tm_runningDot", "searchInlineLoading": "tm_searchInlineLoading", "searchLoading": "tm_searchLoading", "searchLoadingBar": "tm_searchLoadingBar", "searchSkeletonLine": "tm_searchSkeletonLine", "searchSkeletonRow": "tm_searchSkeletonRow", "searchSkeletonTitle": "tm_searchSkeletonTitle", "snippetCode": "tm_snippetCode", "snippetLink": "tm_snippetLink", "spawnActions": "tm_spawnActions", "spawnBtnGhost": "tm_spawnBtnGhost", "spawnBtnPrimary": "tm_spawnBtnPrimary", "spawnError": "tm_spawnError", "spawnFrom": "tm_spawnFrom", "spawnHeading": "tm_spawnHeading", "spawnHint": "tm_spawnHint", "spawnModeActive": "tm_spawnModeActive", "spawnModeBtn": "tm_spawnModeBtn", "spawnModes": "tm_spawnModes", "spawnPanel": "tm_spawnPanel", "spawnTextarea": "tm_spawnTextarea", "stackBadge": "tm_stackBadge", "stackBadgeBusy": "tm_stackBadgeBusy", "stackCell": "tm_stackCell", "stackFace": "tm_stackFace", "stackFaceTitle": "tm_stackFaceTitle", "stackSheetBack": "tm_stackSheetBack", "stackSheetMid": "tm_stackSheetMid", "statusRail": "tm_statusRail", "statusRailCard": "tm_statusRailCard", "statusRailCardDragging": "tm_statusRailCardDragging", "statusRailCount": "tm_statusRailCount", "statusRailEmpty": "tm_statusRailEmpty", "statusRailFloating": "tm_statusRailFloating", "statusRailGhost": "tm_statusRailGhost", "statusRailHead": "tm_statusRailHead", "statusRailList": "tm_statusRailList", "statusRailPanel": "tm_statusRailPanel", "statusRailSlot": "tm_statusRailSlot", "statusRailSlotFloating": "tm_statusRailSlotFloating", "statusRailTab": "tm_statusRailTab", "statusRailTabCount": "tm_statusRailTabCount", "statusRailTitle": "tm_statusRailTitle", "toast": "tm_toast", "toggleButton": "tm_toggleButton", "toggleButtonActive": "tm_toggleButtonActive", "toggleIcon": "tm_toggleIcon", "toggleLabel": "tm_toggleLabel", "toggleRow": "tm_toggleRow", "wsFrame": "tm_wsFrame", "wsFrameBlocked": "tm_wsFrameBlocked", "wsFrameCount": "tm_wsFrameCount", "wsFrameEdge": "tm_wsFrameEdge", "wsFrameHidden": "tm_wsFrameHidden", "wsFrameLabel": "tm_wsFrameLabel", "wsFrameResize": "tm_wsFrameResize", "wsFrameResizeE": "tm_wsFrameResizeE", "wsFrameResizeN": "tm_wsFrameResizeN", "wsFrameResizeNe": "tm_wsFrameResizeNe", "wsFrameResizeNw": "tm_wsFrameResizeNw", "wsFrameResizeS": "tm_wsFrameResizeS", "wsFrameResizeSe": "tm_wsFrameResizeSe", "wsFrameResizeSw": "tm_wsFrameResizeSw", "wsFrameResizeW": "tm_wsFrameResizeW", "wsFrameSelected": "tm_wsFrameSelected", "zoomResetLabel": "tm_zoomResetLabel" };
+var talk_pages_default = { "backButton": "tm_backButton", "batchAction": "tm_batchAction", "batchBar": "tm_batchBar", "batchCount": "tm_batchCount", "batchDanger": "tm_batchDanger", "batchSpace": "tm_batchSpace", "canvas": "tm_canvas", "canvasConnecting": "tm_canvasConnecting", "card": "tm_card", "cardBadgeDone": "tm_cardBadgeDone", "cardBadgeWaiting": "tm_cardBadgeWaiting", "cardChip": "tm_cardChip", "cardChipDone": "tm_cardChipDone", "cardChipDraft": "tm_cardChipDraft", "cardChipError": "tm_cardChipError", "cardChipInterrupted": "tm_cardChipInterrupted", "cardChipRunning": "tm_cardChipRunning", "cardChipWaiting": "tm_cardChipWaiting", "cardFooter": "tm_cardFooter", "cardGhost": "tm_cardGhost", "cardHandle": "tm_cardHandle", "cardLampDone": "tm_cardLampDone", "cardLampError": "tm_cardLampError", "cardLampRunning": "tm_cardLampRunning", "cardLampWaiting": "tm_cardLampWaiting", "cardLinkChip": "tm_cardLinkChip", "cardLinks": "tm_cardLinks", "cardNext": "tm_cardNext", "cardNextLabel": "tm_cardNextLabel", "cardNextText": "tm_cardNextText", "cardPin": "tm_cardPin", "cardQuiet": "tm_cardQuiet", "cardRefresh": "tm_cardRefresh", "cardRefreshBusy": "tm_cardRefreshBusy", "cardRemove": "tm_cardRemove", "cardReticle": "tm_cardReticle", "cardSelected": "tm_cardSelected", "cardStale": "tm_cardStale", "cardSummary": "tm_cardSummary", "cardTime": "tm_cardTime", "cardTitle": "tm_cardTitle", "cardTop": "tm_cardTop", "closeButton": "tm_closeButton", "colorSwatch": "tm_colorSwatch", "colorSwatchClear": "tm_colorSwatchClear", "colorToolbar": "tm_colorToolbar", "colorToolbarLabel": "tm_colorToolbarLabel", "dangerActions": "tm_dangerActions", "dangerBackdrop": "tm_dangerBackdrop", "dangerBody": "tm_dangerBody", "dangerCancel": "tm_dangerCancel", "dangerDialog": "tm_dangerDialog", "dangerOk": "tm_dangerOk", "dangerTitle": "tm_dangerTitle", "dialogBackdrop": "tm_dialogBackdrop", "digestActions": "tm_digestActions", "digestDialog": "tm_digestDialog", "digestDialogFrom": "tm_digestDialogFrom", "digestDialogHead": "tm_digestDialogHead", "digestDialogTitle": "tm_digestDialogTitle", "digestEmpty": "tm_digestEmpty", "digestLabel": "tm_digestLabel", "digestText": "tm_digestText", "drawer": "tm_drawer", "drawerAgentChip": "tm_drawerAgentChip", "drawerAgentChipSub": "tm_drawerAgentChipSub", "drawerBackdrop": "tm_drawerBackdrop", "drawerBackdropOut": "tm_drawerBackdropOut", "drawerCard": "tm_drawerCard", "drawerClose": "tm_drawerClose", "drawerCount": "tm_drawerCount", "drawerEmpty": "tm_drawerEmpty", "drawerHead": "tm_drawerHead", "drawerHint": "tm_drawerHint", "drawerHit": "tm_drawerHit", "drawerHitBlock": "tm_drawerHitBlock", "drawerHitHead": "tm_drawerHitHead", "drawerHitLine": "tm_drawerHitLine", "drawerHitMore": "tm_drawerHitMore", "drawerHitTitle": "tm_drawerHitTitle", "drawerHits": "tm_drawerHits", "drawerHitsHead": "tm_drawerHitsHead", "drawerOut": "tm_drawerOut", "drawerRoleChip": "tm_drawerRoleChip", "drawerScroll": "tm_drawerScroll", "drawerScrollSensor": "tm_drawerScrollSensor", "drawerSearch": "tm_drawerSearch", "drawerSearchError": "tm_drawerSearchError", "drawerSearchGo": "tm_drawerSearchGo", "drawerSearchRow": "tm_drawerSearchRow", "drawerSearchState": "tm_drawerSearchState", "drawerSpace": "tm_drawerSpace", "drawerTitle": "tm_drawerTitle", "drawerWires": "tm_drawerWires", "emptyHint": "tm_emptyHint", "fontButton": "tm_fontButton", "fontGlyphLarge": "tm_fontGlyphLarge", "fontGlyphSmall": "tm_fontGlyphSmall", "fontGroup": "tm_fontGroup", "fontReset": "tm_fontReset", "fontSign": "tm_fontSign", "globalSearch": "tm_globalSearch", "globalSearchBackdrop": "tm_globalSearchBackdrop", "globalSearchBody": "tm_globalSearchBody", "globalSearchButton": "tm_globalSearchButton", "globalSearchHead": "tm_globalSearchHead", "globalSearchInput": "tm_globalSearchInput", "globalSearchPanel": "tm_globalSearchPanel", "globalSearchTitle": "tm_globalSearchTitle", "header": "tm_header", "headerSpace": "tm_headerSpace", "hitMark": "tm_hitMark", "langButton": "tm_langButton", "menu": "tm_menu", "menuEmpty": "tm_menuEmpty", "menuError": "tm_menuError", "menuHint": "tm_menuHint", "menuIcon": "tm_menuIcon", "menuItem": "tm_menuItem", "menuItemDanger": "tm_menuItemDanger", "menuPreview": "tm_menuPreview", "menuSearch": "tm_menuSearch", "menuTitle": "tm_menuTitle", "pageAction": "tm_pageAction", "pageActionOn": "tm_pageActionOn", "pageTab": "tm_pageTab", "pageTabActive": "tm_pageTabActive", "pageTabCount": "tm_pageTabCount", "pageTabScroll": "tm_pageTabScroll", "pageTabTitle": "tm_pageTabTitle", "pageTabs": "tm_pageTabs", "pageTabsSpace": "tm_pageTabsSpace", "panel": "tm_panel", "peek": "tm_peek", "peekHint": "tm_peekHint", "peekLine": "tm_peekLine", "peekTitle": "tm_peekTitle", "pickBox": "tm_pickBox", "pickBoxChecked": "tm_pickBoxChecked", "picker": "tm_picker", "pickerApply": "tm_pickerApply", "pickerAuto": "tm_pickerAuto", "pickerBulk": "tm_pickerBulk", "pickerCancel": "tm_pickerCancel", "pickerClose": "tm_pickerClose", "pickerCount": "tm_pickerCount", "pickerEmpty": "tm_pickerEmpty", "pickerFilter": "tm_pickerFilter", "pickerFilterOn": "tm_pickerFilterOn", "pickerFilters": "tm_pickerFilters", "pickerFoot": "tm_pickerFoot", "pickerGroupTitle": "tm_pickerGroupTitle", "pickerHead": "tm_pickerHead", "pickerLink": "tm_pickerLink", "pickerList": "tm_pickerList", "pickerMask": "tm_pickerMask", "pickerRow": "tm_pickerRow", "pickerRowTitle": "tm_pickerRowTitle", "pickerSearch": "tm_pickerSearch", "pickerTag": "tm_pickerTag", "pickerTime": "tm_pickerTime", "pickerTitle": "tm_pickerTitle", "pickerTools": "tm_pickerTools", "priorityChip": "tm_priorityChip", "priorityHigh": "tm_priorityHigh", "priorityLow": "tm_priorityLow", "priorityMid": "tm_priorityMid", "reactFlowNodeEnter": "tm_reactFlowNodeEnter", "renameActions": "tm_renameActions", "renameBackdrop": "tm_renameBackdrop", "renameButton": "tm_renameButton", "renameDialog": "tm_renameDialog", "renameError": "tm_renameError", "renameHeading": "tm_renameHeading", "renameInput": "tm_renameInput", "renamePrimary": "tm_renamePrimary", "runningDot": "tm_runningDot", "searchInlineLoading": "tm_searchInlineLoading", "searchLoading": "tm_searchLoading", "searchLoadingBar": "tm_searchLoadingBar", "searchSkeletonLine": "tm_searchSkeletonLine", "searchSkeletonRow": "tm_searchSkeletonRow", "searchSkeletonTitle": "tm_searchSkeletonTitle", "snippetCode": "tm_snippetCode", "snippetLink": "tm_snippetLink", "spawnActions": "tm_spawnActions", "spawnBtnGhost": "tm_spawnBtnGhost", "spawnBtnPrimary": "tm_spawnBtnPrimary", "spawnError": "tm_spawnError", "spawnFrom": "tm_spawnFrom", "spawnHeading": "tm_spawnHeading", "spawnHint": "tm_spawnHint", "spawnModeActive": "tm_spawnModeActive", "spawnModeBtn": "tm_spawnModeBtn", "spawnModes": "tm_spawnModes", "spawnPanel": "tm_spawnPanel", "spawnTextarea": "tm_spawnTextarea", "stackBadge": "tm_stackBadge", "stackBadgeBusy": "tm_stackBadgeBusy", "stackCell": "tm_stackCell", "stackFace": "tm_stackFace", "stackFaceTitle": "tm_stackFaceTitle", "stackSheetBack": "tm_stackSheetBack", "stackSheetMid": "tm_stackSheetMid", "statusRail": "tm_statusRail", "statusRailCard": "tm_statusRailCard", "statusRailCardDragging": "tm_statusRailCardDragging", "statusRailCount": "tm_statusRailCount", "statusRailEmpty": "tm_statusRailEmpty", "statusRailFloating": "tm_statusRailFloating", "statusRailGhost": "tm_statusRailGhost", "statusRailHead": "tm_statusRailHead", "statusRailList": "tm_statusRailList", "statusRailPanel": "tm_statusRailPanel", "statusRailSlot": "tm_statusRailSlot", "statusRailSlotFloating": "tm_statusRailSlotFloating", "statusRailTab": "tm_statusRailTab", "statusRailTabCount": "tm_statusRailTabCount", "statusRailTitle": "tm_statusRailTitle", "toast": "tm_toast", "toggleButton": "tm_toggleButton", "toggleButtonActive": "tm_toggleButtonActive", "toggleIcon": "tm_toggleIcon", "toggleLabel": "tm_toggleLabel", "toggleRow": "tm_toggleRow", "wsFrame": "tm_wsFrame", "wsFrameBlocked": "tm_wsFrameBlocked", "wsFrameCount": "tm_wsFrameCount", "wsFrameEdge": "tm_wsFrameEdge", "wsFrameHidden": "tm_wsFrameHidden", "wsFrameLabel": "tm_wsFrameLabel", "wsFrameResize": "tm_wsFrameResize", "wsFrameResizeE": "tm_wsFrameResizeE", "wsFrameResizeN": "tm_wsFrameResizeN", "wsFrameResizeNe": "tm_wsFrameResizeNe", "wsFrameResizeNw": "tm_wsFrameResizeNw", "wsFrameResizeS": "tm_wsFrameResizeS", "wsFrameResizeSe": "tm_wsFrameResizeSe", "wsFrameResizeSw": "tm_wsFrameResizeSw", "wsFrameResizeW": "tm_wsFrameResizeW", "wsFrameSelected": "tm_wsFrameSelected", "zoomResetLabel": "tm_zoomResetLabel" };
 
 // src/client/markdown-inline.tsx
 var import_jsx_runtime = require("react/jsx-runtime");
@@ -2743,7 +2832,7 @@ function defaultTouchable() {
   return navigator.maxTouchPoints || "ontouchstart" in this;
 }
 function drag() {
-  var filter2 = defaultFilter, container = defaultContainer, subject = defaultSubject, touchable = defaultTouchable, gestures = {}, listeners6 = dispatch("start", "drag", "end"), active = 0, mousedownx, mousedowny, mousemoving, touchending, clickDistance2 = 0;
+  var filter2 = defaultFilter, container = defaultContainer, subject = defaultSubject, touchable = defaultTouchable, gestures = {}, listeners7 = dispatch("start", "drag", "end"), active = 0, mousedownx, mousedowny, mousemoving, touchending, clickDistance2 = 0;
   function drag2(selection2) {
     selection2.on("mousedown.drag", mousedowned).filter(touchable).on("touchstart.drag", touchstarted).on("touchmove.drag", touchmoved, nonpassive).on("touchend.drag touchcancel.drag", touchended).style("touch-action", "none").style("-webkit-tap-highlight-color", "rgba(0,0,0,0)");
   }
@@ -2806,7 +2895,7 @@ function drag() {
     }
   }
   function beforestart(that, container2, event, d, identifier, touch) {
-    var dispatch2 = listeners6.copy(), p = pointer(touch || event, container2), dx, dy, s;
+    var dispatch2 = listeners7.copy(), p = pointer(touch || event, container2), dx, dy, s;
     if ((s = subject.call(that, new DragEvent("beforestart", {
       sourceEvent: event,
       target: drag2,
@@ -2865,8 +2954,8 @@ function drag() {
     return arguments.length ? (touchable = typeof _ === "function" ? _ : constant2(!!_), drag2) : touchable;
   };
   drag2.on = function() {
-    var value2 = listeners6.on.apply(listeners6, arguments);
-    return value2 === listeners6 ? drag2 : value2;
+    var value2 = listeners7.on.apply(listeners7, arguments);
+    return value2 === listeners7 ? drag2 : value2;
   };
   drag2.clickDistance = function(_) {
     return arguments.length ? (clickDistance2 = (_ = +_) * _, drag2) : Math.sqrt(clickDistance2);
@@ -4669,7 +4758,7 @@ function defaultConstrain(transform2, extent, translateExtent) {
   );
 }
 function zoom2() {
-  var filter2 = defaultFilter2, extent = defaultExtent, constrain = defaultConstrain, wheelDelta2 = defaultWheelDelta, touchable = defaultTouchable2, scaleExtent = [0, Infinity], translateExtent = [[-Infinity, -Infinity], [Infinity, Infinity]], duration = 250, interpolate2 = zoom, listeners6 = dispatch("start", "zoom", "end"), touchstarting, touchfirst, touchending, touchDelay = 500, wheelDelay = 150, clickDistance2 = 0, tapDistance = 10;
+  var filter2 = defaultFilter2, extent = defaultExtent, constrain = defaultConstrain, wheelDelta2 = defaultWheelDelta, touchable = defaultTouchable2, scaleExtent = [0, Infinity], translateExtent = [[-Infinity, -Infinity], [Infinity, Infinity]], duration = 250, interpolate2 = zoom, listeners7 = dispatch("start", "zoom", "end"), touchstarting, touchfirst, touchending, touchDelay = 500, wheelDelay = 150, clickDistance2 = 0, tapDistance = 10;
   function zoom3(selection2) {
     selection2.property("__zoom", defaultTransform).on("wheel.zoom", wheeled, { passive: false }).on("mousedown.zoom", mousedowned).on("dblclick.zoom", dblclicked).filter(touchable).on("touchstart.zoom", touchstarted).on("touchmove.zoom", touchmoved).on("touchend.zoom touchcancel.zoom", touchended).style("-webkit-tap-highlight-color", "rgba(0,0,0,0)");
   }
@@ -4781,14 +4870,14 @@ function zoom2() {
     },
     emit: function(type) {
       var d = select(this.that).datum();
-      listeners6.call(
+      listeners7.call(
         type,
         this.that,
         new ZoomEvent(type, {
           sourceEvent: this.sourceEvent,
           target: zoom3,
           transform: this.that.__zoom,
-          dispatch: listeners6
+          dispatch: listeners7
         }),
         d
       );
@@ -4938,8 +5027,8 @@ function zoom2() {
     return arguments.length ? (interpolate2 = _, zoom3) : interpolate2;
   };
   zoom3.on = function() {
-    var value2 = listeners6.on.apply(listeners6, arguments);
-    return value2 === listeners6 ? zoom3 : value2;
+    var value2 = listeners7.on.apply(listeners7, arguments);
+    return value2 === listeners7 ? zoom3 : value2;
   };
   zoom3.clickDistance = function(_) {
     return arguments.length ? (clickDistance2 = (_ = +_) * _, zoom3) : Math.sqrt(clickDistance2);
@@ -7648,20 +7737,20 @@ var import_with_selector = __toESM(require_with_selector(), 1);
 var import_meta = {};
 var createStoreImpl = (createState) => {
   let state3;
-  const listeners6 = /* @__PURE__ */ new Set();
+  const listeners7 = /* @__PURE__ */ new Set();
   const setState2 = (partial, replace) => {
     const nextState = typeof partial === "function" ? partial(state3) : partial;
     if (!Object.is(nextState, state3)) {
       const previousState = state3;
       state3 = (replace != null ? replace : typeof nextState !== "object" || nextState === null) ? nextState : Object.assign({}, state3, nextState);
-      listeners6.forEach((listener) => listener(state3, previousState));
+      listeners7.forEach((listener) => listener(state3, previousState));
     }
   };
   const getState = () => state3;
   const getInitialState2 = () => initialState;
-  const subscribe2 = (listener) => {
-    listeners6.add(listener);
-    return () => listeners6.delete(listener);
+  const subscribe3 = (listener) => {
+    listeners7.add(listener);
+    return () => listeners7.delete(listener);
   };
   const destroy = () => {
     if ((import_meta.env ? import_meta.env.MODE : void 0) !== "production") {
@@ -7669,9 +7758,9 @@ var createStoreImpl = (createState) => {
         "[DEPRECATED] The `destroy` method will be unsupported in a future version. Instead use unsubscribe function returned by subscribe. Everything will be garbage-collected if store is garbage-collected."
       );
     }
-    listeners6.clear();
+    listeners7.clear();
   };
-  const api = { setState: setState2, getState, getInitialState: getInitialState2, subscribe: subscribe2, destroy };
+  const api = { setState: setState2, getState, getInitialState: getInitialState2, subscribe: subscribe3, destroy };
   const initialState = state3 = createState(setState2, getState, api);
   return api;
 };
@@ -11072,12 +11161,12 @@ function digestBody(digest) {
   if (next !== "") parts.push(`${t("inject.next")}${next}`);
   return parts;
 }
-function digestIsEmpty2(digest) {
+function digestIsEmpty(digest) {
   return digest === void 0 || digestBody(digest).length === 0;
 }
 function buildInjectionText(title, digest) {
   const header = `${t("inject.header")}「${title}」`;
-  if (digest === void 0 || digestIsEmpty2(digest)) {
+  if (digest === void 0 || digestIsEmpty(digest)) {
     return `${header}
 ${t("spawn.noDigest")}`;
   }
@@ -11205,7 +11294,7 @@ function DigestDialog(props) {
       release();
     };
   }, [props]);
-  const empty2 = digestIsEmpty2(props.digest);
+  const empty2 = digestIsEmpty(props.digest);
   const pushText = empty2 ? "" : buildPushText(props.title, props.digest);
   const injectText = empty2 ? "" : buildInjectionText(props.title, props.digest);
   return /* @__PURE__ */ (0, import_jsx_runtime5.jsx)(
@@ -11271,6 +11360,49 @@ function DigestDialog(props) {
       ] })
     }
   );
+}
+
+// src/client/rpc.ts
+async function callRpc(endpoint, request = {}) {
+  const rpc = connectionService()?.rpc;
+  if (rpc === void 0) throw new Error(t("spawn.apiUnavailable"));
+  const controller = new AbortController();
+  const result = await rpc.call("/api", endpoint, { args: { request } }, controller.signal);
+  if (result.ok !== true) {
+    const failure = result.error;
+    throw new Error(`${endpoint}: ${failure?.message ?? failure?.code ?? "failed"}`);
+  }
+  return result.value;
+}
+function reportToHost(payload) {
+  try {
+    void fetch("/talk-pages/client-boot", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ at: (/* @__PURE__ */ new Date()).toISOString(), ...payload })
+    }).catch(() => {
+    });
+  } catch {
+  }
+}
+async function fetchSearchContext(sessionId, seq, query) {
+  try {
+    const page = await talkMapApi.searchContext(sessionId, seq, query);
+    return Array.isArray(page.lines) ? page.lines.filter((line) => typeof line === "string" && line !== "") : [];
+  } catch (error) {
+    reportToHost({ phase: "search-context-failed", sessionId, seq, message: String(error?.message ?? error) });
+    return [];
+  }
+}
+async function fetchSessionHits(sessionId, query) {
+  try {
+    const page = await talkMapApi.searchSessionHits(sessionId, query);
+    const blocks = (page.blocks ?? []).filter((block) => Array.isArray(block) && block.length > 0);
+    return { blocks, seqs: blocks.map((_, index2) => typeof page.seqs?.[index2] === "number" ? page.seqs[index2] : null) };
+  } catch (error) {
+    reportToHost({ phase: "search-session-failed", sessionId, message: String(error?.message ?? error) });
+    return { blocks: [], seqs: [] };
+  }
 }
 
 // src/client/session-actions.ts
@@ -11344,14 +11476,6 @@ async function archiveSessions(sessionIds) {
   }
   return done;
 }
-async function setPinned(sessionId, pinned) {
-  const ui = uiWorkspaceService();
-  const call = pinned ? ui?.pinSession : ui?.unpinSession;
-  if (ui === void 0 || typeof call !== "function") {
-    throw new Error("这个构建没有暴露置顶接口");
-  }
-  await call.call(ui, sessionId);
-}
 
 // src/client/drawer-state.ts
 var GROUP_KEY = "dsh.talk-pages.drawer.v1";
@@ -11394,49 +11518,6 @@ var drawerState = {
     safeWrite(SCROLL_KEY, null);
   }
 };
-
-// src/client/rpc.ts
-async function callRpc2(endpoint, request = {}) {
-  const rpc = connectionService()?.rpc;
-  if (rpc === void 0) throw new Error(t("spawn.apiUnavailable"));
-  const controller = new AbortController();
-  const result = await rpc.call("/api", endpoint, { args: { request } }, controller.signal);
-  if (result.ok !== true) {
-    const failure = result.error;
-    throw new Error(`${endpoint}: ${failure?.message ?? failure?.code ?? "failed"}`);
-  }
-  return result.value;
-}
-function reportToHost(payload) {
-  try {
-    void fetch("/talk-pages/client-boot", {
-      method: "POST",
-      headers: { "content-type": "application/json" },
-      body: JSON.stringify({ at: (/* @__PURE__ */ new Date()).toISOString(), ...payload })
-    }).catch(() => {
-    });
-  } catch {
-  }
-}
-async function fetchSearchContext(sessionId, seq, query) {
-  try {
-    const page = await talkMapApi.searchContext(sessionId, seq, query);
-    return Array.isArray(page.lines) ? page.lines.filter((line) => typeof line === "string" && line !== "") : [];
-  } catch (error) {
-    reportToHost({ phase: "search-context-failed", sessionId, seq, message: String(error?.message ?? error) });
-    return [];
-  }
-}
-async function fetchSessionHits(sessionId, query) {
-  try {
-    const page = await talkMapApi.searchSessionHits(sessionId, query);
-    const blocks = (page.blocks ?? []).filter((block) => Array.isArray(block) && block.length > 0);
-    return { blocks, seqs: blocks.map((_, index2) => typeof page.seqs?.[index2] === "number" ? page.seqs[index2] : null) };
-  } catch (error) {
-    reportToHost({ phase: "search-session-failed", sessionId, message: String(error?.message ?? error) });
-    return { blocks: [], seqs: [] };
-  }
-}
 
 // src/client/state-persist.ts
 var STORAGE_KEY2 = "dsh.talk-pages.lamp-state.v1";
@@ -12863,8 +12944,119 @@ function RenameDialog(props) {
   ) });
 }
 
-// src/client/SessionCard.tsx
+// src/client/PriorityRail.tsx
+var import_react8 = require("react");
 var import_jsx_runtime10 = require("react/jsx-runtime");
+var OPEN_KEY = "dsh.talk-pages.priority-rail.open.v1";
+var PRIORITY_CLASS = {
+  1: "priorityHigh",
+  2: "priorityMid",
+  3: "priorityLow"
+};
+var PRIORITY_COLOR = { 1: "#f24e4e", 2: "#f5b22e", 3: "#4e9bf2" };
+var openState;
+var listeners6 = /* @__PURE__ */ new Set();
+function readOpen() {
+  if (typeof window === "undefined") return false;
+  try {
+    return window.localStorage.getItem(OPEN_KEY) === "1";
+  } catch {
+    return false;
+  }
+}
+function getOpen() {
+  if (openState === void 0) openState = readOpen();
+  return openState;
+}
+function setOpen(open) {
+  openState = open;
+  try {
+    window.localStorage.setItem(OPEN_KEY, open ? "1" : "0");
+  } catch {
+  }
+  for (const listener of listeners6) listener();
+}
+function subscribe(listener) {
+  listeners6.add(listener);
+  return () => {
+    listeners6.delete(listener);
+  };
+}
+function sortByPriority(entries) {
+  return [...entries].sort((a, b) => a.priority - b.priority || (b.updatedAt ?? 0) - (a.updatedAt ?? 0));
+}
+function PriorityBadge(props) {
+  return /* @__PURE__ */ (0, import_jsx_runtime10.jsx)(
+    "span",
+    {
+      className: `${talk_pages_default["cardChip"]} ${talk_pages_default["priorityChip"]}`,
+      style: { ["--tm-priority"]: PRIORITY_COLOR[props.priority] },
+      "data-talkmap-priority": props.priority,
+      children: t(`card.priority${props.priority}`)
+    }
+  );
+}
+function PriorityRail(props) {
+  const open = (0, import_react8.useSyncExternalStore)(subscribe, getOpen, getOpen);
+  const sorted = sortByPriority(props.entries);
+  return /* @__PURE__ */ (0, import_jsx_runtime10.jsxs)(
+    "div",
+    {
+      className: talk_pages_default["statusRail"],
+      "data-open": open ? "1" : "0",
+      style: { ["--rail-card-w"]: `${props.cardWidth}px` },
+      children: [
+        /* @__PURE__ */ (0, import_jsx_runtime10.jsxs)("div", { className: talk_pages_default["statusRailPanel"], "aria-hidden": !open, children: [
+          /* @__PURE__ */ (0, import_jsx_runtime10.jsxs)("div", { className: talk_pages_default["statusRailHead"], children: [
+            /* @__PURE__ */ (0, import_jsx_runtime10.jsx)("span", { className: talk_pages_default["statusRailTitle"], children: t("priorityRail.title") }),
+            /* @__PURE__ */ (0, import_jsx_runtime10.jsx)("span", { className: talk_pages_default["statusRailCount"], children: sorted.length })
+          ] }),
+          /* @__PURE__ */ (0, import_jsx_runtime10.jsxs)("div", { className: talk_pages_default["statusRailList"], role: "list", children: [
+            sorted.length === 0 ? /* @__PURE__ */ (0, import_jsx_runtime10.jsx)("div", { className: talk_pages_default["statusRailEmpty"], children: t("priorityRail.empty") }) : null,
+            sorted.map((entry) => /* @__PURE__ */ (0, import_jsx_runtime10.jsx)("div", { role: "listitem", className: talk_pages_default["statusRailSlot"], children: /* @__PURE__ */ (0, import_jsx_runtime10.jsxs)(
+              "div",
+              {
+                className: `${talk_pages_default["card"]} ${talk_pages_default["statusRailCard"]} ${talk_pages_default[PRIORITY_CLASS[entry.priority]] ?? ""}`,
+                onClick: () => {
+                  props.onFocus(entry.cardId);
+                },
+                title: entry.title,
+                children: [
+                  /* @__PURE__ */ (0, import_jsx_runtime10.jsx)("div", { className: talk_pages_default["cardTop"], children: /* @__PURE__ */ (0, import_jsx_runtime10.jsx)("span", { className: talk_pages_default["cardTitle"], children: entry.title }) }),
+                  entry.preview !== void 0 && entry.preview !== "" ? /* @__PURE__ */ (0, import_jsx_runtime10.jsx)("div", { className: talk_pages_default["cardSummary"], children: entry.preview }) : null,
+                  /* @__PURE__ */ (0, import_jsx_runtime10.jsxs)("div", { className: talk_pages_default["cardFooter"], children: [
+                    /* @__PURE__ */ (0, import_jsx_runtime10.jsx)("span", { className: talk_pages_default["cardTime"], children: relativeTime(entry.updatedAt) }),
+                    /* @__PURE__ */ (0, import_jsx_runtime10.jsx)(PriorityBadge, { priority: entry.priority })
+                  ] })
+                ]
+              }
+            ) }, entry.cardId))
+          ] })
+        ] }),
+        /* @__PURE__ */ (0, import_jsx_runtime10.jsxs)(
+          "button",
+          {
+            type: "button",
+            className: talk_pages_default["statusRailTab"],
+            "aria-expanded": open,
+            "aria-label": open ? t("priorityRail.close") : t("priorityRail.open"),
+            title: open ? t("priorityRail.close") : t("priorityRail.open"),
+            onClick: () => {
+              setOpen(!open);
+            },
+            children: [
+              /* @__PURE__ */ (0, import_jsx_runtime10.jsx)("svg", { viewBox: "0 0 24 24", width: "16", height: "16", "aria-hidden": "true", children: /* @__PURE__ */ (0, import_jsx_runtime10.jsx)("path", { fill: "currentColor", d: "M6 3h2v18H6zM9 4h10l-2.5 4L19 12H9z" }) }),
+              sorted.length > 0 ? /* @__PURE__ */ (0, import_jsx_runtime10.jsx)("span", { className: talk_pages_default["statusRailTabCount"], children: sorted.length }) : null
+            ]
+          }
+        )
+      ]
+    }
+  );
+}
+
+// src/client/SessionCard.tsx
+var import_jsx_runtime11 = require("react/jsx-runtime");
 var LAMP_CLASS = {
   running: "cardLampRunning",
   done: "cardLampDone",
@@ -12880,13 +13072,13 @@ var LAMP_CHIP = {
 function statusChip(glow, running) {
   const spec = glow !== void 0 ? LAMP_CHIP[glow] : running ? LAMP_CHIP.running : void 0;
   if (spec === void 0) return null;
-  return /* @__PURE__ */ (0, import_jsx_runtime10.jsxs)(
+  return /* @__PURE__ */ (0, import_jsx_runtime11.jsxs)(
     "span",
     {
       className: `${talk_pages_default["cardChip"]} ${talk_pages_default[spec.className]}`,
       "data-talkmap-chip": glow ?? "running",
       children: [
-        spec.dot ? /* @__PURE__ */ (0, import_jsx_runtime10.jsx)("span", { className: talk_pages_default["runningDot"] }) : null,
+        spec.dot ? /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("span", { className: talk_pages_default["runningDot"] }) : null,
         t(spec.key)
       ]
     }
@@ -12909,9 +13101,10 @@ function SessionCardNode(props) {
   if (data.ghost) classNames.push(talk_pages_default["cardGhost"]);
   if (selected2 === true) classNames.push(talk_pages_default["cardSelected"]);
   if (data.glow !== void 0) classNames.push(talk_pages_default[LAMP_CLASS[data.glow]] ?? "");
-  const quiet = data.current !== true && data.pinned !== true && data.glow === void 0 && data.pendingDraft !== true && data.interrupted !== true;
+  if (data.priority !== void 0) classNames.push(talk_pages_default[PRIORITY_CLASS[data.priority]] ?? "");
+  const quiet = data.current !== true && data.pinned !== true && data.priority === void 0 && data.glow === void 0 && data.pendingDraft !== true && data.interrupted !== true;
   if (quiet) classNames.push(talk_pages_default["cardQuiet"] ?? "");
-  return /* @__PURE__ */ (0, import_jsx_runtime10.jsxs)(
+  return /* @__PURE__ */ (0, import_jsx_runtime11.jsxs)(
     "div",
     {
       className: classNames.filter(Boolean).join(" "),
@@ -12923,16 +13116,16 @@ function SessionCardNode(props) {
       style: data.onPick !== void 0 ? { cursor: "pointer" } : void 0,
       "data-talkmap-session": data.sessionId,
       children: [
-        data.current === true ? /* @__PURE__ */ (0, import_jsx_runtime10.jsxs)("span", { className: talk_pages_default["cardReticle"], "aria-hidden": "true", children: [
-          /* @__PURE__ */ (0, import_jsx_runtime10.jsx)("i", {}),
-          /* @__PURE__ */ (0, import_jsx_runtime10.jsx)("i", {}),
-          /* @__PURE__ */ (0, import_jsx_runtime10.jsx)("i", {}),
-          /* @__PURE__ */ (0, import_jsx_runtime10.jsx)("i", {})
+        data.current === true ? /* @__PURE__ */ (0, import_jsx_runtime11.jsxs)("span", { className: talk_pages_default["cardReticle"], "aria-hidden": "true", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("i", {}),
+          /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("i", {}),
+          /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("i", {}),
+          /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("i", {})
         ] }) : null,
         "      ",
-        /* @__PURE__ */ (0, import_jsx_runtime10.jsx)(Handle, { id: "t", type: "source", position: Position.Top, className: talk_pages_default["cardHandle"] ?? "" }),
-        /* @__PURE__ */ (0, import_jsx_runtime10.jsx)(Handle, { id: "l", type: "source", position: Position.Left, className: talk_pages_default["cardHandle"] ?? "" }),
-        data.onPick !== void 0 ? /* @__PURE__ */ (0, import_jsx_runtime10.jsx)(
+        /* @__PURE__ */ (0, import_jsx_runtime11.jsx)(Handle, { id: "t", type: "source", position: Position.Top, className: talk_pages_default["cardHandle"] ?? "" }),
+        /* @__PURE__ */ (0, import_jsx_runtime11.jsx)(Handle, { id: "l", type: "source", position: Position.Left, className: talk_pages_default["cardHandle"] ?? "" }),
+        data.onPick !== void 0 ? /* @__PURE__ */ (0, import_jsx_runtime11.jsx)(
           "span",
           {
             className: `${talk_pages_default["pickBox"]}${selected2 === true ? ` ${talk_pages_default["pickBoxChecked"]}` : ""}`,
@@ -12942,11 +13135,11 @@ function SessionCardNode(props) {
             children: selected2 === true ? "✓" : ""
           }
         ) : null,
-        /* @__PURE__ */ (0, import_jsx_runtime10.jsxs)("div", { className: talk_pages_default["cardTop"], children: [
-          data.pinned === true ? /* @__PURE__ */ (0, import_jsx_runtime10.jsx)("span", { className: talk_pages_default["cardPin"], title: t("card.pinned"), "aria-label": t("card.pinned"), "data-talkmap-pin": "1", children: /* @__PURE__ */ (0, import_jsx_runtime10.jsx)("svg", { viewBox: "0 0 24 24", width: "13", height: "13", "aria-hidden": "true", children: /* @__PURE__ */ (0, import_jsx_runtime10.jsx)("path", { fill: "currentColor", d: "M16 8.6V4h1c.55 0 1-.45 1-1s-.45-1-1-1H7c-.55 0-1 .45-1 1s.45 1 1 1h1v4.6c0 1.66-1.34 3-3 3v2h5.1v7.9l.9 1 .9-1V13.6H19v-2c-1.66 0-3-1.34-3-3z" }) }) }) : null,
-          /* @__PURE__ */ (0, import_jsx_runtime10.jsx)("span", { className: talk_pages_default["cardTitle"], children: data.ghost ? t("card.ghostTitle") : data.title })
+        /* @__PURE__ */ (0, import_jsx_runtime11.jsxs)("div", { className: talk_pages_default["cardTop"], children: [
+          data.pinned === true ? /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("span", { className: talk_pages_default["cardPin"], title: t("card.pinned"), "aria-label": t("card.pinned"), "data-talkmap-pin": "1", children: /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("svg", { viewBox: "0 0 24 24", width: "13", height: "13", "aria-hidden": "true", children: /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("path", { fill: "currentColor", d: "M16 8.6V4h1c.55 0 1-.45 1-1s-.45-1-1-1H7c-.55 0-1 .45-1 1s.45 1 1 1h1v4.6c0 1.66-1.34 3-3 3v2h5.1v7.9l.9 1 .9-1V13.6H19v-2c-1.66 0-3-1.34-3-3z" }) }) }) : null,
+          /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("span", { className: talk_pages_default["cardTitle"], children: data.ghost ? t("card.ghostTitle") : data.title })
         ] }),
-        data.ghost ? /* @__PURE__ */ (0, import_jsx_runtime10.jsx)(
+        data.ghost ? /* @__PURE__ */ (0, import_jsx_runtime11.jsx)(
           "button",
           {
             type: "button",
@@ -12956,10 +13149,10 @@ function SessionCardNode(props) {
             },
             children: t("card.remove")
           }
-        ) : /* @__PURE__ */ (0, import_jsx_runtime10.jsx)(import_jsx_runtime10.Fragment, { children: data.preview !== void 0 && data.preview !== "" ? /* @__PURE__ */ (0, import_jsx_runtime10.jsx)("div", { className: talk_pages_default["cardSummary"], children: data.preview }) : null }),
-        /* @__PURE__ */ (0, import_jsx_runtime10.jsxs)("div", { className: talk_pages_default["cardFooter"], children: [
-          /* @__PURE__ */ (0, import_jsx_runtime10.jsx)("span", { className: talk_pages_default["cardTime"], children: relativeTime(data.updatedAt) }),
-          data.pendingDraft === true ? /* @__PURE__ */ (0, import_jsx_runtime10.jsx)(
+        ) : /* @__PURE__ */ (0, import_jsx_runtime11.jsx)(import_jsx_runtime11.Fragment, { children: data.preview !== void 0 && data.preview !== "" ? /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("div", { className: talk_pages_default["cardSummary"], children: data.preview }) : null }),
+        /* @__PURE__ */ (0, import_jsx_runtime11.jsxs)("div", { className: talk_pages_default["cardFooter"], children: [
+          /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("span", { className: talk_pages_default["cardTime"], children: relativeTime(data.updatedAt) }),
+          data.pendingDraft === true ? /* @__PURE__ */ (0, import_jsx_runtime11.jsx)(
             "span",
             {
               className: `${talk_pages_default["cardChip"]} ${talk_pages_default["cardChipDraft"]}`,
@@ -12968,7 +13161,7 @@ function SessionCardNode(props) {
               children: t("card.draft")
             }
           ) : null,
-          data.interrupted === true ? /* @__PURE__ */ (0, import_jsx_runtime10.jsx)(
+          data.interrupted === true ? /* @__PURE__ */ (0, import_jsx_runtime11.jsx)(
             "span",
             {
               className: `${talk_pages_default["cardChip"]} ${talk_pages_default["cardChipInterrupted"]}`,
@@ -12977,27 +13170,28 @@ function SessionCardNode(props) {
               children: t("card.interrupted")
             }
           ) : null,
-          statusChip(data.glow, data.running === true)
+          statusChip(data.glow, data.running === true),
+          data.priority !== void 0 ? /* @__PURE__ */ (0, import_jsx_runtime11.jsx)(PriorityBadge, { priority: data.priority }) : null
         ] }),
-        /* @__PURE__ */ (0, import_jsx_runtime10.jsx)(Handle, { id: "r", type: "source", position: Position.Right, className: talk_pages_default["cardHandle"] ?? "" }),
-        /* @__PURE__ */ (0, import_jsx_runtime10.jsx)(Handle, { id: "b", type: "source", position: Position.Bottom, className: talk_pages_default["cardHandle"] ?? "" })
+        /* @__PURE__ */ (0, import_jsx_runtime11.jsx)(Handle, { id: "r", type: "source", position: Position.Right, className: talk_pages_default["cardHandle"] ?? "" }),
+        /* @__PURE__ */ (0, import_jsx_runtime11.jsx)(Handle, { id: "b", type: "source", position: Position.Bottom, className: talk_pages_default["cardHandle"] ?? "" })
       ]
     }
   );
 }
 
 // src/client/SpawnPreview.tsx
-var import_react9 = require("react");
-var import_jsx_runtime11 = require("react/jsx-runtime");
+var import_react10 = require("react");
+var import_jsx_runtime12 = require("react/jsx-runtime");
 function SpawnPreview(props) {
   const { pending } = props;
   const digest = canvas.get().digests[pending.parent.sessionId];
-  const [mode, setMode] = (0, import_react9.useState)("full");
-  const [text, setText] = (0, import_react9.useState)(() => buildInjectionText(pending.parent.title, digest));
-  const [firstMessage, setFirstMessage] = (0, import_react9.useState)("");
-  const [busy, setBusy] = (0, import_react9.useState)(false);
-  const [error, setError] = (0, import_react9.useState)(void 0);
-  (0, import_react9.useEffect)(() => {
+  const [mode, setMode] = (0, import_react10.useState)("full");
+  const [text, setText] = (0, import_react10.useState)(() => buildInjectionText(pending.parent.title, digest));
+  const [firstMessage, setFirstMessage] = (0, import_react10.useState)("");
+  const [busy, setBusy] = (0, import_react10.useState)(false);
+  const [error, setError] = (0, import_react10.useState)(void 0);
+  (0, import_react10.useEffect)(() => {
     const release = mapUi.claimEscape("spawn-preview");
     const onKeyDown = (event) => {
       if (event.key === "Escape") {
@@ -13044,7 +13238,7 @@ function SpawnPreview(props) {
     setBusy(true);
     setError(void 0);
     try {
-      const createSession = async () => callRpc2(
+      const createSession = async () => callRpc(
         "session/create",
         pending.parentWorkspaceId !== void 0 ? { workspaceId: pending.parentWorkspaceId } : {}
       );
@@ -13075,7 +13269,7 @@ function SpawnPreview(props) {
       if (firstMessage.trim() === "") throw new Error(t("spawn.needFirstMessage"));
       const created = await createSession();
       addCardAndEdge(created.sessionId, "none");
-      await callRpc2("session/prompt", {
+      await callRpc("session/prompt", {
         sessionId: created.sessionId,
         mode: "queue",
         content: [{ type: "text", text: firstMessage }],
@@ -13091,15 +13285,15 @@ function SpawnPreview(props) {
     { id: "digest", label: t("spawn.mode.digest") },
     { id: "full", label: t("spawn.mode.full") }
   ];
-  return /* @__PURE__ */ (0, import_jsx_runtime11.jsxs)("div", { className: talk_pages_default["spawnPanel"], role: "dialog", "aria-label": t("spawn.heading"), children: [
-    /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("div", { className: talk_pages_default["spawnHeading"], children: t("spawn.heading") }),
-    /* @__PURE__ */ (0, import_jsx_runtime11.jsxs)("div", { className: talk_pages_default["spawnFrom"], children: [
+  return /* @__PURE__ */ (0, import_jsx_runtime12.jsxs)("div", { className: talk_pages_default["spawnPanel"], role: "dialog", "aria-label": t("spawn.heading"), children: [
+    /* @__PURE__ */ (0, import_jsx_runtime12.jsx)("div", { className: talk_pages_default["spawnHeading"], children: t("spawn.heading") }),
+    /* @__PURE__ */ (0, import_jsx_runtime12.jsxs)("div", { className: talk_pages_default["spawnFrom"], children: [
       t("spawn.from"),
       "「",
       pending.parent.title,
       "」"
     ] }),
-    /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("div", { className: talk_pages_default["spawnModes"], children: modes.map((entry) => /* @__PURE__ */ (0, import_jsx_runtime11.jsx)(
+    /* @__PURE__ */ (0, import_jsx_runtime12.jsx)("div", { className: talk_pages_default["spawnModes"], children: modes.map((entry) => /* @__PURE__ */ (0, import_jsx_runtime12.jsx)(
       "button",
       {
         type: "button",
@@ -13111,9 +13305,9 @@ function SpawnPreview(props) {
       },
       entry.id
     )) }),
-    mode === "digest" ? /* @__PURE__ */ (0, import_jsx_runtime11.jsxs)(import_jsx_runtime11.Fragment, { children: [
-      /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("div", { className: talk_pages_default["spawnHint"], children: t("spawn.hint") }),
-      /* @__PURE__ */ (0, import_jsx_runtime11.jsx)(
+    mode === "digest" ? /* @__PURE__ */ (0, import_jsx_runtime12.jsxs)(import_jsx_runtime12.Fragment, { children: [
+      /* @__PURE__ */ (0, import_jsx_runtime12.jsx)("div", { className: talk_pages_default["spawnHint"], children: t("spawn.hint") }),
+      /* @__PURE__ */ (0, import_jsx_runtime12.jsx)(
         "textarea",
         {
           className: `${talk_pages_default["spawnTextarea"]} nodrag nowheel`,
@@ -13124,9 +13318,9 @@ function SpawnPreview(props) {
           }
         }
       )
-    ] }) : mode === "none" ? /* @__PURE__ */ (0, import_jsx_runtime11.jsxs)(import_jsx_runtime11.Fragment, { children: [
-      /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("div", { className: talk_pages_default["spawnHint"], children: t("spawn.noneHint") }),
-      /* @__PURE__ */ (0, import_jsx_runtime11.jsx)(
+    ] }) : mode === "none" ? /* @__PURE__ */ (0, import_jsx_runtime12.jsxs)(import_jsx_runtime12.Fragment, { children: [
+      /* @__PURE__ */ (0, import_jsx_runtime12.jsx)("div", { className: talk_pages_default["spawnHint"], children: t("spawn.noneHint") }),
+      /* @__PURE__ */ (0, import_jsx_runtime12.jsx)(
         "textarea",
         {
           className: `${talk_pages_default["spawnTextarea"]} nodrag nowheel`,
@@ -13144,10 +13338,10 @@ function SpawnPreview(props) {
           }
         }
       )
-    ] }) : /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("div", { className: talk_pages_default["spawnHint"], children: t("spawn.fullHint") }),
-    error !== void 0 ? /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("div", { className: talk_pages_default["spawnError"], children: error }) : null,
-    /* @__PURE__ */ (0, import_jsx_runtime11.jsxs)("div", { className: talk_pages_default["spawnActions"], children: [
-      /* @__PURE__ */ (0, import_jsx_runtime11.jsx)(
+    ] }) : /* @__PURE__ */ (0, import_jsx_runtime12.jsx)("div", { className: talk_pages_default["spawnHint"], children: t("spawn.fullHint") }),
+    error !== void 0 ? /* @__PURE__ */ (0, import_jsx_runtime12.jsx)("div", { className: talk_pages_default["spawnError"], children: error }) : null,
+    /* @__PURE__ */ (0, import_jsx_runtime12.jsxs)("div", { className: talk_pages_default["spawnActions"], children: [
+      /* @__PURE__ */ (0, import_jsx_runtime12.jsx)(
         "button",
         {
           type: "button",
@@ -13157,7 +13351,7 @@ function SpawnPreview(props) {
           children: t("spawn.cancel")
         }
       ),
-      /* @__PURE__ */ (0, import_jsx_runtime11.jsx)(
+      /* @__PURE__ */ (0, import_jsx_runtime12.jsx)(
         "button",
         {
           type: "button",
@@ -13174,7 +13368,7 @@ function SpawnPreview(props) {
 }
 
 // src/client/WsFrame.tsx
-var import_jsx_runtime12 = require("react/jsx-runtime");
+var import_jsx_runtime13 = require("react/jsx-runtime");
 var EDGE = 10;
 var CORNER = 26;
 var EDGE_HANDLES = [
@@ -13197,7 +13391,7 @@ function WsFrameNode(props) {
     event.stopPropagation();
     data.onResizeStart?.(axis, event);
   };
-  return /* @__PURE__ */ (0, import_jsx_runtime12.jsxs)(
+  return /* @__PURE__ */ (0, import_jsx_runtime13.jsxs)(
     "div",
     {
       className: `${talk_pages_default["wsFrame"]}${selected2 === true ? ` ${talk_pages_default["wsFrameSelected"]}` : ""}${data.blocked === true ? ` ${talk_pages_default["wsFrameBlocked"]}` : ""}`,
@@ -13211,7 +13405,7 @@ function WsFrameNode(props) {
       "data-talkmap-frame": "",
       "data-talkmap-workspace": data.workspaceId,
       children: [
-        /* @__PURE__ */ (0, import_jsx_runtime12.jsxs)(
+        /* @__PURE__ */ (0, import_jsx_runtime13.jsxs)(
           "div",
           {
             className: talk_pages_default["wsFrameLabel"],
@@ -13227,15 +13421,15 @@ function WsFrameNode(props) {
             "data-talkmap-box-label": data.workspaceId,
             children: [
               data.title,
-              /* @__PURE__ */ (0, import_jsx_runtime12.jsx)("span", { className: talk_pages_default["wsFrameCount"], children: data.count })
+              /* @__PURE__ */ (0, import_jsx_runtime13.jsx)("span", { className: talk_pages_default["wsFrameCount"], children: data.count })
             ]
           }
         ),
-        /* @__PURE__ */ (0, import_jsx_runtime12.jsx)("div", { className: talk_pages_default["wsFrameEdge"], style: { top: 0, left: 0, right: 0, height: EDGE } }),
-        /* @__PURE__ */ (0, import_jsx_runtime12.jsx)("div", { className: talk_pages_default["wsFrameEdge"], style: { bottom: 0, left: 0, right: 0, height: EDGE } }),
-        /* @__PURE__ */ (0, import_jsx_runtime12.jsx)("div", { className: talk_pages_default["wsFrameEdge"], style: { top: 0, bottom: 0, left: 0, width: EDGE } }),
-        /* @__PURE__ */ (0, import_jsx_runtime12.jsx)("div", { className: talk_pages_default["wsFrameEdge"], style: { top: 0, bottom: 0, right: 0, width: EDGE } }),
-        [...EDGE_HANDLES, ...CORNER_HANDLES].map((handle) => /* @__PURE__ */ (0, import_jsx_runtime12.jsx)(
+        /* @__PURE__ */ (0, import_jsx_runtime13.jsx)("div", { className: talk_pages_default["wsFrameEdge"], style: { top: 0, left: 0, right: 0, height: EDGE } }),
+        /* @__PURE__ */ (0, import_jsx_runtime13.jsx)("div", { className: talk_pages_default["wsFrameEdge"], style: { bottom: 0, left: 0, right: 0, height: EDGE } }),
+        /* @__PURE__ */ (0, import_jsx_runtime13.jsx)("div", { className: talk_pages_default["wsFrameEdge"], style: { top: 0, bottom: 0, left: 0, width: EDGE } }),
+        /* @__PURE__ */ (0, import_jsx_runtime13.jsx)("div", { className: talk_pages_default["wsFrameEdge"], style: { top: 0, bottom: 0, right: 0, width: EDGE } }),
+        [...EDGE_HANDLES, ...CORNER_HANDLES].map((handle) => /* @__PURE__ */ (0, import_jsx_runtime13.jsx)(
           "div",
           {
             className: `${talk_pages_default["wsFrameResize"]} ${talk_pages_default[handle.className] ?? ""}`,
@@ -13393,8 +13587,8 @@ function migrateToBoxes(input) {
 }
 
 // src/client/StackDrawer.tsx
-var import_react10 = require("react");
-var import_jsx_runtime13 = require("react/jsx-runtime");
+var import_react11 = require("react");
+var import_jsx_runtime14 = require("react/jsx-runtime");
 var LAMP_CLASS2 = {
   running: "cardLampRunning",
   done: "cardLampDone",
@@ -13405,16 +13599,16 @@ function isIndexDisabled(message) {
   return message.includes("search is disabled") || message.includes("SESSION_QUERY_SEARCH_DISABLED");
 }
 function StackDrawer(props) {
-  const scrollerRef = (0, import_react10.useRef)(null);
-  const [wires, setWires] = (0, import_react10.useState)([]);
-  const [wireSize, setWireSize] = (0, import_react10.useState)({ width: 0, height: 0 });
+  const scrollerRef = (0, import_react11.useRef)(null);
+  const [wires, setWires] = (0, import_react11.useState)([]);
+  const [wireSize, setWireSize] = (0, import_react11.useState)({ width: 0, height: 0 });
   const remembered = loadSearch("drawer:" + props.groupId);
-  const [query, setQuery] = (0, import_react10.useState)(remembered?.query ?? "");
-  const [hits, setHits] = (0, import_react10.useState)(remembered?.hits ?? []);
-  const [searching, setSearching] = (0, import_react10.useState)(false);
-  const [dragId, setDragId] = (0, import_react10.useState)(null);
-  const [dropIndex, setDropIndex] = (0, import_react10.useState)(null);
-  const [searchError, setSearchError] = (0, import_react10.useState)(null);
+  const [query, setQuery] = (0, import_react11.useState)(remembered?.query ?? "");
+  const [hits, setHits] = (0, import_react11.useState)(remembered?.hits ?? []);
+  const [searching, setSearching] = (0, import_react11.useState)(false);
+  const [dragId, setDragId] = (0, import_react11.useState)(null);
+  const [dropIndex, setDropIndex] = (0, import_react11.useState)(null);
+  const [searchError, setSearchError] = (0, import_react11.useState)(null);
   const runSearch = async () => {
     const trimmed = query.trim();
     if (trimmed.length < 2 || props.onSearchContent === void 0) {
@@ -13438,7 +13632,7 @@ function StackDrawer(props) {
   };
   const needle = query.trim().toLowerCase();
   const visibleItems = needle === "" ? props.items : props.items.filter((item) => item.title.toLowerCase().includes(needle));
-  (0, import_react10.useLayoutEffect)(() => {
+  (0, import_react11.useLayoutEffect)(() => {
     const scroller = scrollerRef.current;
     const links = (props.links ?? []).filter((link2) => link2.visible);
     if (scroller === null || links.length === 0) {
@@ -13717,12 +13911,12 @@ function StackDrawer(props) {
       window.cancelAnimationFrame(raf);
     };
   }, [props.links, props.items, query, visibleItems.length]);
-  (0, import_react10.useEffect)(() => {
+  (0, import_react11.useEffect)(() => {
     const scroller = scrollerRef.current;
     if (scroller === null) return;
     scroller.scrollTop = drawerState.readScroll();
   }, []);
-  (0, import_react10.useEffect)(() => {
+  (0, import_react11.useEffect)(() => {
     const release = mapUi.claimEscape("stack-drawer");
     const onKeyDown = (event) => {
       if (event.key !== "Escape") return;
@@ -13735,9 +13929,9 @@ function StackDrawer(props) {
       release();
     };
   }, []);
-  const lastScrollAt = (0, import_react10.useRef)(0);
-  const [leaving, setLeaving] = (0, import_react10.useState)(false);
-  const leaveTimer = (0, import_react10.useRef)(null);
+  const lastScrollAt = (0, import_react11.useRef)(0);
+  const [leaving, setLeaving] = (0, import_react11.useState)(false);
+  const leaveTimer = (0, import_react11.useRef)(null);
   const requestClose = () => {
     if (leaving) return;
     setLeaving(true);
@@ -13746,10 +13940,10 @@ function StackDrawer(props) {
       props.onClose();
     }, 130);
   };
-  (0, import_react10.useEffect)(() => () => {
+  (0, import_react11.useEffect)(() => () => {
     if (leaveTimer.current !== null) window.clearTimeout(leaveTimer.current);
   }, []);
-  const scrollSaveTimer = (0, import_react10.useRef)(null);
+  const scrollSaveTimer = (0, import_react11.useRef)(null);
   const slotUnder = (clientX, clientY) => {
     const scroller = scrollerRef.current;
     if (scroller === null) return null;
@@ -13773,7 +13967,7 @@ function StackDrawer(props) {
     setDragId(null);
     setDropIndex(null);
   };
-  return /* @__PURE__ */ (0, import_jsx_runtime13.jsx)(
+  return /* @__PURE__ */ (0, import_jsx_runtime14.jsx)(
     "div",
     {
       className: `${talk_pages_default["drawerBackdrop"]}${leaving ? ` ${talk_pages_default["drawerBackdropOut"]}` : ""}`,
@@ -13783,19 +13977,19 @@ function StackDrawer(props) {
       onClick: (event) => {
         if (event.target === event.currentTarget) requestClose();
       },
-      children: /* @__PURE__ */ (0, import_jsx_runtime13.jsxs)(
+      children: /* @__PURE__ */ (0, import_jsx_runtime14.jsxs)(
         "div",
         {
           className: `${talk_pages_default["drawer"]}${leaving ? ` ${talk_pages_default["drawerOut"]}` : ""}`,
           role: "dialog",
           "aria-label": props.workspaceTitle,
           children: [
-            /* @__PURE__ */ (0, import_jsx_runtime13.jsxs)("div", { className: talk_pages_default["drawerHead"], children: [
-              /* @__PURE__ */ (0, import_jsx_runtime13.jsx)("span", { className: talk_pages_default["drawerTitle"], children: props.workspaceTitle }),
-              /* @__PURE__ */ (0, import_jsx_runtime13.jsx)("span", { className: talk_pages_default["drawerCount"], children: t("stack.total", { n: String(props.items.length) }) }),
-              /* @__PURE__ */ (0, import_jsx_runtime13.jsx)("span", { className: talk_pages_default["drawerSpace"] }),
-              /* @__PURE__ */ (0, import_jsx_runtime13.jsx)("span", { className: talk_pages_default["drawerHint"], children: t("stack.hint") }),
-              /* @__PURE__ */ (0, import_jsx_runtime13.jsx)(
+            /* @__PURE__ */ (0, import_jsx_runtime14.jsxs)("div", { className: talk_pages_default["drawerHead"], children: [
+              /* @__PURE__ */ (0, import_jsx_runtime14.jsx)("span", { className: talk_pages_default["drawerTitle"], children: props.workspaceTitle }),
+              /* @__PURE__ */ (0, import_jsx_runtime14.jsx)("span", { className: talk_pages_default["drawerCount"], children: t("stack.total", { n: String(props.items.length) }) }),
+              /* @__PURE__ */ (0, import_jsx_runtime14.jsx)("span", { className: talk_pages_default["drawerSpace"] }),
+              /* @__PURE__ */ (0, import_jsx_runtime14.jsx)("span", { className: talk_pages_default["drawerHint"], children: t("stack.hint") }),
+              /* @__PURE__ */ (0, import_jsx_runtime14.jsx)(
                 "button",
                 {
                   type: "button",
@@ -13807,8 +14001,8 @@ function StackDrawer(props) {
                 }
               )
             ] }),
-            /* @__PURE__ */ (0, import_jsx_runtime13.jsxs)("div", { className: talk_pages_default["drawerSearchRow"], children: [
-              /* @__PURE__ */ (0, import_jsx_runtime13.jsx)(
+            /* @__PURE__ */ (0, import_jsx_runtime14.jsxs)("div", { className: talk_pages_default["drawerSearchRow"], children: [
+              /* @__PURE__ */ (0, import_jsx_runtime14.jsx)(
                 "input",
                 {
                   className: talk_pages_default["drawerSearch"],
@@ -13834,7 +14028,7 @@ function StackDrawer(props) {
                   }
                 }
               ),
-              /* @__PURE__ */ (0, import_jsx_runtime13.jsx)(
+              /* @__PURE__ */ (0, import_jsx_runtime14.jsx)(
                 "button",
                 {
                   type: "button",
@@ -13846,10 +14040,10 @@ function StackDrawer(props) {
                   children: t("global.searchRun")
                 }
               ),
-              searching ? /* @__PURE__ */ (0, import_jsx_runtime13.jsx)("span", { className: talk_pages_default["drawerSearchState"], children: t("stack.searching") }) : null,
-              searchError !== null ? /* @__PURE__ */ (0, import_jsx_runtime13.jsx)("span", { className: talk_pages_default["drawerSearchError"], title: searchError, children: isIndexDisabled(searchError) ? t("stack.searchDisabled") : t("stack.searchFailed") + "：" + (searchError.length > 70 ? searchError.slice(0, 70) + "…" : searchError) }) : null
+              searching ? /* @__PURE__ */ (0, import_jsx_runtime14.jsx)("span", { className: talk_pages_default["drawerSearchState"], children: t("stack.searching") }) : null,
+              searchError !== null ? /* @__PURE__ */ (0, import_jsx_runtime14.jsx)("span", { className: talk_pages_default["drawerSearchError"], title: searchError, children: isIndexDisabled(searchError) ? t("stack.searchDisabled") : t("stack.searchFailed") + "：" + (searchError.length > 70 ? searchError.slice(0, 70) + "…" : searchError) }) : null
             ] }),
-            /* @__PURE__ */ (0, import_jsx_runtime13.jsxs)(
+            /* @__PURE__ */ (0, import_jsx_runtime14.jsxs)(
               "div",
               {
                 className: talk_pages_default["drawerScroll"],
@@ -13864,15 +14058,15 @@ function StackDrawer(props) {
                   }, 200);
                 },
                 children: [
-                  wires.length > 0 ? /* @__PURE__ */ (0, import_jsx_runtime13.jsx)(
+                  wires.length > 0 ? /* @__PURE__ */ (0, import_jsx_runtime14.jsx)(
                     "svg",
                     {
                       className: talk_pages_default["drawerWires"],
                       width: Math.max(1, wireSize.width),
                       height: Math.max(1, wireSize.height),
                       "aria-hidden": "true",
-                      children: wires.map((wire, index2) => /* @__PURE__ */ (0, import_jsx_runtime13.jsxs)("g", { children: [
-                        /* @__PURE__ */ (0, import_jsx_runtime13.jsx)(
+                      children: wires.map((wire, index2) => /* @__PURE__ */ (0, import_jsx_runtime14.jsxs)("g", { children: [
+                        /* @__PURE__ */ (0, import_jsx_runtime14.jsx)(
                           "path",
                           {
                             d: wire.d,
@@ -13885,7 +14079,7 @@ function StackDrawer(props) {
                             strokeDasharray: "6 5"
                           }
                         ),
-                        /* @__PURE__ */ (0, import_jsx_runtime13.jsx)(
+                        /* @__PURE__ */ (0, import_jsx_runtime14.jsx)(
                           "path",
                           {
                             d: "M0 0 L-9 -4 L-9 4 Z",
@@ -13902,7 +14096,7 @@ function StackDrawer(props) {
                     const quiet = item.glow === void 0 && item.pendingDraft !== true && item.interrupted !== true && item.pinned !== true;
                     if (quiet) classNames.push(talk_pages_default["cardQuiet"] ?? "");
                     if (item.selected === true) classNames.push(talk_pages_default["cardSelected"] ?? "");
-                    return /* @__PURE__ */ (0, import_jsx_runtime13.jsxs)(
+                    return /* @__PURE__ */ (0, import_jsx_runtime14.jsxs)(
                       "button",
                       {
                         type: "button",
@@ -13942,18 +14136,18 @@ function StackDrawer(props) {
                           props.onCardMenu?.(item.cardId, event);
                         },
                         children: [
-                          item.current === true ? /* @__PURE__ */ (0, import_jsx_runtime13.jsxs)("span", { className: talk_pages_default["cardReticle"], children: [
-                            /* @__PURE__ */ (0, import_jsx_runtime13.jsx)("i", {}),
-                            /* @__PURE__ */ (0, import_jsx_runtime13.jsx)("i", {}),
-                            /* @__PURE__ */ (0, import_jsx_runtime13.jsx)("i", {}),
-                            /* @__PURE__ */ (0, import_jsx_runtime13.jsx)("i", {})
+                          item.current === true ? /* @__PURE__ */ (0, import_jsx_runtime14.jsxs)("span", { className: talk_pages_default["cardReticle"], children: [
+                            /* @__PURE__ */ (0, import_jsx_runtime14.jsx)("i", {}),
+                            /* @__PURE__ */ (0, import_jsx_runtime14.jsx)("i", {}),
+                            /* @__PURE__ */ (0, import_jsx_runtime14.jsx)("i", {}),
+                            /* @__PURE__ */ (0, import_jsx_runtime14.jsx)("i", {})
                           ] }) : null,
-                          /* @__PURE__ */ (0, import_jsx_runtime13.jsxs)("div", { className: talk_pages_default["cardTop"], children: [
-                            item.pinned === true ? /* @__PURE__ */ (0, import_jsx_runtime13.jsx)("span", { className: talk_pages_default["cardPin"], title: t("card.pinned"), "data-talkmap-pin": "1", children: /* @__PURE__ */ (0, import_jsx_runtime13.jsx)("svg", { viewBox: "0 0 24 24", width: "13", height: "13", "aria-hidden": "true", children: /* @__PURE__ */ (0, import_jsx_runtime13.jsx)("path", { fill: "currentColor", d: "M16 8.6V4h1c.55 0 1-.45 1-1s-.45-1-1-1H7c-.55 0-1 .45-1 1s.45 1 1 1h1v4.6c0 1.66-1.34 3-3 3v2h5.1v7.9l.9 1 .9-1V13.6H19v-2c-1.66 0-3-1.34-3-3z" }) }) }) : null,
-                            /* @__PURE__ */ (0, import_jsx_runtime13.jsx)("span", { className: talk_pages_default["cardTitle"], children: item.title })
+                          /* @__PURE__ */ (0, import_jsx_runtime14.jsxs)("div", { className: talk_pages_default["cardTop"], children: [
+                            item.pinned === true ? /* @__PURE__ */ (0, import_jsx_runtime14.jsx)("span", { className: talk_pages_default["cardPin"], title: t("card.pinned"), "data-talkmap-pin": "1", children: /* @__PURE__ */ (0, import_jsx_runtime14.jsx)("svg", { viewBox: "0 0 24 24", width: "13", height: "13", "aria-hidden": "true", children: /* @__PURE__ */ (0, import_jsx_runtime14.jsx)("path", { fill: "currentColor", d: "M16 8.6V4h1c.55 0 1-.45 1-1s-.45-1-1-1H7c-.55 0-1 .45-1 1s.45 1 1 1h1v4.6c0 1.66-1.34 3-3 3v2h5.1v7.9l.9 1 .9-1V13.6H19v-2c-1.66 0-3-1.34-3-3z" }) }) }) : null,
+                            /* @__PURE__ */ (0, import_jsx_runtime14.jsx)("span", { className: talk_pages_default["cardTitle"], children: item.title })
                           ] }),
-                          item.preview !== void 0 && item.preview !== "" ? /* @__PURE__ */ (0, import_jsx_runtime13.jsx)("div", { className: talk_pages_default["cardSummary"], children: item.preview }) : null,
-                          item.links !== void 0 && item.links.length > 0 ? /* @__PURE__ */ (0, import_jsx_runtime13.jsx)("div", { className: talk_pages_default["cardLinks"], "data-talkmap-card-links": item.links.length, children: item.links.slice(0, 3).map((link2) => /* @__PURE__ */ (0, import_jsx_runtime13.jsxs)(
+                          item.preview !== void 0 && item.preview !== "" ? /* @__PURE__ */ (0, import_jsx_runtime14.jsx)("div", { className: talk_pages_default["cardSummary"], children: item.preview }) : null,
+                          item.links !== void 0 && item.links.length > 0 ? /* @__PURE__ */ (0, import_jsx_runtime14.jsx)("div", { className: talk_pages_default["cardLinks"], "data-talkmap-card-links": item.links.length, children: item.links.slice(0, 3).map((link2) => /* @__PURE__ */ (0, import_jsx_runtime14.jsxs)(
                             "span",
                             {
                               className: talk_pages_default["cardLinkChip"],
@@ -13966,9 +14160,9 @@ function StackDrawer(props) {
                             },
                             (link2.outgoing ? "out-" : "in-") + link2.toCardId
                           )) }) : null,
-                          /* @__PURE__ */ (0, import_jsx_runtime13.jsxs)("div", { className: talk_pages_default["cardFooter"], children: [
-                            /* @__PURE__ */ (0, import_jsx_runtime13.jsx)("span", { className: talk_pages_default["cardTime"], children: relativeTime(item.updatedAt) }),
-                            item.pendingDraft === true ? /* @__PURE__ */ (0, import_jsx_runtime13.jsx)(
+                          /* @__PURE__ */ (0, import_jsx_runtime14.jsxs)("div", { className: talk_pages_default["cardFooter"], children: [
+                            /* @__PURE__ */ (0, import_jsx_runtime14.jsx)("span", { className: talk_pages_default["cardTime"], children: relativeTime(item.updatedAt) }),
+                            item.pendingDraft === true ? /* @__PURE__ */ (0, import_jsx_runtime14.jsx)(
                               "span",
                               {
                                 className: `${talk_pages_default["cardChip"]} ${talk_pages_default["cardChipDraft"]}`,
@@ -13977,7 +14171,7 @@ function StackDrawer(props) {
                                 children: t("card.draft")
                               }
                             ) : null,
-                            item.interrupted === true ? /* @__PURE__ */ (0, import_jsx_runtime13.jsx)(
+                            item.interrupted === true ? /* @__PURE__ */ (0, import_jsx_runtime14.jsx)(
                               "span",
                               {
                                 className: `${talk_pages_default["cardChip"]} ${talk_pages_default["cardChipInterrupted"]}`,
@@ -13986,13 +14180,13 @@ function StackDrawer(props) {
                                 children: t("card.interrupted")
                               }
                             ) : null,
-                            item.glow === void 0 ? null : /* @__PURE__ */ (0, import_jsx_runtime13.jsxs)(
+                            item.glow === void 0 ? null : /* @__PURE__ */ (0, import_jsx_runtime14.jsxs)(
                               "span",
                               {
                                 className: `${talk_pages_default["cardChip"]} ${talk_pages_default[LAMP_CHIP[item.glow].className]}`,
                                 "data-talkmap-chip": item.glow,
                                 children: [
-                                  item.glow === "running" ? /* @__PURE__ */ (0, import_jsx_runtime13.jsx)("span", { className: talk_pages_default["runningDot"] }) : null,
+                                  item.glow === "running" ? /* @__PURE__ */ (0, import_jsx_runtime14.jsx)("span", { className: talk_pages_default["runningDot"] }) : null,
                                   t(LAMP_CHIP[item.glow].key)
                                 ]
                               }
@@ -14003,7 +14197,7 @@ function StackDrawer(props) {
                       item.cardId
                     );
                   }),
-                  hits.length > 0 ? /* @__PURE__ */ (0, import_jsx_runtime13.jsx)(
+                  hits.length > 0 ? /* @__PURE__ */ (0, import_jsx_runtime14.jsx)(
                     SearchResults,
                     {
                       query,
@@ -14014,7 +14208,7 @@ function StackDrawer(props) {
                       }
                     }
                   ) : null,
-                  needle !== "" && visibleItems.length === 0 ? /* @__PURE__ */ (0, import_jsx_runtime13.jsx)("div", { className: talk_pages_default["drawerEmpty"], children: t("stack.noTitleMatch") }) : null
+                  needle !== "" && visibleItems.length === 0 ? /* @__PURE__ */ (0, import_jsx_runtime14.jsx)("div", { className: talk_pages_default["drawerEmpty"], children: t("stack.noTitleMatch") }) : null
                 ]
               }
             )
@@ -14026,13 +14220,13 @@ function StackDrawer(props) {
 }
 
 // src/client/StackNode.tsx
-var import_jsx_runtime14 = require("react/jsx-runtime");
+var import_jsx_runtime15 = require("react/jsx-runtime");
 function StackNode(props) {
   const { data } = props;
   const open = () => {
     data.onOpen();
   };
-  return /* @__PURE__ */ (0, import_jsx_runtime14.jsxs)(
+  return /* @__PURE__ */ (0, import_jsx_runtime15.jsxs)(
     "div",
     {
       className: [talk_pages_default["stackCell"], talk_pages_default["cardQuiet"] ?? ""].filter(Boolean).join(" "),
@@ -14050,11 +14244,11 @@ function StackNode(props) {
         open();
       },
       children: [
-        /* @__PURE__ */ (0, import_jsx_runtime14.jsx)("span", { className: talk_pages_default["stackSheetBack"] }),
-        /* @__PURE__ */ (0, import_jsx_runtime14.jsx)("span", { className: talk_pages_default["stackSheetMid"] }),
-        /* @__PURE__ */ (0, import_jsx_runtime14.jsxs)("div", { className: talk_pages_default["stackFace"], children: [
-          /* @__PURE__ */ (0, import_jsx_runtime14.jsx)("span", { className: talk_pages_default["stackFaceTitle"], children: data.topTitle ?? t("frame.unknown") }),
-          /* @__PURE__ */ (0, import_jsx_runtime14.jsxs)("span", { className: [talk_pages_default["stackBadge"], data.busy === true ? talk_pages_default["stackBadgeBusy"] ?? "" : ""].filter(Boolean).join(" "), children: [
+        /* @__PURE__ */ (0, import_jsx_runtime15.jsx)("span", { className: talk_pages_default["stackSheetBack"] }),
+        /* @__PURE__ */ (0, import_jsx_runtime15.jsx)("span", { className: talk_pages_default["stackSheetMid"] }),
+        /* @__PURE__ */ (0, import_jsx_runtime15.jsxs)("div", { className: talk_pages_default["stackFace"], children: [
+          /* @__PURE__ */ (0, import_jsx_runtime15.jsx)("span", { className: talk_pages_default["stackFaceTitle"], children: data.topTitle ?? t("frame.unknown") }),
+          /* @__PURE__ */ (0, import_jsx_runtime15.jsxs)("span", { className: [talk_pages_default["stackBadge"], data.busy === true ? talk_pages_default["stackBadgeBusy"] ?? "" : ""].filter(Boolean).join(" "), children: [
             "+",
             data.count
           ] })
@@ -14064,319 +14258,10 @@ function StackNode(props) {
   );
 }
 
-// src/client/StatusRail.tsx
-var import_react11 = require("react");
-var import_jsx_runtime15 = require("react/jsx-runtime");
-var OPEN_KEY = "dsh.talk-pages.status-rail.open.v1";
-var ORDER_KEY = "dsh.talk-pages.status-rail.order.v1";
-var FLIP_MS = 180;
-var LAMP_CLASS3 = {
-  running: "cardLampRunning",
-  done: "cardLampDone",
-  error: "cardLampError",
-  waiting: "cardLampWaiting"
-};
-var openState;
-var openListeners = /* @__PURE__ */ new Set();
-function readOpen() {
-  if (typeof window === "undefined") return false;
-  try {
-    return window.localStorage.getItem(OPEN_KEY) === "1";
-  } catch {
-    return false;
-  }
-}
-function writeOpen(open) {
-  try {
-    window.localStorage.setItem(OPEN_KEY, open ? "1" : "0");
-  } catch {
-  }
-}
-function subscribeOpen(listener) {
-  openListeners.add(listener);
-  return () => {
-    openListeners.delete(listener);
-  };
-}
-function openSnapshot() {
-  if (openState === void 0) openState = readOpen();
-  return openState;
-}
-function setOpenState(next) {
-  openState = next;
-  writeOpen(next);
-  for (const listener of openListeners) listener();
-}
-function readOrder() {
-  if (typeof window === "undefined") return [];
-  try {
-    const raw = window.localStorage.getItem(ORDER_KEY);
-    const parsed = raw === null ? [] : JSON.parse(raw);
-    return Array.isArray(parsed) ? parsed.filter((item) => typeof item === "string") : [];
-  } catch {
-    return [];
-  }
-}
-function writeOrder(order) {
-  try {
-    window.localStorage.setItem(ORDER_KEY, JSON.stringify(order));
-  } catch {
-  }
-}
-function StatusRail(props) {
-  const open = (0, import_react11.useSyncExternalStore)(subscribeOpen, openSnapshot, openSnapshot);
-  const [order, setOrder] = (0, import_react11.useState)(() => readOrder());
-  const [drag2, setDrag] = (0, import_react11.useState)(null);
-  const [shift, setShift] = (0, import_react11.useState)({});
-  const seenRef = (0, import_react11.useRef)(/* @__PURE__ */ new Map());
-  const slotsRef = (0, import_react11.useRef)(/* @__PURE__ */ new Map());
-  const prevTops = (0, import_react11.useRef)(/* @__PURE__ */ new Map());
-  const panelRef = (0, import_react11.useRef)(null);
-  const orderRef = (0, import_react11.useRef)(order);
-  orderRef.current = order;
-  const dragRef = (0, import_react11.useRef)(null);
-  dragRef.current = drag2;
-  const signature = (0, import_react11.useMemo)(
-    () => props.entries.map((entry) => `${entry.cardId}:${entry.lamp}:${entry.stamp}`).join("|"),
-    [props.entries]
-  );
-  (0, import_react11.useEffect)(() => {
-    const seen = seenRef.current;
-    const fresh = [];
-    for (const entry of props.entries) {
-      const before = seen.get(entry.cardId);
-      const now2 = `${entry.lamp}:${entry.stamp}`;
-      if (before !== void 0 && before !== now2) fresh.push(entry.cardId);
-      seen.set(entry.cardId, now2);
-    }
-    const alive = new Set(props.entries.map((entry) => entry.cardId));
-    setOrder((current) => {
-      const kept = current.filter((cardId) => alive.has(cardId));
-      const next = [.../* @__PURE__ */ new Set([...fresh.reverse(), ...kept])];
-      for (const entry of props.entries) {
-        if (!next.includes(entry.cardId)) next.push(entry.cardId);
-      }
-      if (next.length === kept.length && next.every((cardId, index2) => cardId === kept[index2])) return kept;
-      writeOrder(next);
-      return next;
-    });
-    for (const cardId of [...seen.keys()]) {
-      if (!alive.has(cardId)) seen.delete(cardId);
-    }
-  }, [signature]);
-  const ordered = (0, import_react11.useMemo)(() => {
-    const byId2 = new Map(props.entries.map((entry) => [entry.cardId, entry]));
-    const rows = [];
-    for (const cardId of order) {
-      const entry = byId2.get(cardId);
-      if (entry !== void 0) rows.push(entry);
-    }
-    for (const entry of props.entries) {
-      if (!order.includes(entry.cardId)) rows.push(entry);
-    }
-    return rows;
-  }, [order, props.entries]);
-  (0, import_react11.useLayoutEffect)(() => {
-    if (drag2 !== null) return;
-    const next = /* @__PURE__ */ new Map();
-    const deltas = {};
-    for (const [cardId, element] of slotsRef.current) {
-      const top = element.getBoundingClientRect().top;
-      next.set(cardId, top);
-      const before = prevTops.current.get(cardId);
-      if (before === void 0 || Math.abs(before - top) < 1) continue;
-      deltas[cardId] = before - top;
-    }
-    prevTops.current = next;
-    if (Object.keys(deltas).length === 0) return;
-    setShift(deltas);
-    let inner = 0;
-    const outer = requestAnimationFrame(() => {
-      inner = requestAnimationFrame(() => {
-        setShift({});
-      });
-    });
-    return () => {
-      cancelAnimationFrame(outer);
-      if (inner !== 0) cancelAnimationFrame(inner);
-    };
-  }, [order, drag2 === null]);
-  (0, import_react11.useEffect)(() => {
-    if (drag2 === null) return;
-    const { cardId } = drag2;
-    const indexUnder = (pointerY) => {
-      const ids = orderRef.current;
-      let best = 0;
-      let bestDistance = Number.POSITIVE_INFINITY;
-      for (let index2 = 0; index2 < ids.length; index2 += 1) {
-        const element = slotsRef.current.get(ids[index2]);
-        if (element === void 0) continue;
-        const rect = element.getBoundingClientRect();
-        const distance2 = Math.abs(pointerY - (rect.top + rect.height / 2));
-        if (distance2 < bestDistance) {
-          bestDistance = distance2;
-          best = index2;
-        }
-      }
-      return best;
-    };
-    const onMove = (event) => {
-      const hover = indexUnder(event.clientY);
-      setDrag((current) => current === null ? null : { ...current, pointerY: event.clientY, hover });
-    };
-    const onUp = () => {
-      const current = dragRef.current;
-      if (current !== null && current.hover !== current.origin) {
-        setOrder((existing) => {
-          const from = existing.indexOf(current.cardId);
-          if (from < 0) return existing;
-          const next = [...existing];
-          next.splice(from, 1);
-          const to = Math.min(Math.max(current.hover, 0), next.length);
-          next.splice(to, 0, current.cardId);
-          writeOrder(next);
-          return next;
-        });
-      }
-      prevTops.current.clear();
-      setDrag(null);
-    };
-    window.addEventListener("pointermove", onMove);
-    window.addEventListener("pointerup", onUp);
-    window.addEventListener("pointercancel", onUp);
-    return () => {
-      window.removeEventListener("pointermove", onMove);
-      window.removeEventListener("pointerup", onUp);
-      window.removeEventListener("pointercancel", onUp);
-    };
-  }, [drag2 === null]);
-  const toggle = (0, import_react11.useCallback)(() => {
-    setOpenState(!openSnapshot());
-  }, []);
-  const beginDrag = (0, import_react11.useCallback)((event, cardId) => {
-    if (event.button !== 0) return;
-    const element = slotsRef.current.get(cardId);
-    if (element === void 0) return;
-    const rect = element.getBoundingClientRect();
-    event.preventDefault();
-    const index2 = Math.max(0, orderRef.current.indexOf(cardId));
-    setDrag({
-      cardId,
-      origin: index2,
-      hover: index2,
-      step: rect.height + 10,
-      startPointerY: event.clientY,
-      pointerY: event.clientY,
-      left: rect.left,
-      baseTop: rect.top,
-      width: rect.width
-    });
-  }, []);
-  const renderCard = (entry, floating) => /* @__PURE__ */ (0, import_jsx_runtime15.jsxs)(
-    "div",
-    {
-      className: `${talk_pages_default["card"]} ${talk_pages_default[LAMP_CLASS3[entry.lamp]] ?? ""} ${talk_pages_default["statusRailCard"]}${floating ? ` ${talk_pages_default["statusRailCardDragging"]}` : ""}`,
-      onPointerDown: floating ? void 0 : (event) => {
-        beginDrag(event, entry.cardId);
-      },
-      onClick: () => {
-        if (!floating && dragRef.current === null) props.onFocus(entry.cardId);
-      },
-      title: entry.title,
-      children: [
-        /* @__PURE__ */ (0, import_jsx_runtime15.jsx)("div", { className: talk_pages_default["cardTop"], children: /* @__PURE__ */ (0, import_jsx_runtime15.jsx)("span", { className: talk_pages_default["cardTitle"], children: entry.title }) }),
-        entry.preview !== void 0 && entry.preview !== "" ? /* @__PURE__ */ (0, import_jsx_runtime15.jsx)("div", { className: talk_pages_default["cardSummary"], children: entry.preview }) : null,
-        /* @__PURE__ */ (0, import_jsx_runtime15.jsxs)("div", { className: talk_pages_default["cardFooter"], children: [
-          /* @__PURE__ */ (0, import_jsx_runtime15.jsx)("span", { className: talk_pages_default["cardTime"], children: relativeTime(entry.updatedAt) }),
-          /* @__PURE__ */ (0, import_jsx_runtime15.jsxs)("span", { className: `${talk_pages_default["cardChip"]} ${talk_pages_default[LAMP_CHIP[entry.lamp].className]}`, children: [
-            LAMP_CHIP[entry.lamp].dot ? /* @__PURE__ */ (0, import_jsx_runtime15.jsx)("span", { className: talk_pages_default["runningDot"] }) : null,
-            t(LAMP_CHIP[entry.lamp].key)
-          ] })
-        ] })
-      ]
-    }
-  );
-  const floatingEntry = drag2 === null ? void 0 : ordered.find((entry) => entry.cardId === drag2.cardId);
-  return /* @__PURE__ */ (0, import_jsx_runtime15.jsxs)(
-    "div",
-    {
-      className: talk_pages_default["statusRail"],
-      "data-open": open ? "1" : "0",
-      style: { ["--rail-card-w"]: `${props.cardWidth}px` },
-      children: [
-        /* @__PURE__ */ (0, import_jsx_runtime15.jsxs)("div", { className: talk_pages_default["statusRailPanel"], "aria-hidden": !open, ref: panelRef, children: [
-          /* @__PURE__ */ (0, import_jsx_runtime15.jsxs)("div", { className: talk_pages_default["statusRailHead"], children: [
-            /* @__PURE__ */ (0, import_jsx_runtime15.jsx)("span", { className: talk_pages_default["statusRailTitle"], children: t("statusRail.title") }),
-            /* @__PURE__ */ (0, import_jsx_runtime15.jsx)("span", { className: talk_pages_default["statusRailCount"], children: props.entries.length })
-          ] }),
-          /* @__PURE__ */ (0, import_jsx_runtime15.jsxs)("div", { className: talk_pages_default["statusRailList"], role: "list", children: [
-            ordered.length === 0 ? /* @__PURE__ */ (0, import_jsx_runtime15.jsx)("div", { className: talk_pages_default["statusRailEmpty"], children: t("statusRail.empty") }) : null,
-            ordered.map((entry, index2) => {
-              const dragging = drag2 !== null && drag2.cardId === entry.cardId;
-              let moved = 0;
-              if (drag2 !== null && !dragging) {
-                if (drag2.hover > drag2.origin && index2 > drag2.origin && index2 <= drag2.hover) moved = -drag2.step;
-                else if (drag2.hover < drag2.origin && index2 >= drag2.hover && index2 < drag2.origin) moved = drag2.step;
-              }
-              const style2 = drag2 !== null ? { transform: `translateY(${moved}px)`, transition: `transform ${FLIP_MS}ms cubic-bezier(0.22, 0.61, 0.36, 1)` } : shift[entry.cardId] !== void 0 ? { transform: `translateY(${shift[entry.cardId]}px)`, transition: "none" } : { transition: `transform ${FLIP_MS}ms cubic-bezier(0.22, 0.61, 0.36, 1)` };
-              return /* @__PURE__ */ (0, import_jsx_runtime15.jsx)(
-                "div",
-                {
-                  role: "listitem",
-                  ref: (element) => {
-                    if (element === null) slotsRef.current.delete(entry.cardId);
-                    else slotsRef.current.set(entry.cardId, element);
-                  },
-                  className: talk_pages_default["statusRailSlot"],
-                  style: style2,
-                  children: dragging ? /* @__PURE__ */ (0, import_jsx_runtime15.jsx)("div", { className: talk_pages_default["statusRailGhost"], children: renderCard(entry, false) }) : renderCard(entry, false)
-                },
-                entry.cardId
-              );
-            })
-          ] })
-        ] }),
-        drag2 !== null && floatingEntry !== void 0 ? /* @__PURE__ */ (0, import_jsx_runtime15.jsx)(
-          "div",
-          {
-            className: talk_pages_default["statusRailFloating"],
-            style: {
-              left: drag2.left,
-              width: drag2.width,
-              top: drag2.baseTop + (drag2.pointerY - drag2.startPointerY)
-            },
-            children: renderCard(floatingEntry, true)
-          }
-        ) : null,
-        /* @__PURE__ */ (0, import_jsx_runtime15.jsxs)(
-          "button",
-          {
-            type: "button",
-            className: talk_pages_default["statusRailTab"],
-            "aria-expanded": open,
-            "aria-label": open ? t("statusRail.close") : t("statusRail.open"),
-            title: open ? t("statusRail.close") : t("statusRail.open"),
-            onClick: toggle,
-            children: [
-              /* @__PURE__ */ (0, import_jsx_runtime15.jsxs)("svg", { viewBox: "0 0 12 28", width: "14", height: "30", "aria-hidden": "true", children: [
-                /* @__PURE__ */ (0, import_jsx_runtime15.jsx)("rect", { x: "1.4", y: "1", width: "2", height: "20", rx: "1", fill: "currentColor" }),
-                /* @__PURE__ */ (0, import_jsx_runtime15.jsx)("rect", { x: "8.6", y: "1", width: "2", height: "20", rx: "1", fill: "currentColor" }),
-                /* @__PURE__ */ (0, import_jsx_runtime15.jsx)("circle", { cx: "2.4", cy: "25", r: "1.5", fill: "currentColor" }),
-                /* @__PURE__ */ (0, import_jsx_runtime15.jsx)("circle", { cx: "9.6", cy: "25", r: "1.5", fill: "currentColor" })
-              ] }),
-              props.entries.length > 0 ? /* @__PURE__ */ (0, import_jsx_runtime15.jsx)("span", { className: talk_pages_default["statusRailTabCount"], children: props.entries.length }) : null
-            ]
-          }
-        )
-      ]
-    }
-  );
-}
-
 // src/client/use-dark.ts
 var import_react12 = require("react");
 var DARK_ATTRIBUTE = "data-ds-dark-theme";
-function subscribe(listener) {
+function subscribe2(listener) {
   if (typeof document === "undefined") return () => {
   };
   const observer = new MutationObserver(listener);
@@ -14390,7 +14275,7 @@ function getSnapshot() {
   return document.body.hasAttribute(DARK_ATTRIBUTE);
 }
 function useDsDarkTheme() {
-  return (0, import_react12.useSyncExternalStore)(subscribe, getSnapshot);
+  return (0, import_react12.useSyncExternalStore)(subscribe2, getSnapshot);
 }
 
 // src/client/MapCanvas.tsx
@@ -14406,7 +14291,6 @@ var COLS = 3;
 var AUTO_SYNC_PER_PAGE = 60;
 var AUTO_SYNC_TOTAL = 200;
 var EMPTY_SESSION_STATUS = /* @__PURE__ */ new Map();
-var lastActivitySeen = /* @__PURE__ */ new Map();
 function snap(value2) {
   return Math.round(value2 / GRID) * GRID;
 }
@@ -14545,7 +14429,6 @@ function CanvasInner(props) {
     [workspaces]
   );
   const workspacesReady = workspaces.baselinesReady !== false;
-  const pinnedSessions = (0, import_react13.useMemo)(() => new Set(workspaces.pinnedSessionIds ?? []), [workspaces]);
   const boardSessionIds = (0, import_react13.useMemo)(
     () => new Set(Object.values(canvasState.cards).map((card) => card.sessionId)),
     [canvasState.cards]
@@ -14667,11 +14550,11 @@ function CanvasInner(props) {
         return card === void 0 ? void 0 : { cardId, x: card.x, y: card.y };
       }).filter((entry) => entry !== void 0);
       const reading = readingOrder(members);
-      const ordered = pinnedSessions.size === 0 ? reading : [...reading].sort((a, b) => {
-        const pinA = pinnedSessions.has(visibleCards[a]?.sessionId ?? "") ? 0 : 1;
-        const pinB = pinnedSessions.has(visibleCards[b]?.sessionId ?? "") ? 0 : 1;
-        return pinA - pinB;
-      });
+      const ordered = reading;
+      if (boxes[groupId]?.free === true) {
+        out[groupId] = { rect, ordered, shown: ordered, folded: [], free: true };
+        continue;
+      }
       const capacity = capacityFor(rect);
       let preview = ordered;
       if (draggingCardId !== null && ordered.includes(draggingCardId)) {
@@ -14686,18 +14569,32 @@ function CanvasInner(props) {
         rect,
         ordered: preview,
         shown: preview.slice(0, visibleSlots),
-        folded: preview.length > capacity ? preview.slice(visibleSlots) : []
+        folded: preview.length > capacity ? preview.slice(visibleSlots) : [],
+        free: false
       };
     }
     return out;
-  }, [frameRects, membersByGroup, visibleCards, pinnedSessions, draggingCardId, dragCenter]);
+  }, [frameRects, membersByGroup, visibleCards, draggingCardId, dragCenter, boxes]);
   const cardLayout = (0, import_react13.useMemo)(() => {
     const out = {};
     for (const layout of Object.values(folderLayouts)) {
+      if (layout.free) continue;
       Object.assign(out, layoutFor(layout.rect, layout.ordered));
     }
     return out;
   }, [folderLayouts]);
+  const memberShift = (0, import_react13.useMemo)(() => {
+    const out = {};
+    if (liveFrame === null) return out;
+    const stored = wsFrames[liveFrame.groupId];
+    if (stored === void 0 || boxes[liveFrame.groupId]?.free !== true) return out;
+    if (liveFrame.rect.width !== stored.width || liveFrame.rect.height !== stored.height) return out;
+    const dx = liveFrame.rect.x - stored.x;
+    const dy = liveFrame.rect.y - stored.y;
+    if (dx === 0 && dy === 0) return out;
+    for (const cardId of membersByGroup.get(liveFrame.groupId) ?? []) out[cardId] = { dx, dy };
+    return out;
+  }, [liveFrame, wsFrames, boxes, membersByGroup]);
   const foldedCards = (0, import_react13.useMemo)(() => {
     const out = {};
     for (const [groupId, layout] of Object.entries(folderLayouts)) {
@@ -14721,44 +14618,10 @@ function CanvasInner(props) {
     return () => window.clearTimeout(timer4);
   }, [cardLayout, canvasState.cards, canvasState.phase, draggingCardId, liveFrame]);
   const foldedSet = (0, import_react13.useMemo)(() => new Set(Object.values(foldedCards).flat()), [foldedCards]);
-  (0, import_react13.useEffect)(() => {
-    if (canvasState.phase !== "ready") return;
-    if (draggingCardId !== null || liveFrame !== null) return;
-    const seen = lastActivitySeen;
-    const stamps = /* @__PURE__ */ new Map();
-    for (const card of Object.values(visibleCards)) {
-      stamps.set(card.sessionId, sessions.byId[card.sessionId]?.updatedAt ?? card.createdAt);
-    }
-    if (seen.size === 0) {
-      for (const [sessionId, stamp] of stamps) seen.set(sessionId, stamp);
-      return;
-    }
-    const promoted = {};
-    for (const layout of Object.values(folderLayouts)) {
-      let candidate;
-      for (const cardId of layout.ordered) {
-        const card = visibleCards[cardId];
-        if (card === void 0) continue;
-        const stamp = stamps.get(card.sessionId) ?? 0;
-        const before = seen.get(card.sessionId);
-        if (before === void 0 || stamp <= before) continue;
-        if (candidate === void 0 || stamp > candidate.stamp) candidate = { cardId, stamp };
-      }
-      if (candidate === void 0) continue;
-      const isPinned = (cardId) => pinnedSessions.has(visibleCards[cardId]?.sessionId ?? "");
-      if (layout.ordered[0] === candidate.cardId || isPinned(candidate.cardId)) continue;
-      const rest = layout.ordered.filter((id2) => id2 !== candidate.cardId);
-      const firstUnpinned = rest.findIndex((id2) => !isPinned(id2));
-      const insertAt = firstUnpinned === -1 ? rest.length : firstUnpinned;
-      const next = [...rest.slice(0, insertAt), candidate.cardId, ...rest.slice(insertAt)];
-      Object.assign(promoted, layoutFor(layout.rect, next));
-    }
-    for (const [sessionId, stamp] of stamps) seen.set(sessionId, stamp);
-    if (Object.keys(promoted).length > 0) canvas.moveCards(promoted);
-  }, [canvasState.phase, visibleCards, sessions, folderLayouts, draggingCardId, liveFrame, pinnedSessions]);
   const autoSyncedRef = (0, import_react13.useRef)(false);
   (0, import_react13.useEffect)(() => {
     if (canvasState.phase !== "ready" || !workspacesReady || autoSyncedRef.current) return;
+    if (canvasState.global?.autoAdd !== true) return;
     if (layoutVersion < LAYOUT_VERSION) return;
     autoSyncedRef.current = true;
     const remembered = canvasState.global?.layoutMemory ?? {};
@@ -14971,26 +14834,23 @@ function CanvasInner(props) {
     if (status?.completionUnread === true || finishedById.has(sessionId)) return "done";
     return void 0;
   };
-  const statusEntries = (0, import_react13.useMemo)(() => {
+  const priorityEntries = (0, import_react13.useMemo)(() => {
     const rows = [];
     for (const [cardId, card] of Object.entries(visibleCards)) {
-      if (card.boardId !== INBOX_BOARD_ID) continue;
-      const lamp = glowOf(card.sessionId);
-      if (lamp === void 0) continue;
+      if (card.boardId !== INBOX_BOARD_ID || card.priority === void 0) continue;
+      if (pageOfCard(card, boxes, sessionWs) !== activePage) continue;
       const summary = sessions.byId[card.sessionId];
       rows.push({
         cardId,
         sessionId: card.sessionId,
         title: renamedTitles[card.sessionId] ?? summary?.displayTitle ?? card.sessionId,
-        lamp,
-        stamp: summary?.updatedAt ?? 0,
+        priority: card.priority,
         ...summary?.updatedAt !== void 0 ? { updatedAt: summary.updatedAt } : {},
-        ...previews[card.sessionId] !== void 0 ? { preview: previews[card.sessionId] } : {},
-        ...pinnedSessions.has(card.sessionId) ? { pinned: true } : {}
+        ...previews[card.sessionId] !== void 0 ? { preview: previews[card.sessionId] } : {}
       });
     }
     return rows;
-  }, [visibleCards, sessions, renamedTitles, previews, pinnedSessions, statusById, alertById, finishedById]);
+  }, [visibleCards, boxes, sessionWs, activePage, sessions, renamedTitles, previews]);
   const focusCard = (0, import_react13.useCallback)((cardId) => {
     const slot = cardLayout[cardId];
     const card = visibleCards[cardId];
@@ -15064,14 +14924,14 @@ function CanvasInner(props) {
         ...draftSessions.has(card.sessionId) ? { pendingDraft: true } : {},
         ...interruptedById.has(card.sessionId) ? { interrupted: true } : {},
         ...currentSessionId() === card.sessionId ? { current: true } : {},
-        ...pinnedSessions.has(card.sessionId) ? { pinned: true } : {}
+        ...card.priority !== void 0 ? { priority: card.priority } : {}
       };
       return {
         id: cardId,
         type: "sessionCard",
         // The dragged card follows the pointer; every other card sits on its
         // slot (and glides there — the CSS transition owns the animation).
-        position: dragging || slot === void 0 ? { x: card.x, y: card.y } : { x: slot.x, y: slot.y },
+        position: dragging || slot === void 0 ? { x: card.x + (memberShift[cardId]?.dx ?? 0), y: card.y + (memberShift[cardId]?.dy ?? 0) } : { x: slot.x, y: slot.y },
         // Batch mode shows the pick as the card's ring; otherwise it is the
         // canvas selection.
         selected: batchMode ? batchPicks.has(cardId) : liveSelectedIds.has(cardId),
@@ -15118,7 +14978,7 @@ function CanvasInner(props) {
       };
     });
     return [...frameNodes, ...cardNodes, ...stackNodes];
-  }, [frameRects, folderLayouts, foldedCards, foldedSet, cardLayout, draggingCardId, membersByGroup, wsTitles, boxes, visibleCards, canvasState.digests, canvasState.global, sessions, statusById, alertById, finishedById, interruptedById, draftSessions, previews, pinnedSessions, renamedTitles, liveSelectedIds, batchMode, batchPicks, locale]);
+  }, [frameRects, folderLayouts, foldedCards, foldedSet, cardLayout, draggingCardId, memberShift, membersByGroup, wsTitles, boxes, visibleCards, canvasState.digests, canvasState.global, sessions, statusById, alertById, finishedById, interruptedById, draftSessions, previews, renamedTitles, liveSelectedIds, batchMode, batchPicks, locale]);
   const sessionIdToCardId = (0, import_react13.useMemo)(() => {
     const index2 = /* @__PURE__ */ new Map();
     for (const [cardId, card] of Object.entries(visibleCards)) {
@@ -15342,6 +15202,17 @@ function CanvasInner(props) {
               rejectFrameDrop(change.id, base);
             } else {
               canvas.setWsFrameRect(groupId, rect);
+              const stored = wsFrames[groupId] ?? base;
+              const dx = rect.x - stored.x;
+              const dy = rect.y - stored.y;
+              if (boxes[groupId]?.free === true && (dx !== 0 || dy !== 0)) {
+                const moved = {};
+                for (const cardId of membersByGroup.get(groupId) ?? []) {
+                  const member = visibleCards[cardId];
+                  if (member !== void 0) moved[cardId] = { x: member.x + dx, y: member.y + dy };
+                }
+                canvas.moveCards(moved);
+              }
             }
           } else if (change.dragging === true) {
             setLiveFrame({ groupId, rect });
@@ -15357,7 +15228,11 @@ function CanvasInner(props) {
             canvas.setCardBox(change.id, target);
             const droppedLayout = folderLayouts[target];
             const droppedRect = frameRects[target];
-            if (droppedLayout !== void 0 && droppedRect !== void 0) {
+            if (droppedLayout?.free === true) {
+              const x = snapEnabled ? snap(change.position.x) : change.position.x;
+              const y = snapEnabled ? snap(change.position.y) : change.position.y;
+              canvas.moveCard(change.id, x, y);
+            } else if (droppedLayout !== void 0 && droppedRect !== void 0) {
               const cols = colsForWidth(droppedRect.width);
               const order = droppedLayout.ordered.includes(change.id) ? droppedLayout.ordered : (() => {
                 const at = Math.min(Math.max(0, slotIndexAt(droppedRect, centre)), droppedLayout.ordered.length);
@@ -15437,6 +15312,18 @@ function CanvasInner(props) {
       setToast(null);
     }, 4e3);
   };
+  const showToastRef = (0, import_react13.useRef)(showToast);
+  showToastRef.current = showToast;
+  (0, import_react13.useEffect)(() => {
+    const onToast = (event) => {
+      const detail = event.detail;
+      if (typeof detail === "string") showToastRef.current(detail);
+    };
+    window.addEventListener("talk-pages:toast", onToast);
+    return () => {
+      window.removeEventListener("talk-pages:toast", onToast);
+    };
+  }, []);
   const createBoxAt = (flowX, flowY) => {
     const width = CARD_W * 2 + GAP_X + FRAME_PAD * 2;
     const created = canvas.createBox(activePage, {
@@ -15523,7 +15410,7 @@ function CanvasInner(props) {
     try {
       const fresh = await talkMapApi.ensureDigest(fromCard.sessionId);
       const digest = fresh.digest ?? canvasState.digests[fromCard.sessionId];
-      if (digest === void 0 || digestIsEmpty2(digest)) {
+      if (digest === void 0 || digestIsEmpty(digest)) {
         showToast(t("digest.empty"));
         return;
       }
@@ -15660,7 +15547,6 @@ function CanvasInner(props) {
         ...glow !== void 0 ? { glow } : {},
         ...draftSessions.has(card.sessionId) ? { pendingDraft: true } : {},
         ...interruptedById.has(card.sessionId) ? { interrupted: true } : {},
-        ...pinnedSessions.has(card.sessionId) ? { pinned: true } : {},
         // The drawer mirrors the canvas selection (single pick or batch tick),
         // and marks the conversation the map was opened from.
         selected: batchMode ? batchPicks.has(cardId) : liveSelectedIds.has(cardId),
@@ -15671,16 +15557,6 @@ function CanvasInner(props) {
       });
     }
     return items;
-  };
-  const togglePin = (cardId) => {
-    const card = visibleCards[cardId];
-    if (card === void 0) return;
-    const next = !pinnedSessions.has(card.sessionId);
-    void setPinned(card.sessionId, next).then(() => {
-      showToast(next ? t("toast.pinned") : t("toast.unpinned"));
-    }).catch((error) => {
-      showToast(`${t("toast.pinFailed")}${String(error)}`);
-    });
   };
   const runActions = async (kind, cardIds) => {
     if (cardIds.length === 0) return;
@@ -15850,7 +15726,7 @@ function CanvasInner(props) {
             if (services2 === void 0 || parentDir === "") throw new Error("no workspace root available");
             const path = `${parentDir}/${value2}`;
             await talkMapApi.ensureDir(path);
-            const created = await callRpc2("workspace/create", { path });
+            const created = await callRpc("workspace/create", { path });
             canvas.setActivePage(created.workspace.workspaceId);
             close();
           }
@@ -15930,16 +15806,30 @@ function CanvasInner(props) {
     } else if (menu.kind === "card" && menu.targetId !== void 0) {
       const cardId = menu.targetId;
       const card = canvasState.cards[cardId];
-      const isPinned = card !== void 0 && pinnedSessions.has(card.sessionId);
-      items.push({
-        key: "pin",
-        icon: isPinned ? "unpin" : "pin",
-        label: isPinned ? t("menu.unpin") : t("menu.pin"),
-        onPick: () => {
-          close();
-          togglePin(cardId);
-        }
-      });
+      const current = card?.priority;
+      for (const level of [1, 2, 3]) {
+        items.push({
+          key: `priority-${level}`,
+          icon: "pin",
+          label: t(`menu.priority${level}`),
+          ...current === level ? { hint: "✓" } : {},
+          onPick: () => {
+            close();
+            canvas.setCardPriority(cardId, current === level ? void 0 : level);
+          }
+        });
+      }
+      if (current !== void 0) {
+        items.push({
+          key: "priority-clear",
+          icon: "unpin",
+          label: t("menu.priorityClear"),
+          onPick: () => {
+            close();
+            canvas.setCardPriority(cardId, void 0);
+          }
+        });
+      }
       items.push({
         key: "unread",
         icon: "unread",
@@ -15968,7 +15858,7 @@ function CanvasInner(props) {
         key: "view-digest",
         icon: "digest",
         label: t("menu.viewDigest"),
-        ...card === void 0 || digestIsEmpty2(canvasState.digests[card.sessionId]) ? { hint: t("digest.empty"), disabled: true } : {},
+        ...card === void 0 || digestIsEmpty(canvasState.digests[card.sessionId]) ? { hint: t("digest.empty"), disabled: true } : {},
         onPick: () => {
           close();
           if (card === void 0) return;
@@ -16018,7 +15908,7 @@ function CanvasInner(props) {
       const toTitle = toCard !== void 0 ? sessions.byId[toCard.sessionId]?.displayTitle ?? toCard.sessionId : "?";
       title = `${fromTitle} → ${toTitle}`;
       const digest = fromCard !== void 0 ? canvasState.digests[fromCard.sessionId] : void 0;
-      const noDigest = digest === void 0 || digestIsEmpty2(digest);
+      const noDigest = digest === void 0 || digestIsEmpty(digest);
       const lineage = stored === void 0;
       items.push({
         key: "push",
@@ -16086,6 +15976,14 @@ function CanvasInner(props) {
         }
       });
       items.push({
+        key: "box-layout",
+        label: box?.free === true ? t("menu.boxGrid") : t("menu.boxFree"),
+        onPick: () => {
+          close();
+          canvas.setBoxFree(boxId, box?.free !== true);
+        }
+      });
+      items.push({
         key: "box-color",
         label: `${t("menu.color")}…`,
         onPick: () => {
@@ -16111,7 +16009,7 @@ function CanvasInner(props) {
       ...searchable ? { searchable } : {},
       items
     };
-  }, [menu, workspaces.items, sessions, boardSessionIds, boxes, pages, activePage, wsTitles, canvasState.cards, canvasState.edges, canvasState.digests, pinnedSessions, locale]);
+  }, [menu, workspaces.items, sessions, boardSessionIds, boxes, pages, activePage, wsTitles, canvasState.cards, canvasState.edges, canvasState.digests, locale]);
   const savedCamera = canvas.savedCamera(pageCameraKey(activePage));
   const hasContent = Object.keys(visibleCards).length > 0 || Object.keys(frameRects).length > 0;
   return /* @__PURE__ */ (0, import_jsx_runtime16.jsxs)(
@@ -16223,7 +16121,7 @@ function CanvasInner(props) {
             ]
           }
         ),
-        /* @__PURE__ */ (0, import_jsx_runtime16.jsx)(StatusRail, { entries: statusEntries, cardWidth: CARD_W, onFocus: focusCard }),
+        /* @__PURE__ */ (0, import_jsx_runtime16.jsx)(PriorityRail, { entries: priorityEntries, cardWidth: CARD_W, onFocus: focusCard }),
         batchMode ? /* @__PURE__ */ (0, import_jsx_runtime16.jsx)(
           BatchBar,
           {
@@ -16375,17 +16273,213 @@ function MapCanvas(props) {
 }
 
 // src/client/PageTabs.tsx
+var import_react16 = require("react");
+
+// src/client/ConversationPicker.tsx
 var import_react15 = require("react");
 var import_jsx_runtime17 = require("react/jsx-runtime");
+var ROW_COLS = 4;
+function ConversationPicker(props) {
+  const canvasState = canvas.get();
+  const workspaces = props.useWorkspaces((state3) => state3);
+  const sessions = props.useSessions((state3) => state3);
+  const sessionPage = (0, import_react15.useMemo)(() => sessionPageIndex(workspaces.items), [workspaces.items]);
+  const archived = (0, import_react15.useMemo)(() => new Set(workspaces.archivedSessionIds ?? []), [workspaces.archivedSessionIds]);
+  const pageTitle = (0, import_react15.useMemo)(
+    () => new Map(workspaces.items.map((item) => [item.workspaceId, item.title])),
+    [workspaces.items]
+  );
+  const onMap = (0, import_react15.useMemo)(() => {
+    const out = /* @__PURE__ */ new Map();
+    for (const [cardId, card] of Object.entries(canvasState.cards)) out.set(card.sessionId, cardId);
+    return out;
+  }, [canvasState.cards]);
+  const rows = (0, import_react15.useMemo)(() => sessions.ids.map((id2) => ({ id: id2, summary: sessions.byId[id2] })).filter((entry) => entry.summary !== void 0 && !entry.summary.blank && entry.summary.origin !== "subagent").map(({ id: id2, summary }) => ({
+    id: id2,
+    title: summary.displayTitle,
+    pageId: sessionPage.get(id2) ?? UNSORTED_PAGE_ID,
+    archived: archived.has(id2),
+    updatedAt: summary.updatedAt
+  })).sort((a, b) => b.updatedAt - a.updatedAt), [sessions, sessionPage, archived]);
+  const [picked, setPicked] = (0, import_react15.useState)(() => new Set(onMap.keys()));
+  const [query, setQuery] = (0, import_react15.useState)("");
+  const [filter2, setFilter] = (0, import_react15.useState)("all");
+  const autoAdd = canvasState.global?.autoAdd === true;
+  (0, import_react15.useEffect)(() => {
+    const release = mapUi.claimEscape("conversation-picker");
+    const onKeyDown = (event) => {
+      if (event.key !== "Escape") return;
+      event.stopPropagation();
+      props.onClose();
+    };
+    window.addEventListener("keydown", onKeyDown, { capture: true });
+    return () => {
+      window.removeEventListener("keydown", onKeyDown, { capture: true });
+      release();
+    };
+  }, []);
+  const shown = (0, import_react15.useMemo)(() => {
+    const needle = query.trim().toLowerCase();
+    return rows.filter((row) => {
+      if (needle !== "" && !row.title.toLowerCase().includes(needle)) return false;
+      if (filter2 === "on") return onMap.has(row.id);
+      if (filter2 === "off") return !onMap.has(row.id);
+      if (filter2 === "archived") return row.archived;
+      return true;
+    });
+  }, [rows, query, filter2, onMap]);
+  const groups = (0, import_react15.useMemo)(() => {
+    const order = new Map(workspaces.items.map((item, index2) => [item.workspaceId, index2]));
+    const byPage = /* @__PURE__ */ new Map();
+    for (const row of shown) byPage.set(row.pageId, [...byPage.get(row.pageId) ?? [], row]);
+    return [...byPage.entries()].sort((a, b) => (order.get(a[0]) ?? 1e9) - (order.get(b[0]) ?? 1e9));
+  }, [shown, workspaces.items]);
+  const toggle = (id2) => {
+    setPicked((previous) => {
+      const next = new Set(previous);
+      if (next.has(id2)) next.delete(id2);
+      else next.add(id2);
+      return next;
+    });
+  };
+  const setShown = (on) => {
+    setPicked((previous) => {
+      const next = new Set(previous);
+      for (const row of shown) {
+        if (on) next.add(row.id);
+        else next.delete(row.id);
+      }
+      return next;
+    });
+  };
+  const apply2 = () => {
+    const state3 = canvas.get();
+    const boxes = state3.global?.boxes;
+    let removed = 0;
+    for (const [sessionId, cardId] of onMap) {
+      if (picked.has(sessionId)) continue;
+      canvas.removeCard(cardId);
+      removed += 1;
+    }
+    const bottomByPage = /* @__PURE__ */ new Map();
+    for (const card of Object.values(state3.cards)) {
+      const pageId = pageOfCard(card, boxes, sessionPage);
+      bottomByPage.set(pageId, Math.max(bottomByPage.get(pageId) ?? 0, card.y + CARD_H));
+    }
+    const countByPage = /* @__PURE__ */ new Map();
+    const added = {};
+    for (const row of rows) {
+      if (!picked.has(row.id) || onMap.has(row.id)) continue;
+      const index2 = countByPage.get(row.pageId) ?? 0;
+      countByPage.set(row.pageId, index2 + 1);
+      const baseY = (bottomByPage.get(row.pageId) ?? -GAP_Y) + GAP_Y;
+      added[newCardId()] = {
+        boardId: INBOX_BOARD_ID,
+        sessionId: row.id,
+        x: index2 % ROW_COLS * (CARD_W + GAP_X),
+        y: baseY + Math.floor(index2 / ROW_COLS) * (CARD_H + GAP_Y),
+        createdAt: Date.now()
+      };
+    }
+    if (Object.keys(added).length > 0) canvas.addCards(added);
+    props.onClose();
+    window.dispatchEvent(new CustomEvent("talk-pages:toast", {
+      detail: t("picker.added", { a: String(Object.keys(added).length), r: String(removed) })
+    }));
+  };
+  const filters = [
+    ["all", "picker.filterAll"],
+    ["on", "picker.filterOnMap"],
+    ["off", "picker.filterOff"],
+    ["archived", "picker.filterArchived"]
+  ];
+  return /* @__PURE__ */ (0, import_jsx_runtime17.jsx)("div", { className: talk_pages_default["pickerMask"], onMouseDown: (event) => {
+    if (event.target === event.currentTarget) props.onClose();
+  }, children: /* @__PURE__ */ (0, import_jsx_runtime17.jsxs)("div", { className: talk_pages_default["picker"], role: "dialog", "aria-label": t("picker.title"), "data-talkmap-picker": "", children: [
+    /* @__PURE__ */ (0, import_jsx_runtime17.jsxs)("div", { className: talk_pages_default["pickerHead"], children: [
+      /* @__PURE__ */ (0, import_jsx_runtime17.jsx)("span", { className: talk_pages_default["pickerTitle"], children: t("picker.title") }),
+      /* @__PURE__ */ (0, import_jsx_runtime17.jsx)("button", { type: "button", className: talk_pages_default["pickerClose"], onClick: props.onClose, "aria-label": t("picker.cancel"), children: "✕" })
+    ] }),
+    /* @__PURE__ */ (0, import_jsx_runtime17.jsxs)("div", { className: talk_pages_default["pickerTools"], children: [
+      /* @__PURE__ */ (0, import_jsx_runtime17.jsx)(
+        "input",
+        {
+          className: talk_pages_default["pickerSearch"],
+          placeholder: t("picker.search"),
+          value: query,
+          autoFocus: true,
+          onChange: (event) => {
+            setQuery(event.target.value);
+          }
+        }
+      ),
+      /* @__PURE__ */ (0, import_jsx_runtime17.jsx)("div", { className: talk_pages_default["pickerFilters"], children: filters.map(([key, label]) => /* @__PURE__ */ (0, import_jsx_runtime17.jsx)(
+        "button",
+        {
+          type: "button",
+          className: `${talk_pages_default["pickerFilter"]}${filter2 === key ? ` ${talk_pages_default["pickerFilterOn"]}` : ""}`,
+          onClick: () => {
+            setFilter(key);
+          },
+          children: t(label)
+        },
+        key
+      )) }),
+      /* @__PURE__ */ (0, import_jsx_runtime17.jsxs)("div", { className: talk_pages_default["pickerBulk"], children: [
+        /* @__PURE__ */ (0, import_jsx_runtime17.jsx)("button", { type: "button", className: talk_pages_default["pickerLink"], onClick: () => {
+          setShown(true);
+        }, children: t("picker.selectShown") }),
+        /* @__PURE__ */ (0, import_jsx_runtime17.jsx)("button", { type: "button", className: talk_pages_default["pickerLink"], onClick: () => {
+          setShown(false);
+        }, children: t("picker.clearShown") })
+      ] })
+    ] }),
+    /* @__PURE__ */ (0, import_jsx_runtime17.jsxs)("div", { className: talk_pages_default["pickerList"], children: [
+      groups.length === 0 ? /* @__PURE__ */ (0, import_jsx_runtime17.jsx)("div", { className: talk_pages_default["pickerEmpty"], children: t("picker.empty") }) : null,
+      groups.map(([pageId, items]) => /* @__PURE__ */ (0, import_jsx_runtime17.jsxs)("div", { className: talk_pages_default["pickerGroup"], children: [
+        /* @__PURE__ */ (0, import_jsx_runtime17.jsx)("div", { className: talk_pages_default["pickerGroupTitle"], children: pageTitle.get(pageId) ?? t("page.unsorted") }),
+        items.map((row) => /* @__PURE__ */ (0, import_jsx_runtime17.jsxs)("label", { className: talk_pages_default["pickerRow"], "data-talkmap-picker-row": row.id, children: [
+          /* @__PURE__ */ (0, import_jsx_runtime17.jsx)("input", { type: "checkbox", checked: picked.has(row.id), onChange: () => {
+            toggle(row.id);
+          } }),
+          /* @__PURE__ */ (0, import_jsx_runtime17.jsx)("span", { className: talk_pages_default["pickerRowTitle"], children: row.title }),
+          row.archived ? /* @__PURE__ */ (0, import_jsx_runtime17.jsx)("span", { className: talk_pages_default["pickerTag"], children: t("picker.archivedTag") }) : null,
+          /* @__PURE__ */ (0, import_jsx_runtime17.jsx)("span", { className: talk_pages_default["pickerTime"], children: relativeTime(row.updatedAt) })
+        ] }, row.id))
+      ] }, pageId))
+    ] }),
+    /* @__PURE__ */ (0, import_jsx_runtime17.jsxs)("div", { className: talk_pages_default["pickerFoot"], children: [
+      /* @__PURE__ */ (0, import_jsx_runtime17.jsxs)("label", { className: talk_pages_default["pickerAuto"], children: [
+        /* @__PURE__ */ (0, import_jsx_runtime17.jsx)(
+          "input",
+          {
+            type: "checkbox",
+            checked: autoAdd,
+            onChange: (event) => {
+              canvas.patchGlobalNow({ autoAdd: event.target.checked });
+            }
+          }
+        ),
+        t("picker.autoAdd")
+      ] }),
+      /* @__PURE__ */ (0, import_jsx_runtime17.jsx)("span", { className: talk_pages_default["pickerCount"], children: t("picker.selected", { n: String(picked.size) }) }),
+      /* @__PURE__ */ (0, import_jsx_runtime17.jsx)("button", { type: "button", className: talk_pages_default["pickerCancel"], onClick: props.onClose, children: t("picker.cancel") }),
+      /* @__PURE__ */ (0, import_jsx_runtime17.jsx)("button", { type: "button", className: talk_pages_default["pickerApply"], onClick: apply2, "data-talkmap-picker-apply": "", children: t("picker.apply") })
+    ] })
+  ] }) });
+}
+
+// src/client/PageTabs.tsx
+var import_jsx_runtime18 = require("react/jsx-runtime");
 function PageTabs(props) {
-  const canvasState = (0, import_react15.useSyncExternalStore)(canvas.subscribe, canvas.get);
-  (0, import_react15.useSyncExternalStore)(subscribeLocale, activeLocale, activeLocale);
+  const canvasState = (0, import_react16.useSyncExternalStore)(canvas.subscribe, canvas.get);
+  (0, import_react16.useSyncExternalStore)(subscribeLocale, activeLocale, activeLocale);
   const workspaces = props.useWorkspaces((state3) => state3);
   const sessions = props.useSessions((state3) => state3);
   const boxes = canvasState.global?.boxes;
   const activePageStored = canvasState.global?.activePage;
-  const sessionPage = (0, import_react15.useMemo)(() => sessionPageIndex(workspaces.items), [workspaces.items]);
-  const pages = (0, import_react15.useMemo)(() => buildPages({
+  const sessionPage = (0, import_react16.useMemo)(() => sessionPageIndex(workspaces.items), [workspaces.items]);
+  const pages = (0, import_react16.useMemo)(() => buildPages({
     workspaces: workspaces.items,
     cards: canvasState.cards,
     boxes,
@@ -16397,10 +16491,11 @@ function PageTabs(props) {
   }), [workspaces.items, canvasState.cards, boxes, sessionPage, sessions, activePageStored]);
   const activePage = resolveActivePage(canvasState.global, pages);
   const snap2 = canvasState.global?.snap !== false;
-  return /* @__PURE__ */ (0, import_jsx_runtime17.jsxs)("div", { className: talk_pages_default["pageTabs"], role: "tablist", "aria-label": t("page.tabs"), "data-talkmap-pages": "", children: [
-    /* @__PURE__ */ (0, import_jsx_runtime17.jsx)("div", { className: talk_pages_default["pageTabScroll"], children: pages.map((page) => {
+  const [picking, setPicking] = (0, import_react16.useState)(false);
+  return /* @__PURE__ */ (0, import_jsx_runtime18.jsxs)("div", { className: talk_pages_default["pageTabs"], role: "tablist", "aria-label": t("page.tabs"), "data-talkmap-pages": "", children: [
+    /* @__PURE__ */ (0, import_jsx_runtime18.jsx)("div", { className: talk_pages_default["pageTabScroll"], children: pages.map((page) => {
       const active = page.id === activePage;
-      return /* @__PURE__ */ (0, import_jsx_runtime17.jsxs)(
+      return /* @__PURE__ */ (0, import_jsx_runtime18.jsxs)(
         "button",
         {
           type: "button",
@@ -16414,15 +16509,28 @@ function PageTabs(props) {
             canvas.setActivePage(page.id);
           },
           children: [
-            /* @__PURE__ */ (0, import_jsx_runtime17.jsx)("span", { className: talk_pages_default["pageTabTitle"], children: page.title }),
-            /* @__PURE__ */ (0, import_jsx_runtime17.jsx)("span", { className: talk_pages_default["pageTabCount"], children: page.count })
+            /* @__PURE__ */ (0, import_jsx_runtime18.jsx)("span", { className: talk_pages_default["pageTabTitle"], children: page.title }),
+            /* @__PURE__ */ (0, import_jsx_runtime18.jsx)("span", { className: talk_pages_default["pageTabCount"], children: page.count })
           ]
         },
         page.id
       );
     }) }),
-    /* @__PURE__ */ (0, import_jsx_runtime17.jsx)("span", { className: talk_pages_default["pageTabsSpace"] }),
-    /* @__PURE__ */ (0, import_jsx_runtime17.jsx)(
+    /* @__PURE__ */ (0, import_jsx_runtime18.jsx)("span", { className: talk_pages_default["pageTabsSpace"] }),
+    /* @__PURE__ */ (0, import_jsx_runtime18.jsx)(
+      "button",
+      {
+        type: "button",
+        className: talk_pages_default["pageAction"],
+        title: t("picker.title"),
+        "data-talkmap-open-picker": "",
+        onClick: () => {
+          setPicking(true);
+        },
+        children: t("picker.button")
+      }
+    ),
+    /* @__PURE__ */ (0, import_jsx_runtime18.jsx)(
       "button",
       {
         type: "button",
@@ -16436,7 +16544,7 @@ function PageTabs(props) {
         children: t("page.snap")
       }
     ),
-    /* @__PURE__ */ (0, import_jsx_runtime17.jsx)(
+    /* @__PURE__ */ (0, import_jsx_runtime18.jsx)(
       "button",
       {
         type: "button",
@@ -16448,16 +16556,19 @@ function PageTabs(props) {
         },
         children: t("page.newBox")
       }
-    )
+    ),
+    picking ? /* @__PURE__ */ (0, import_jsx_runtime18.jsx)(ConversationPicker, { ...props, onClose: () => {
+      setPicking(false);
+    } }) : null
   ] });
 }
 
 // src/client/MapOverlay.tsx
-var import_jsx_runtime18 = require("react/jsx-runtime");
+var import_jsx_runtime19 = require("react/jsx-runtime");
 function FontSizeButtons() {
-  const step2 = (0, import_react16.useSyncExternalStore)(fontScale.subscribe, fontScale.getSnapshot);
-  return /* @__PURE__ */ (0, import_jsx_runtime18.jsxs)("div", { className: talk_pages_default["fontGroup"], role: "group", "aria-label": t("font.group"), children: [
-    /* @__PURE__ */ (0, import_jsx_runtime18.jsxs)(
+  const step2 = (0, import_react17.useSyncExternalStore)(fontScale.subscribe, fontScale.getSnapshot);
+  return /* @__PURE__ */ (0, import_jsx_runtime19.jsxs)("div", { className: talk_pages_default["fontGroup"], role: "group", "aria-label": t("font.group"), children: [
+    /* @__PURE__ */ (0, import_jsx_runtime19.jsxs)(
       "button",
       {
         type: "button",
@@ -16469,12 +16580,12 @@ function FontSizeButtons() {
           fontScale.decrease();
         },
         children: [
-          /* @__PURE__ */ (0, import_jsx_runtime18.jsx)("span", { className: talk_pages_default["fontGlyphSmall"], children: "A" }),
-          /* @__PURE__ */ (0, import_jsx_runtime18.jsx)("span", { className: talk_pages_default["fontSign"], children: "−" })
+          /* @__PURE__ */ (0, import_jsx_runtime19.jsx)("span", { className: talk_pages_default["fontGlyphSmall"], children: "A" }),
+          /* @__PURE__ */ (0, import_jsx_runtime19.jsx)("span", { className: talk_pages_default["fontSign"], children: "−" })
         ]
       }
     ),
-    /* @__PURE__ */ (0, import_jsx_runtime18.jsxs)(
+    /* @__PURE__ */ (0, import_jsx_runtime19.jsxs)(
       "button",
       {
         type: "button",
@@ -16486,12 +16597,12 @@ function FontSizeButtons() {
           fontScale.increase();
         },
         children: [
-          /* @__PURE__ */ (0, import_jsx_runtime18.jsx)("span", { className: talk_pages_default["fontGlyphLarge"], children: "A" }),
-          /* @__PURE__ */ (0, import_jsx_runtime18.jsx)("span", { className: talk_pages_default["fontSign"], children: "+" })
+          /* @__PURE__ */ (0, import_jsx_runtime19.jsx)("span", { className: talk_pages_default["fontGlyphLarge"], children: "A" }),
+          /* @__PURE__ */ (0, import_jsx_runtime19.jsx)("span", { className: talk_pages_default["fontSign"], children: "+" })
         ]
       }
     ),
-    /* @__PURE__ */ (0, import_jsx_runtime18.jsx)(
+    /* @__PURE__ */ (0, import_jsx_runtime19.jsx)(
       "button",
       {
         type: "button",
@@ -16508,15 +16619,15 @@ function FontSizeButtons() {
   ] });
 }
 function BackIcon() {
-  return /* @__PURE__ */ (0, import_jsx_runtime18.jsx)("svg", { width: "18", height: "18", viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "2", strokeLinecap: "round", strokeLinejoin: "round", "aria-hidden": "true", children: /* @__PURE__ */ (0, import_jsx_runtime18.jsx)("path", { d: "M15 5l-7 7 7 7" }) });
+  return /* @__PURE__ */ (0, import_jsx_runtime19.jsx)("svg", { width: "18", height: "18", viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "2", strokeLinecap: "round", strokeLinejoin: "round", "aria-hidden": "true", children: /* @__PURE__ */ (0, import_jsx_runtime19.jsx)("path", { d: "M15 5l-7 7 7 7" }) });
 }
 function CloseIcon() {
-  return /* @__PURE__ */ (0, import_jsx_runtime18.jsx)("svg", { width: "18", height: "18", viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "2", strokeLinecap: "round", "aria-hidden": "true", children: /* @__PURE__ */ (0, import_jsx_runtime18.jsx)("path", { d: "M6 6l12 12M18 6L6 18" }) });
+  return /* @__PURE__ */ (0, import_jsx_runtime19.jsx)("svg", { width: "18", height: "18", viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "2", strokeLinecap: "round", "aria-hidden": "true", children: /* @__PURE__ */ (0, import_jsx_runtime19.jsx)("path", { d: "M6 6l12 12M18 6L6 18" }) });
 }
 function MapOverlay(props) {
-  (0, import_react16.useSyncExternalStore)(subscribeLocale, activeLocale, activeLocale);
-  const fontStep = (0, import_react16.useSyncExternalStore)(fontScale.subscribe, fontScale.getSnapshot);
-  (0, import_react16.useEffect)(() => {
+  (0, import_react17.useSyncExternalStore)(subscribeLocale, activeLocale, activeLocale);
+  const fontStep = (0, import_react17.useSyncExternalStore)(fontScale.subscribe, fontScale.getSnapshot);
+  (0, import_react17.useEffect)(() => {
     mapUi.setOpen(true);
     hideSidebarForMap();
     return () => {
@@ -16524,7 +16635,7 @@ function MapOverlay(props) {
       restoreSidebarAfterMap();
     };
   }, []);
-  (0, import_react16.useEffect)(() => {
+  (0, import_react17.useEffect)(() => {
     const onKeyDown = (event) => {
       if (event.key !== "Escape") return;
       if (mapUi.escapeClaimed()) return;
@@ -16536,7 +16647,7 @@ function MapOverlay(props) {
       window.removeEventListener("keydown", onKeyDown, { capture: true });
     };
   }, []);
-  return /* @__PURE__ */ (0, import_jsx_runtime18.jsxs)(
+  return /* @__PURE__ */ (0, import_jsx_runtime19.jsxs)(
     "div",
     {
       className: talk_pages_default["panel"],
@@ -16545,8 +16656,8 @@ function MapOverlay(props) {
       "aria-label": t("map.title"),
       style: { "--tm-font-step": `${fontStep}px` },
       children: [
-        /* @__PURE__ */ (0, import_jsx_runtime18.jsxs)("div", { className: talk_pages_default["header"], children: [
-          /* @__PURE__ */ (0, import_jsx_runtime18.jsxs)(
+        /* @__PURE__ */ (0, import_jsx_runtime19.jsxs)("div", { className: talk_pages_default["header"], "data-window-drag": "", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime19.jsxs)(
             "button",
             {
               type: "button",
@@ -16555,17 +16666,17 @@ function MapOverlay(props) {
               "aria-label": t("map.back"),
               onClick: closeMapPanel,
               children: [
-                /* @__PURE__ */ (0, import_jsx_runtime18.jsx)(BackIcon, {}),
-                /* @__PURE__ */ (0, import_jsx_runtime18.jsx)("span", { children: t("map.back") })
+                /* @__PURE__ */ (0, import_jsx_runtime19.jsx)(BackIcon, {}),
+                /* @__PURE__ */ (0, import_jsx_runtime19.jsx)("span", { children: t("map.back") })
               ]
             }
           ),
-          /* @__PURE__ */ (0, import_jsx_runtime18.jsx)("span", { className: talk_pages_default["headerSpace"] }),
-          /* @__PURE__ */ (0, import_jsx_runtime18.jsx)(GlobalSearch, { onOpenSession: (sessionId) => {
+          /* @__PURE__ */ (0, import_jsx_runtime19.jsx)("span", { className: talk_pages_default["headerSpace"] }),
+          /* @__PURE__ */ (0, import_jsx_runtime19.jsx)(GlobalSearch, { onOpenSession: (sessionId) => {
             openSessionInUi(sessionId);
           } }),
-          /* @__PURE__ */ (0, import_jsx_runtime18.jsx)(FontSizeButtons, {}),
-          /* @__PURE__ */ (0, import_jsx_runtime18.jsx)(
+          /* @__PURE__ */ (0, import_jsx_runtime19.jsx)(FontSizeButtons, {}),
+          /* @__PURE__ */ (0, import_jsx_runtime19.jsx)(
             "button",
             {
               type: "button",
@@ -16573,37 +16684,37 @@ function MapOverlay(props) {
               title: t("map.close"),
               "aria-label": t("map.close"),
               onClick: closeMapPanel,
-              children: /* @__PURE__ */ (0, import_jsx_runtime18.jsx)(CloseIcon, {})
+              children: /* @__PURE__ */ (0, import_jsx_runtime19.jsx)(CloseIcon, {})
             }
           )
         ] }),
-        /* @__PURE__ */ (0, import_jsx_runtime18.jsx)(PageTabs, { ...props }),
-        /* @__PURE__ */ (0, import_jsx_runtime18.jsx)(MapCanvas, { ...props })
+        /* @__PURE__ */ (0, import_jsx_runtime19.jsx)(PageTabs, { ...props }),
+        /* @__PURE__ */ (0, import_jsx_runtime19.jsx)(MapCanvas, { ...props })
       ]
     }
   );
 }
 
 // src/client/MapToggleButton.tsx
-var import_react17 = require("react");
-var import_jsx_runtime19 = require("react/jsx-runtime");
+var import_react18 = require("react");
+var import_jsx_runtime20 = require("react/jsx-runtime");
 function MapIcon() {
-  return /* @__PURE__ */ (0, import_jsx_runtime19.jsxs)("svg", { className: talk_pages_default["toggleIcon"], viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "1.8", strokeLinecap: "round", strokeLinejoin: "round", "aria-hidden": "true", children: [
-    /* @__PURE__ */ (0, import_jsx_runtime19.jsx)("path", { d: "M9 4 3.5 6v14L9 18l6 2 5.5-2V4L15 6 9 4Z" }),
-    /* @__PURE__ */ (0, import_jsx_runtime19.jsx)("path", { d: "M9 4v14" }),
-    /* @__PURE__ */ (0, import_jsx_runtime19.jsx)("path", { d: "M15 6v14" })
+  return /* @__PURE__ */ (0, import_jsx_runtime20.jsxs)("svg", { className: talk_pages_default["toggleIcon"], viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "1.8", strokeLinecap: "round", strokeLinejoin: "round", "aria-hidden": "true", children: [
+    /* @__PURE__ */ (0, import_jsx_runtime20.jsx)("path", { d: "M9 4 3.5 6v14L9 18l6 2 5.5-2V4L15 6 9 4Z" }),
+    /* @__PURE__ */ (0, import_jsx_runtime20.jsx)("path", { d: "M9 4v14" }),
+    /* @__PURE__ */ (0, import_jsx_runtime20.jsx)("path", { d: "M15 6v14" })
   ] });
 }
 function MapToggleButton(props) {
-  const open = (0, import_react17.useSyncExternalStore)(mapUi.subscribe, () => mapUi.get().open);
-  const locale = (0, import_react17.useSyncExternalStore)(subscribeLocale, activeLocale, activeLocale);
+  const open = (0, import_react18.useSyncExternalStore)(mapUi.subscribe, () => mapUi.get().open);
+  const locale = (0, import_react18.useSyncExternalStore)(subscribeLocale, activeLocale, activeLocale);
   const wide = props.wide;
-  (0, import_react17.useEffect)(() => {
+  (0, import_react18.useEffect)(() => {
     reportSidebarWide(wide);
   }, [wide]);
   const classNames = [wide ? talk_pages_default["toggleRow"] : talk_pages_default["toggleButton"]];
   if (open) classNames.push(talk_pages_default["toggleButtonActive"]);
-  return /* @__PURE__ */ (0, import_jsx_runtime19.jsxs)(
+  return /* @__PURE__ */ (0, import_jsx_runtime20.jsxs)(
     "button",
     {
       type: "button",
@@ -16616,8 +16727,8 @@ function MapToggleButton(props) {
         mapUi.toggle();
       },
       children: [
-        /* @__PURE__ */ (0, import_jsx_runtime19.jsx)(MapIcon, {}),
-        wide ? /* @__PURE__ */ (0, import_jsx_runtime19.jsx)("span", { className: talk_pages_default["toggleLabel"], children: t("map.toggle") }) : null
+        /* @__PURE__ */ (0, import_jsx_runtime20.jsx)(MapIcon, {}),
+        wide ? /* @__PURE__ */ (0, import_jsx_runtime20.jsx)("span", { className: talk_pages_default["toggleLabel"], children: t("map.toggle") }) : null
       ]
     }
   );

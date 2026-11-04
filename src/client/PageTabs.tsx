@@ -11,10 +11,11 @@
  *   - ＋ 新建框 — create a box at the viewport centre (the canvas owns the
  *     viewport, so the button only calls the action the canvas registered).
  */
-import { useMemo, useSyncExternalStore } from 'react'
+import { useMemo, useState, useSyncExternalStore } from 'react'
 import type { RootSlotStandardProps } from './dsh.ts'
 import { canvas } from './canvas-store.ts'
 import { canvasActions } from './canvas-actions.ts'
+import { ConversationPicker } from './ConversationPicker.tsx'
 import { activeLocale, subscribeLocale, t } from './i18n.ts'
 import { buildPages, resolveActivePage, sessionPageIndex } from './pages.ts'
 import styles from './talk-pages.module.css'
@@ -41,6 +42,7 @@ export function PageTabs(props: RootSlotStandardProps): React.JSX.Element {
   }), [workspaces.items, canvasState.cards, boxes, sessionPage, sessions, activePageStored])
   const activePage = resolveActivePage(canvasState.global, pages)
   const snap = canvasState.global?.snap !== false
+  const [picking, setPicking] = useState(false)
 
   return (
     <div className={styles['pageTabs']} role="tablist" aria-label={t('page.tabs')} data-talkmap-pages="">
@@ -68,6 +70,15 @@ export function PageTabs(props: RootSlotStandardProps): React.JSX.Element {
       <span className={styles['pageTabsSpace']} />
       <button
         type="button"
+        className={styles['pageAction']}
+        title={t('picker.title')}
+        data-talkmap-open-picker=""
+        onClick={() => { setPicking(true) }}
+      >
+        {t('picker.button')}
+      </button>
+      <button
+        type="button"
         className={`${styles['pageAction']}${snap ? ` ${styles['pageActionOn']}` : ''}`}
         aria-pressed={snap}
         title={t('page.snapHint')}
@@ -85,6 +96,7 @@ export function PageTabs(props: RootSlotStandardProps): React.JSX.Element {
       >
         {t('page.newBox')}
       </button>
+      {picking ? <ConversationPicker {...props} onClose={() => { setPicking(false) }} /> : null}
     </div>
   )
 }

@@ -37,6 +37,8 @@ export const cardSchema = z.object({
   wsOverride: z.string().optional(),
   /** User box this card belongs to; absent = a free card at its own x/y. */
   boxId: z.string().optional(),
+  /** Importance mark set by the user: 1 high, 2 medium, 3 low; absent = unmarked. */
+  priority: z.number().int().min(1).max(3).optional(),
   createdAt: z.number(),
 })
 export type Card = z.infer<typeof cardSchema>
@@ -45,6 +47,8 @@ export type Card = z.infer<typeof cardSchema>
 export const boxSchema = z.object({
   pageId: z.string(),
   title: z.string(),
+  /** Members keep the positions the user gave them (no slot grid, no overflow stack). */
+  free: z.boolean().optional(),
 })
 export type Box = z.infer<typeof boxSchema>
 
@@ -121,6 +125,8 @@ export const globalSchema = z.object({
   activePage: z.string().optional(),
   /** Free cards snap to the 16px grid on drop; absent = true. */
   snap: z.boolean().optional(),
+  /** New conversations of a workspace appear on its page by themselves; absent = false. */
+  autoAdd: z.boolean().optional(),
   /** Map-toggle hotkey, e.g. "alt+KeyF" (modifiers + KeyboardEvent.code). */
   hotkey: z.string().optional(),
   /** Interface language of the map's own copy; absent = follow <html lang>. */

@@ -7,6 +7,7 @@
 import { Handle, Position, type NodeProps, type Node } from '@xyflow/react'
 import { canvas } from './canvas-store.ts'
 import { t } from './i18n.ts'
+import { PriorityBadge, PRIORITY_CLASS, type Priority } from './PriorityRail.tsx'
 import styles from './talk-pages.module.css'
 
 /** Which lamp the card wears; see the priority order in MapCanvas. */
@@ -77,6 +78,8 @@ export interface SessionCardData extends Record<string, unknown> {
   current?: boolean
   /** Pinned in the sidebar: shown at full strength, with a pin mark. */
   pinned?: boolean
+  /** The user's importance mark (1 high, 2 medium, 3 low). */
+  priority?: Priority
 }
 
 export type SessionCardNodeType = Node<SessionCardData, 'sessionCard'>
@@ -100,9 +103,10 @@ export function SessionCardNode(props: NodeProps<SessionCardNodeType>): React.JS
   if (data.ghost) classNames.push(styles['cardGhost'])
   if (selected === true) classNames.push(styles['cardSelected'])
   if (data.glow !== undefined) classNames.push(styles[LAMP_CLASS[data.glow]] ?? '')
+  if (data.priority !== undefined) classNames.push(styles[PRIORITY_CLASS[data.priority]] ?? '')
   // A card with nothing to report recedes; hovering brings it back. Any status
   // (lamp, unsent text, interrupted run) keeps it at full strength.
-  const quiet = data.current !== true && data.pinned !== true
+  const quiet = data.current !== true && data.pinned !== true && data.priority === undefined
     && data.glow === undefined && data.pendingDraft !== true && data.interrupted !== true
   if (quiet) classNames.push(styles['cardQuiet'] ?? '')
 
@@ -203,6 +207,7 @@ export function SessionCardNode(props: NodeProps<SessionCardNodeType>): React.JS
             )
           : null}
         {statusChip(data.glow, data.running === true)}
+        {data.priority !== undefined ? <PriorityBadge priority={data.priority} /> : null}
       </div>
       <Handle id="r" type="source" position={Position.Right} className={styles['cardHandle'] ?? ''} />
       <Handle id="b" type="source" position={Position.Bottom} className={styles['cardHandle'] ?? ''} />

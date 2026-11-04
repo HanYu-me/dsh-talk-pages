@@ -17,6 +17,8 @@ export interface Card {
    * x/y and nothing ever moves it. A boxed card is laid out by the slot grid.
    */
   boxId?: string
+  /** Importance mark: 1 high, 2 medium, 3 low; absent = unmarked. */
+  priority?: 1 | 2 | 3
   createdAt: number
 }
 
@@ -29,6 +31,8 @@ export interface Box {
   /** Page (workspace id, or UNSORTED_PAGE_ID) this box belongs to. */
   pageId: string
   title: string
+  /** Members keep their own positions (no slot grid, no overflow stack). */
+  free?: boolean
 }
 
 export interface Board {
@@ -102,6 +106,8 @@ export interface MapGlobal {
   activePage?: string
   /** Free cards snap to the 16px grid on drop; absent = true. */
   snap?: boolean
+  /** New conversations of a workspace appear on its page by themselves; absent = false. */
+  autoAdd?: boolean
   /** Map-toggle hotkey, e.g. "alt+KeyF" (modifiers + KeyboardEvent.code). */
   hotkey?: string
   /** Interface language; absent = 'auto' (follow dsh's <html lang>). */

@@ -121,7 +121,7 @@ export function MapOverlay(props: RootSlotStandardProps): React.JSX.Element {
       // One variable drives every font size in the panel (see talk-pages.module.css).
       style={{ '--tm-font-step': `${fontStep}px` } as React.CSSProperties}
     >
-      <div className={styles['header']}>
+      <div className={styles['header']} data-window-drag="">
         <button
           type="button"
           className={styles['backButton']}

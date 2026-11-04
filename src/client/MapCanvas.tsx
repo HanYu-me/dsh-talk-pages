@@ -32,7 +32,7 @@ import { pickFaces, type Obstacle } from './edge-routing.ts'
 import { lastPushFor, stampPush } from './push-log.ts'
 import { DigestDialog } from './DigestDialog.tsx'
 import { closeMapPanel, currentSessionId, getServices, mapUi, openSessionInUi, uiWorkspaceService } from './map-state.ts'
-import { archiveSessions, setPinned, trashSessions } from './session-actions.ts'
+import { archiveSessions, trashSessions } from './session-actions.ts'
 import { allSessionTitles, setCardTable, setTitleResolver, setTitleTable } from './map-state.ts'
 import { drawerState } from './drawer-state.ts'
 import { callRpc, fetchSearchContext, fetchSessionHits, searchSessions, type ContentHit } from './rpc.ts'
@@ -62,7 +62,7 @@ import {
 } from './pages.ts'
 import { StackDrawer, type StackEntry } from './StackDrawer.tsx'
 import { StackNode, type StackNodeType } from './StackNode.tsx'
-import { StatusRail, type StatusRailEntry, type StatusLamp } from './StatusRail.tsx'
+import { PriorityRail, type PriorityRailEntry } from './PriorityRail.tsx'
 import { useDsDarkTheme } from './use-dark.ts'
 import styles from './talk-pages.module.css'
 
@@ -88,7 +88,6 @@ const EMPTY_SESSION_STATUS: ReadonlyMap<string, SessionStatusFact> = new Map()
  * closing the map unmounts the panel, and "you sent a message while the map was
  * closed" is the case the promotion exists for — a component ref would forget it.
  */
-const lastActivitySeen = new Map<string, number>()
 
 function snap(value: number): number {
   return Math.round(value / GRID) * GRID
@@ -300,7 +299,6 @@ function CanvasInner(props: RootSlotStandardProps): React.JSX.Element {
   )
   const workspacesReady = workspaces.baselinesReady !== false
   /** The sidebar's own pin set — the map mirrors it, it does not own it. */
-  const pinnedSessions = useMemo(() => new Set(workspaces.pinnedSessionIds ?? []), [workspaces])
   /** Sessions that already own a card (import/auto-sync skip these). */
   const boardSessionIds = useMemo(
     () => new Set(Object.values(canvasState.cards).map(card => card.sessionId)),
@@ -471,6 +469,8 @@ function CanvasInner(props: RootSlotStandardProps): React.JSX.Element {
       shown: string[]
       /** Cards folded into the stack cell (empty = no stack). */
       folded: string[]
+      /** Free box: members keep their own positions. */
+      free: boolean
     }> = {}
     for (const [groupId, rect] of Object.entries(frameRects)) {
       const members = (membersByGroup.get(groupId) ?? [])
@@ -480,16 +480,13 @@ function CanvasInner(props: RootSlotStandardProps): React.JSX.Element {
         })
         .filter((entry): entry is PlacedCard => entry !== undefined)
       const reading = readingOrder(members)
-      // Pinned sessions lead their folder — same pin the sidebar flips, so a
-      // pin made there shows up here and vice versa. A stable sort keeps the
-      // reading order inside each group.
-      const ordered = (pinnedSessions.size === 0
-        ? reading
-        : [...reading].sort((a, b) => {
-          const pinA = pinnedSessions.has(visibleCards[a]?.sessionId ?? '') ? 0 : 1
-          const pinB = pinnedSessions.has(visibleCards[b]?.sessionId ?? '') ? 0 : 1
-          return pinA - pinB
-        }))
+      // The sidebar's pins do NOT order the map: a conversation pinned there is
+      // not pinned here. The reading order is the user's own arrangement.
+      const ordered = reading
+      if (boxes[groupId]?.free === true) {
+        out[groupId] = { rect, ordered, shown: ordered, folded: [], free: true }
+        continue
+      }
       const capacity = capacityFor(rect)
       let preview = ordered
       if (draggingCardId !== null && ordered.includes(draggingCardId)) {
@@ -510,10 +507,11 @@ function CanvasInner(props: RootSlotStandardProps): React.JSX.Element {
         ordered: preview,
         shown: preview.slice(0, visibleSlots),
         folded: preview.length > capacity ? preview.slice(visibleSlots) : [],
+        free: false,
       }
     }
     return out
-  }, [frameRects, membersByGroup, visibleCards, pinnedSessions, draggingCardId, dragCenter])
+  }, [frameRects, membersByGroup, visibleCards, draggingCardId, dragCenter, boxes])
 
   // Slot positions for every card that lives in a folder. Positions are derived
   // from the order, never stored-and-trusted: that is what makes a resize
@@ -521,10 +519,30 @@ function CanvasInner(props: RootSlotStandardProps): React.JSX.Element {
   const cardLayout = useMemo(() => {
     const out: Record<string, { x: number; y: number }> = {}
     for (const layout of Object.values(folderLayouts)) {
+      if (layout.free) continue
       Object.assign(out, layoutFor(layout.rect, layout.ordered))
     }
     return out
   }, [folderLayouts])
+
+  /**
+   * While a FREE box is being moved its members travel with it: the live rect
+   * differs from the stored one by a pure translation (same size), and every
+   * member is drawn shifted by that delta. Resizing (the size changes) never
+   * shifts members.
+   */
+  const memberShift = useMemo(() => {
+    const out: Record<string, { dx: number; dy: number }> = {}
+    if (liveFrame === null) return out
+    const stored = wsFrames[liveFrame.groupId]
+    if (stored === undefined || boxes[liveFrame.groupId]?.free !== true) return out
+    if (liveFrame.rect.width !== stored.width || liveFrame.rect.height !== stored.height) return out
+    const dx = liveFrame.rect.x - stored.x
+    const dy = liveFrame.rect.y - stored.y
+    if (dx === 0 && dy === 0) return out
+    for (const cardId of membersByGroup.get(liveFrame.groupId) ?? []) out[cardId] = { dx, dy }
+    return out
+  }, [liveFrame, wsFrames, boxes, membersByGroup])
 
   /** card ids folded into a stack cell, and which folder each cell belongs to. */
   const foldedCards = useMemo(() => {
@@ -560,52 +578,8 @@ function CanvasInner(props: RootSlotStandardProps): React.JSX.Element {
   /** Cards folded into a stack cell — kept in the model, hidden from the grid. */
   const foldedSet = useMemo(() => new Set(Object.values(foldedCards).flat()), [foldedCards])
 
-  // "An active conversation jumps the queue": when a session's stamp advances
-  // (a message was just sent, or it started running), its card is promoted to
-  // the first slot of its folder — once.
-  //
-  // The memory lives at MODULE scope, not in a component ref: the map panel
-  // unmounts every time it closes, so a ref would re-seed on the next open and
-  // the promotion could never see "you sent a message while the map was closed"
-  // — which is exactly when it matters most.
-  useEffect(() => {
-    if (canvasState.phase !== 'ready') return
-    if (draggingCardId !== null || liveFrame !== null) return
-    const seen = lastActivitySeen
-    const stamps = new Map<string, number>()
-    for (const card of Object.values(visibleCards)) {
-      stamps.set(card.sessionId, sessions.byId[card.sessionId]?.updatedAt ?? card.createdAt)
-    }
-    if (seen.size === 0) {
-      for (const [sessionId, stamp] of stamps) seen.set(sessionId, stamp)
-      return
-    }
-    const promoted: Record<string, { x: number; y: number }> = {}
-    for (const layout of Object.values(folderLayouts)) {
-      let candidate: { cardId: string; stamp: number } | undefined
-      for (const cardId of layout.ordered) {
-        const card = visibleCards[cardId]
-        if (card === undefined) continue
-        const stamp = stamps.get(card.sessionId) ?? 0
-        const before = seen.get(card.sessionId)
-        // A card that just appeared has no previous stamp: it is a new import,
-        // not activity, so it keeps its place at the end.
-        if (before === undefined || stamp <= before) continue
-        if (candidate === undefined || stamp > candidate.stamp) candidate = { cardId, stamp }
-      }
-      if (candidate === undefined) continue
-      const isPinned = (cardId: string): boolean => pinnedSessions.has(visibleCards[cardId]?.sessionId ?? '')
-      if (layout.ordered[0] === candidate.cardId || isPinned(candidate.cardId)) continue
-      // Land right after the pinned block: activity never unseats a pin.
-      const rest = layout.ordered.filter(id => id !== candidate.cardId)
-      const firstUnpinned = rest.findIndex(id => !isPinned(id))
-      const insertAt = firstUnpinned === -1 ? rest.length : firstUnpinned
-      const next = [...rest.slice(0, insertAt), candidate.cardId, ...rest.slice(insertAt)]
-      Object.assign(promoted, layoutFor(layout.rect, next))
-    }
-    for (const [sessionId, stamp] of stamps) seen.set(sessionId, stamp)
-    if (Object.keys(promoted).length > 0) canvas.moveCards(promoted)
-  }, [canvasState.phase, visibleCards, sessions, folderLayouts, draggingCardId, liveFrame, pinnedSessions])
+  // (The old "active conversation jumps to the first slot" reordering is gone: the
+  // map never rearranges what the user arranged.)
 
   // Auto-sync: every page pulls in the sessions of its workspace that have no
   // card yet, once per open. The map stopped asking the user to press "同步" —
@@ -617,6 +591,9 @@ function CanvasInner(props: RootSlotStandardProps): React.JSX.Element {
   const autoSyncedRef = useRef(false)
   useEffect(() => {
     if (canvasState.phase !== 'ready' || !workspacesReady || autoSyncedRef.current) return
+    // What stays on the map is the user's choice (the 选择对话 picker); automatic
+    // import is opt-in.
+    if (canvasState.global?.autoAdd !== true) return
     // Wait for the v5 migration: before it, grouped cards still look free.
     if (layoutVersion < LAYOUT_VERSION) return
     autoSyncedRef.current = true
@@ -891,30 +868,24 @@ function CanvasInner(props: RootSlotStandardProps): React.JSX.Element {
     return undefined
   }
 
-  /**
-   * The status rail lists only the cards that carry a lamp right now. It is derived, not
-   * stored, so a card whose status clears leaves the list on its own.
-   */
-  const statusEntries = useMemo<StatusRailEntry[]>(() => {
-    const rows: StatusRailEntry[] = []
+  /** The priority rail lists the cards the user marked, highest priority first. */
+  const priorityEntries = useMemo<PriorityRailEntry[]>(() => {
+    const rows: PriorityRailEntry[] = []
     for (const [cardId, card] of Object.entries(visibleCards)) {
-      if (card.boardId !== INBOX_BOARD_ID) continue
-      const lamp = glowOf(card.sessionId) as StatusLamp | undefined
-      if (lamp === undefined) continue
+      if (card.boardId !== INBOX_BOARD_ID || card.priority === undefined) continue
+      if (pageOfCard(card, boxes, sessionWs) !== activePage) continue
       const summary = sessions.byId[card.sessionId]
       rows.push({
         cardId,
         sessionId: card.sessionId,
         title: renamedTitles[card.sessionId] ?? summary?.displayTitle ?? card.sessionId,
-        lamp,
-        stamp: summary?.updatedAt ?? 0,
+        priority: card.priority,
         ...(summary?.updatedAt !== undefined ? { updatedAt: summary.updatedAt } : {}),
         ...(previews[card.sessionId] !== undefined ? { preview: previews[card.sessionId] } : {}),
-        ...(pinnedSessions.has(card.sessionId) ? { pinned: true } : {}),
       })
     }
     return rows
-  }, [visibleCards, sessions, renamedTitles, previews, pinnedSessions, statusById, alertById, finishedById])
+  }, [visibleCards, boxes, sessionWs, activePage, sessions, renamedTitles, previews])
 
   /** Bring one card into view and select it (a click on a rail row). */
   const focusCard = useCallback((cardId: string) => {
@@ -993,14 +964,16 @@ function CanvasInner(props: RootSlotStandardProps): React.JSX.Element {
           ...(draftSessions.has(card.sessionId) ? { pendingDraft: true } : {}),
           ...(interruptedById.has(card.sessionId) ? { interrupted: true } : {}),
           ...(currentSessionId() === card.sessionId ? { current: true } : {}),
-          ...(pinnedSessions.has(card.sessionId) ? { pinned: true } : {}),
-        }
+          ...(card.priority !== undefined ? { priority: card.priority } : {}),
+          }
         return {
           id: cardId,
           type: 'sessionCard' as const,
           // The dragged card follows the pointer; every other card sits on its
           // slot (and glides there — the CSS transition owns the animation).
-          position: dragging || slot === undefined ? { x: card.x, y: card.y } : { x: slot.x, y: slot.y },
+          position: dragging || slot === undefined
+            ? { x: card.x + (memberShift[cardId]?.dx ?? 0), y: card.y + (memberShift[cardId]?.dy ?? 0) }
+            : { x: slot.x, y: slot.y },
           // Batch mode shows the pick as the card's ring; otherwise it is the
           // canvas selection.
           selected: batchMode ? batchPicks.has(cardId) : liveSelectedIds.has(cardId),
@@ -1055,7 +1028,7 @@ function CanvasInner(props: RootSlotStandardProps): React.JSX.Element {
       }
     })
     return [...frameNodes, ...cardNodes, ...stackNodes]
-  }, [frameRects, folderLayouts, foldedCards, foldedSet, cardLayout, draggingCardId, membersByGroup, wsTitles, boxes, visibleCards, canvasState.digests, canvasState.global, sessions, statusById, alertById, finishedById, interruptedById, draftSessions, previews, pinnedSessions, renamedTitles, liveSelectedIds, batchMode, batchPicks, locale])
+  }, [frameRects, folderLayouts, foldedCards, foldedSet, cardLayout, draggingCardId, memberShift, membersByGroup, wsTitles, boxes, visibleCards, canvasState.digests, canvasState.global, sessions, statusById, alertById, finishedById, interruptedById, draftSessions, previews, renamedTitles, liveSelectedIds, batchMode, batchPicks, locale])
 
   const sessionIdToCardId = useMemo(() => {
     const index = new Map<string, string>()
@@ -1397,6 +1370,19 @@ function CanvasInner(props: RootSlotStandardProps): React.JSX.Element {
               rejectFrameDrop(change.id, base)
             } else {
               canvas.setWsFrameRect(groupId, rect)
+              // A free box carries its members: they were drawn shifted during
+              // the drag, now the shift becomes their stored position.
+              const stored = wsFrames[groupId] ?? base
+              const dx = rect.x - stored.x
+              const dy = rect.y - stored.y
+              if (boxes[groupId]?.free === true && (dx !== 0 || dy !== 0)) {
+                const moved: Record<string, { x: number; y: number }> = {}
+                for (const cardId of membersByGroup.get(groupId) ?? []) {
+                  const member = visibleCards[cardId]
+                  if (member !== undefined) moved[cardId] = { x: member.x + dx, y: member.y + dy }
+                }
+                canvas.moveCards(moved)
+              }
             }
           } else if (change.dragging === true) {
             setLiveFrame({ groupId, rect })
@@ -1424,7 +1410,11 @@ function CanvasInner(props: RootSlotStandardProps): React.JSX.Element {
             // fell back to the old arrangement and the box snapped back.
             const droppedLayout = folderLayouts[target]
             const droppedRect = frameRects[target]
-            if (droppedLayout !== undefined && droppedRect !== undefined) {
+            if (droppedLayout?.free === true) {
+              const x = snapEnabled ? snap(change.position.x) : change.position.x
+              const y = snapEnabled ? snap(change.position.y) : change.position.y
+              canvas.moveCard(change.id, x, y)
+            } else if (droppedLayout !== undefined && droppedRect !== undefined) {
               const cols = colsForWidth(droppedRect.width)
               const order = droppedLayout.ordered.includes(change.id)
                 ? droppedLayout.ordered
@@ -1523,6 +1513,17 @@ function CanvasInner(props: RootSlotStandardProps): React.JSX.Element {
     if (toastTimer.current !== undefined) clearTimeout(toastTimer.current)
     toastTimer.current = setTimeout(() => { setToast(null) }, 4000)
   }
+  // Chrome outside the canvas (the conversation picker) reports through the same toast.
+  const showToastRef = useRef(showToast)
+  showToastRef.current = showToast
+  useEffect(() => {
+    const onToast = (event: Event): void => {
+      const detail = (event as CustomEvent<unknown>).detail
+      if (typeof detail === 'string') showToastRef.current(detail)
+    }
+    window.addEventListener('talk-pages:toast', onToast)
+    return () => { window.removeEventListener('talk-pages:toast', onToast) }
+  }, [])
 
   /**
    * Create an EMPTY box with its top-left corner at a flow point. Two columns
@@ -1835,7 +1836,6 @@ function CanvasInner(props: RootSlotStandardProps): React.JSX.Element {
         ...(glow !== undefined ? { glow } : {}),
         ...(draftSessions.has(card.sessionId) ? { pendingDraft: true } : {}),
         ...(interruptedById.has(card.sessionId) ? { interrupted: true } : {}),
-        ...(pinnedSessions.has(card.sessionId) ? { pinned: true } : {}),
         // The drawer mirrors the canvas selection (single pick or batch tick),
         // and marks the conversation the map was opened from.
         selected: batchMode ? batchPicks.has(cardId) : liveSelectedIds.has(cardId),
@@ -1846,18 +1846,6 @@ function CanvasInner(props: RootSlotStandardProps): React.JSX.Element {
       })
     }
     return items
-  }
-
-  /** Flip the shipped pin for one card (mirrors the sidebar's 置顶). */
-  const togglePin = (cardId: string): void => {
-    const card = visibleCards[cardId]
-    if (card === undefined) return
-    const next = !pinnedSessions.has(card.sessionId)
-    void setPinned(card.sessionId, next).then(() => {
-      showToast(next ? t('toast.pinned') : t('toast.unpinned'))
-    }).catch((error: unknown) => {
-      showToast(`${t('toast.pinFailed')}${String(error)}`)
-    })
   }
 
   /**
@@ -2170,20 +2158,33 @@ function CanvasInner(props: RootSlotStandardProps): React.JSX.Element {
     } else if (menu.kind === 'card' && menu.targetId !== undefined) {
       const cardId = menu.targetId
       const card = canvasState.cards[cardId]
-      const isPinned = card !== undefined && pinnedSessions.has(card.sessionId)
       // "打开对话" lives on the card itself (single click) and "从地图移除" is
       // covered by 删除/归档 — neither needs a menu entry.
-      // The shipped pin: flipping it here flips it in the sidebar too, and the
-      // folder layout keeps pinned cards in front.
-      items.push({
-        key: 'pin',
-        icon: isPinned ? 'unpin' : 'pin',
-        label: isPinned ? t('menu.unpin') : t('menu.pin'),
-        onPick: () => {
-          close()
-          togglePin(cardId)
-        },
-      })
+      // Importance marks are the map's own (the sidebar's pin is not mirrored here).
+      const current = card?.priority
+      for (const level of [1, 2, 3] as const) {
+        items.push({
+          key: `priority-${level}`,
+          icon: 'pin',
+          label: t(`menu.priority${level}`),
+          ...(current === level ? { hint: '✓' } : {}),
+          onPick: () => {
+            close()
+            canvas.setCardPriority(cardId, current === level ? undefined : level)
+          },
+        })
+      }
+      if (current !== undefined) {
+        items.push({
+          key: 'priority-clear',
+          icon: 'unpin',
+          label: t('menu.priorityClear'),
+          onPick: () => {
+            close()
+            canvas.setCardPriority(cardId, undefined)
+          },
+        })
+      }
       // Mark it unread by hand: exactly the "finished, nobody looked" state the
       // map computes on its own, cleared the same way (open the conversation).
       items.push({
@@ -2348,6 +2349,14 @@ function CanvasInner(props: RootSlotStandardProps): React.JSX.Element {
         },
       })
       items.push({
+        key: 'box-layout',
+        label: box?.free === true ? t('menu.boxGrid') : t('menu.boxFree'),
+        onPick: () => {
+          close()
+          canvas.setBoxFree(boxId, box?.free !== true)
+        },
+      })
+      items.push({
         key: 'box-color',
         label: `${t('menu.color')}…`,
         onPick: () => { setMenu({ ...menu, view: 'box-color' }) },
@@ -2373,7 +2382,7 @@ function CanvasInner(props: RootSlotStandardProps): React.JSX.Element {
       items,
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [menu, workspaces.items, sessions, boardSessionIds, boxes, pages, activePage, wsTitles, canvasState.cards, canvasState.edges, canvasState.digests, pinnedSessions, locale])
+  }, [menu, workspaces.items, sessions, boardSessionIds, boxes, pages, activePage, wsTitles, canvasState.cards, canvasState.edges, canvasState.digests, locale])
 
   const savedCamera = canvas.savedCamera(pageCameraKey(activePage))
   const hasContent = Object.keys(visibleCards).length > 0 || Object.keys(frameRects).length > 0
@@ -2500,7 +2509,7 @@ function CanvasInner(props: RootSlotStandardProps): React.JSX.Element {
           </ControlButton>
         </Controls>
       </ReactFlow>
-      <StatusRail entries={statusEntries} cardWidth={CARD_W} onFocus={focusCard} />
+      <PriorityRail entries={priorityEntries} cardWidth={CARD_W} onFocus={focusCard} />
       {batchMode
         ? (
             <BatchBar

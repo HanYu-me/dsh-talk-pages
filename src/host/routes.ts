@@ -4,6 +4,7 @@
  * browser-trust fence). Mutations accept same-origin browser requests and
  * origin-less local tools (curl); a cross-origin browser POST is refused.
  */
+import { onReload } from './reload-bus.ts'
 import type { IncomingMessage, ServerResponse } from 'node:http'
 import { appendFile, mkdir } from 'node:fs/promises'
 import { homedir } from 'node:os'
@@ -144,6 +145,11 @@ export function mountTalkMapRoutes(
     if (change.domain !== DOMAIN_NAME) return
     const frame = `event: change\ndata: ${JSON.stringify(change)}\n\n`
     for (const client of sseClients) client.write(frame)
+  })
+
+  // The agent API changed the canvas behind the browser's back: tell open maps to re-sync.
+  const offReload = onReload(() => {
+    for (const client of sseClients) client.write('event: reload\ndata: {}\n\n')
   })
 
   const ping = setInterval(() => {
@@ -458,6 +464,7 @@ export function mountTalkMapRoutes(
   return () => {
     clearInterval(ping)
     offChanged()
+    offReload()
     for (const client of sseClients) client.end()
     sseClients.clear()
     unregister()

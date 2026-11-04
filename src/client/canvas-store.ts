@@ -235,7 +235,7 @@ export const canvas = {
         else digests[change.key] = change.value as Digest
         setState({ digests })
       }
-    })
+    }, () => { canvas.refresh() })
   },
 
   moveCard(id: string, x: number, y: number): void {
@@ -374,6 +374,34 @@ export const canvas = {
     })
   },
 
+  /** Mark a card's importance (1 high, 2 medium, 3 low; undefined clears it). */
+  setCardPriority(id: string, priority: 1 | 2 | 3 | undefined): void {
+    const card = state.cards[id]
+    if (card === undefined || card.priority === priority) return
+    pushUndo()
+    const next = { ...card }
+    if (priority === undefined) delete next.priority
+    else next.priority = priority
+    setState({ cards: { ...state.cards, [id]: next } })
+    trackCardWrite(talkMapApi.upsertCards({ [id]: next }).catch((error) => {
+      console.error('[dsh-talk-pages] card priority save failed:', error)
+    }))
+  },
+
+  /** Switch a box between the slot grid and free placement of its members. */
+  setBoxFree(boxId: string, free: boolean): void {
+    if (state.global === null) return
+    const box = state.global.boxes?.[boxId]
+    if (box === undefined || (box.free === true) === free) return
+    pushUndo()
+    const global: MapGlobal = {
+      ...state.global,
+      boxes: { ...state.global.boxes, [boxId]: { ...box, free } },
+    }
+    setState({ global })
+    void persistGlobal(global, 'box')
+  },
+
   /** Switch the rendered page (each page keeps its own camera). */
   setActivePage(pageId: string): void {
     if (state.global === null || state.global.activePage === pageId) return
@@ -397,7 +425,7 @@ export const canvas = {
     pushUndo()
     const global: MapGlobal = {
       ...state.global,
-      boxes: { ...state.global.boxes, [boxId]: { pageId, title } },
+      boxes: { ...state.global.boxes, [boxId]: { pageId, title, free: true } },
       wsFrames: { ...state.global.wsFrames, [boxId]: rect },
     }
     setState({ global })

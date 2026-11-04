@@ -695,6 +695,13 @@
         sync()
         return Promise.resolve()
       },
+      unarchiveSession: (sessionId) => {
+        log('ui.unarchiveSession', sessionId)
+        archivedSessionIds = archivedSessionIds.filter(id => id !== sessionId)
+        workspacesState = buildWorkspaces()
+        sync()
+        return Promise.resolve()
+      },
     },
     // Panel navigation: the map registers a `main` entry and selects it here,
     // exactly like the recycle bin / Plugins page do in the real shell.
@@ -815,6 +822,13 @@
       recycleBusyLeft = on ? times : 0
     },
     pinned: () => pinnedSessionIds.slice(),
+    archived: () => archivedSessionIds.slice(),
+    /** Test hook: put a session in the archive as the sidebar would. */
+    archive(sessionId) {
+      archivedSessionIds = [...archivedSessionIds, sessionId]
+      workspacesState = buildWorkspaces()
+      sync()
+    },
     /** What the fake shell's sidebar looks like right now. */
     sidebarState: () => ({
       collapsed: sidebarCollapsed,

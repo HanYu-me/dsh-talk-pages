@@ -16,6 +16,7 @@ import { fontScale } from './font-scale.ts'
 import { GlobalSearch } from './GlobalSearch.tsx'
 import { closeMapPanel, hideSidebarForMap, mapUi, openSessionInUi, restoreSidebarAfterMap } from './map-state.ts'
 import { MapCanvas } from './MapCanvas.tsx'
+import { unarchiveSession } from './session-actions.ts'
 import { PageTabs } from './PageTabs.tsx'
 import styles from './talk-pages.module.css'
 
@@ -85,6 +86,7 @@ export function MapOverlay(props: RootSlotStandardProps): React.JSX.Element {
   // MapCanvas re-keys its own memos so the React-Flow nodes follow.
   useSyncExternalStore(subscribeLocale, activeLocale, activeLocale)
   const fontStep = useSyncExternalStore(fontScale.subscribe, fontScale.getSnapshot)
+  const archivedIds = props.useWorkspaces(state => state.archivedSessionIds)
 
   // The shell selected this panel: publish that so the sidebar button, the
   // hotkey and the context menu all agree on the state — and give the map the
@@ -133,7 +135,16 @@ export function MapOverlay(props: RootSlotStandardProps): React.JSX.Element {
           <span>{t('map.back')}</span>
         </button>
         <span className={styles['headerSpace']} />
-        <GlobalSearch onOpenSession={(sessionId) => { openSessionInUi(sessionId) }} />
+        <GlobalSearch
+          onOpenSession={(sessionId) => {
+            // A search hit may be archived: restore it first, then open it.
+            if ((archivedIds ?? []).includes(sessionId)) {
+              void unarchiveSession(sessionId).then(() => { openSessionInUi(sessionId) }).catch(() => { openSessionInUi(sessionId) })
+              return
+            }
+            openSessionInUi(sessionId)
+          }}
+        />
         <FontSizeButtons />
         <button
           type="button"

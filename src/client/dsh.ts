@@ -163,6 +163,8 @@ export interface UiWorkspaceService {
   unpinSession?(sessionId: string): Promise<unknown>
   /** Archive a session (the shipped "归档"), optionally stopping its work. */
   archiveSession?(sessionId: string, options?: { stopActivity?: boolean }): Promise<void>
+  /** Restore an archived session (the shipped "取消归档"). */
+  unarchiveSession?(sessionId: string): Promise<void>
 }
 
 /** ctx.workspaces (subset): connectWorkspace reuses-or-creates the blank session. */

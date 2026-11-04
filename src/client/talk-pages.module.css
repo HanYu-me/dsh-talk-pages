@@ -2668,3 +2668,10 @@
 .pickerTime { color: var(--dsw-alias-label-tertiary, var(--dsw-alias-label-secondary)); min-width: 40px; text-align: right; }
 .pickerAuto { display: flex; align-items: center; gap: 6px; flex: 1; color: var(--dsw-alias-label-secondary); }
 .pickerCount { color: var(--dsw-alias-label-secondary); }
+
+/* ---- archived conversations ---------------------------------------------- */
+.cardChipArchived {
+  color: var(--dsw-alias-label-secondary);
+  border: 1px dashed var(--dsw-alias-border-l3, rgba(255, 255, 255, 0.35));
+  background: transparent;
+}

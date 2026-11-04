@@ -80,6 +80,8 @@ export interface SessionCardData extends Record<string, unknown> {
   pinned?: boolean
   /** The user's importance mark (1 high, 2 medium, 3 low). */
   priority?: Priority
+  /** The conversation is archived; clicking the card restores and opens it. */
+  archived?: boolean
 }
 
 export type SessionCardNodeType = Node<SessionCardData, 'sessionCard'>
@@ -207,6 +209,9 @@ export function SessionCardNode(props: NodeProps<SessionCardNodeType>): React.JS
             )
           : null}
         {statusChip(data.glow, data.running === true)}
+        {data.archived === true
+          ? <span className={`${styles['cardChip']} ${styles['cardChipArchived']}`} title={t('card.archivedHint')} data-talkmap-archived="1">{t('card.archived')}</span>
+          : null}
         {data.priority !== undefined ? <PriorityBadge priority={data.priority} /> : null}
       </div>
       <Handle id="r" type="source" position={Position.Right} className={styles['cardHandle'] ?? ''} />

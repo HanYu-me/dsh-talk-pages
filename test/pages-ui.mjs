@@ -559,6 +559,24 @@ try {
     String((await globalState()).autoAdd))
   await page.click('[class*="pickerCancel"]')
 
+  // ---- 6c. archived conversations: marked on the card; a click restores, then opens ----
+  await openPage('ws-plan')
+  await harness(() => window.__harness.archive('s26'))
+  await wait(600)
+  const archivedCardId = await cardIdForSession('s26')
+  check('an archived conversation keeps its card, marked 已归档',
+    await harness(() => document.querySelector('[data-talkmap-archived="1"]') !== null))
+  const ac = await cardBox(archivedCardId)
+  await page.mouse.click(ac.x + 60, ac.y + 40)
+  await wait(900)
+  const entries = await harness(() => window.__harness.log)
+  const unarchiveAt = entries.findIndex(entry => entry.kind === 'ui.unarchiveSession' && entry.detail === 's26')
+  const openAt = entries.findIndex(entry => entry.kind === 'ui.openSession' && entry.detail === 's26')
+  check('clicking an archived card restores it from the archive',
+    unarchiveAt >= 0 && !(await harness(() => window.__harness.archived())).includes('s26'),
+    JSON.stringify(entries.slice(-4)))
+  check('and only then opens it', openAt > unarchiveAt && unarchiveAt >= 0, `${unarchiveAt} < ${openAt}`)
+
   // ---- 7. no uncaught errors ----------------------------------------
   check('no uncaught page errors', pageErrors.length === 0, pageErrors.slice(0, 3).join(' | '))
 } finally {

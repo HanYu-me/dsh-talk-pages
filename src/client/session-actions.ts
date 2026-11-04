@@ -71,6 +71,17 @@ function isBusyRefusal(error: unknown): boolean {
     || message.includes('still active')
 }
 
+/**
+ * Restore an archived session so it can be opened (the shipped 取消归档).
+ * Resolves false when this build has no such service.
+ */
+export async function unarchiveSession(sessionId: string): Promise<boolean> {
+  const ui = uiWorkspaceService()
+  if (ui === undefined || typeof ui.unarchiveSession !== 'function') return false
+  await ui.unarchiveSession(sessionId)
+  return true
+}
+
 /** Ask the shell to stop a session's work (turn, jobs, subagents, schedules). */
 async function stopWork(sessionIds: readonly string[]): Promise<void> {
   const ui = uiWorkspaceService()

@@ -32,7 +32,7 @@ import { pickFaces, type Obstacle } from './edge-routing.ts'
 import { lastPushFor, stampPush } from './push-log.ts'
 import { DigestDialog } from './DigestDialog.tsx'
 import { closeMapPanel, currentSessionId, getServices, mapUi, openSessionInUi, uiWorkspaceService } from './map-state.ts'
-import { archiveSessions, trashSessions } from './session-actions.ts'
+import { archiveSessions, trashSessions, unarchiveSession } from './session-actions.ts'
 import { allSessionTitles, setCardTable, setTitleResolver, setTitleTable } from './map-state.ts'
 import { drawerState } from './drawer-state.ts'
 import { callRpc, fetchSearchContext, fetchSessionHits, searchSessions, type ContentHit } from './rpc.ts'
@@ -304,6 +304,9 @@ function CanvasInner(props: RootSlotStandardProps): React.JSX.Element {
     () => new Set(Object.values(canvasState.cards).map(card => card.sessionId)),
     [canvasState.cards],
   )
+
+  /** Sessions in the archive: their cards stay on the map, marked. */
+  const archivedSet = useMemo(() => new Set(workspaces.archivedSessionIds ?? []), [workspaces])
 
   const wsFrames = canvasState.global?.wsFrames ?? {}
   const boxes = canvasState.global?.boxes ?? {}
@@ -965,6 +968,7 @@ function CanvasInner(props: RootSlotStandardProps): React.JSX.Element {
           ...(interruptedById.has(card.sessionId) ? { interrupted: true } : {}),
           ...(currentSessionId() === card.sessionId ? { current: true } : {}),
           ...(card.priority !== undefined ? { priority: card.priority } : {}),
+          ...(archivedSet.has(card.sessionId) ? { archived: true } : {}),
           }
         return {
           id: cardId,
@@ -1028,7 +1032,7 @@ function CanvasInner(props: RootSlotStandardProps): React.JSX.Element {
       }
     })
     return [...frameNodes, ...cardNodes, ...stackNodes]
-  }, [frameRects, folderLayouts, foldedCards, foldedSet, cardLayout, draggingCardId, memberShift, membersByGroup, wsTitles, boxes, visibleCards, canvasState.digests, canvasState.global, sessions, statusById, alertById, finishedById, interruptedById, draftSessions, previews, renamedTitles, liveSelectedIds, batchMode, batchPicks, locale])
+  }, [frameRects, folderLayouts, foldedCards, foldedSet, cardLayout, draggingCardId, memberShift, membersByGroup, wsTitles, boxes, visibleCards, canvasState.digests, canvasState.global, sessions, statusById, alertById, finishedById, interruptedById, draftSessions, previews, renamedTitles, liveSelectedIds, batchMode, batchPicks, archivedSet, locale])
 
   const sessionIdToCardId = useMemo(() => {
     const index = new Map<string, string>()
@@ -1726,6 +1730,17 @@ function CanvasInner(props: RootSlotStandardProps): React.JSX.Element {
   const openSession = (sessionId: string): void => {
     // Looking at it counts as reading it: drop the map's own "finished, unread".
     sessionActivity.acknowledge(sessionId)
+    // An archived conversation cannot be opened as it is (the shell would answer
+    // with a blank new one): restore it first, then open it.
+    if ((workspaces.archivedSessionIds ?? []).includes(sessionId)) {
+      void unarchiveSession(sessionId).then((restored) => {
+        if (restored) showToast(t('toast.unarchived'))
+        if (openSessionInUi(sessionId)) closeMapPanel()
+      }).catch((error: unknown) => {
+        showToast(`${t('toast.unarchiveFailed')}${String(error)}`)
+      })
+      return
+    }
     // Open first: if the runtime has no session opener, the map stays up (and
     // the reason lands in the console) instead of closing onto the old chat.
     if (openSessionInUi(sessionId)) closeMapPanel()

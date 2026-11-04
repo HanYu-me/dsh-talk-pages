@@ -16,6 +16,36 @@ DeepSeek Harness（dsh）的可视化对话白板：**每个工作区一页**，
 - **框内自由摆放**：新建的框默认自由摆放（成员位置由你定，拖动框时成员跟着走）；右键框可切换成网格排列。
 - **让对话来整理地图**：开一个新对话说「按行业整理个股研究」即可——插件提供文件接口（`~/.dsh/talk-pages/`），见 [docs/AGENT.md](docs/AGENT.md) 和 [skills/talk-pages-layout](skills/talk-pages-layout/SKILL.md)。
 
+## 截图
+
+下面是示例数据（虚构的对话标题）下的实际界面。
+
+**每个工作区一页，页内自由摆放 + 框 + 连线 + 优先级。** 顶部标签栏切换工作区；「官网改版」「内容与素材」是两个自建的框（可命名、着色、缩放），右侧是不在任何框里的自由卡片，虚线是关联；卡片右下角的「高 / 中 / 低」是优先级，「已归档」表示这条对话在归档里。
+
+![页面、框、连线与优先级](docs/screenshots/1-pages-boxes-priority.png)
+
+**重点对话栏**：左侧展开后按优先级列出所有已标记的卡片，点一下就定位到那张卡。
+
+![重点对话栏](docs/screenshots/6-priority-rail.png)
+
+**右键卡片**：标记优先级、重命名、归档等。
+
+![卡片右键菜单](docs/screenshots/2-card-menu.png)
+
+**右键空白处 →「显示 / 隐藏对话…」**：列出当前页的全部对话（含已归档），✓ 表示在地图上，点一下切换。
+
+![显示 / 隐藏对话](docs/screenshots/3-show-hide-menu.png)
+
+**选择对话**：一次性勾选哪些对话放在地图上，已归档的也能选。
+
+![选择对话](docs/screenshots/4-conversation-picker.png)
+
+**每个工作区一页**：切换标签就换一整张画布，各页各自记住镜头位置。
+
+![另一个页面](docs/screenshots/5-another-page.png)
+
+（截图由 `node scripts/screenshots.mjs` 用离线测试台的演示数据重新生成。）
+
 ## 安装
 
 ```sh

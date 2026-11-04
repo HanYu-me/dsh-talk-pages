@@ -2352,12 +2352,17 @@
   box-shadow: 6px 0 26px rgba(0, 0, 0, 0.32);
   backdrop-filter: blur(10px);
   transform: translateX(-101%);
-  transition: transform 320ms cubic-bezier(0.22, 0.61, 0.36, 1), box-shadow 320ms ease;
+  /* Closed, the panel waits just outside the left edge: hide it once it has slid
+   * out so it never shows over whatever sits to the left of the map. */
+  visibility: hidden;
+  transition: transform 320ms cubic-bezier(0.22, 0.61, 0.36, 1), box-shadow 320ms ease, visibility 0s linear 320ms;
   pointer-events: none;
 }
 
 .statusRail[data-open="1"] .statusRailPanel {
   transform: translateX(0);
+  visibility: visible;
+  transition-delay: 0s;
   pointer-events: auto;
 }
 

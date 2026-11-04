@@ -1,6 +1,6 @@
 {
   "name": "dsh-talk-pages",
-  "version": "0.2.2",
+  "version": "0.2.3",
   "description": "Workspace pages for DeepSeek Harness conversations: one page per workspace, freely placed conversation cards, links, and named boxes that group conversations.",
   "type": "module",
   "main": "lib/index.js",

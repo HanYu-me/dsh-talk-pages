@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="zh">
+<head>
+<meta charset="utf-8" />
+<link rel="icon" href="data:," />
+<title>dsh-talk-pages offline harness</title>
+<!-- The real DSH theme, extracted from the installed app.asar by
+     scripts/extract-theme.mjs. The dark palette activates via
+     data-ds-dark-theme on <body>, exactly like the shell does. -->
+<link rel="stylesheet" href="dsh-theme.css" />
+<style>
+  html, body { margin: 0; height: 100%; background: var(--dsw-alias-bg-base, #151517);
+    color: var(--dsw-alias-label-primary, #f5f6f7);
+    font-family: -apple-system, "Segoe UI", "Microsoft YaHei", sans-serif; }
+  #host { position: relative; height: 100vh; }
+</style>
+</head>
+<body data-ds-dark-theme>
+  <div id="host"></div>
+  <script src="../node_modules/react/umd/react.production.min.js"></script>
+  <script src="../node_modules/react-dom/umd/react-dom.production.min.js"></script>
+  <script src="harness.js"></script>
+  <!-- dev build: the live app loads client/client.js, which must not change while it runs --><script src="../client/client.dev.js"></script>
+  <script>__harness.boot()</script>
+</body>
+</html>

@@ -1,0 +1,36 @@
+name: publish
+
+# 用 npm Trusted Publishing（OIDC）发布：不存任何 token，也不需要一次性密码。
+# 触发方式：推一个 v* 标签（或在 Actions 页面手动 Run workflow）。
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  id-token: write # OIDC 换取 npm 的短期发布凭据
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          # 刻意不设 registry-url：它会写一个占位 token 到 .npmrc，
+          # 而 trusted publishing 要的是"没有 token、走 OIDC"。
+          # registry 由 package.json 的 publishConfig 指定。
+
+      - name: Show toolchain
+        run: |
+          node --version
+          npm --version
+
+      - name: Upgrade npm (OIDC 发布需要 >= 11.5.1)
+        run: npm install -g npm@latest
+
+      - name: Publish to npm
+        run: npm publish --access public --provenance

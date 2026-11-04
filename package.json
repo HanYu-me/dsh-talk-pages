@@ -1,0 +1,80 @@
+{
+  "name": "dsh-talk-pages",
+  "version": "0.1.0",
+  "description": "Workspace pages for DeepSeek Harness conversations: one page per workspace, freely placed conversation cards, links, and named boxes that group conversations.",
+  "type": "module",
+  "main": "lib/index.js",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/HanYu-me/dsh-talk-pages.git"
+  },
+  "keywords": [
+    "dsh",
+    "dsh-plugin",
+    "deepseek-harness",
+    "conversation-map",
+    "whiteboard",
+    "workspace"
+  ],
+  "scripts": {
+    "build": "node scripts/build-host.mjs && node scripts/build-client.mjs --publish",
+    "build:client": "node scripts/build-client.mjs",
+    "harness": "node test/serve.mjs 8791",
+    "test:pages": "node test/pages.test.mjs",
+    "test:pages-ui": "node test/pages-ui.mjs",
+    "test:layout": "node test/grid.test.mjs",
+    "build:host": "node scripts/build-host.mjs"
+  },
+  "dsh": {
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    },
+    "client": {
+      "inject": [
+        "@deepseek-ai/dsh-client-runtime"
+      ],
+      "platform": "web"
+    }
+  },
+  "exports": {
+    ".": "./lib/index.js",
+    "./client": "./client/client.js",
+    "./cordis.patch.yml": "./cordis.patch.yml",
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "lib/index.js",
+    "client/client.js",
+    "cordis.patch.yml",
+    "LICENSE",
+    "README.md",
+    "README.zh.md"
+  ],
+  "dependencies": {
+    "zod": "^4.1.5"
+  },
+  "peerDependencies": {
+    "@deepseek-ai/cordis": "*",
+    "react": "^18.2.0"
+  },
+  "devDependencies": {
+    "@types/node": "^26.2.0",
+    "@types/react": "~18.3.1",
+    "@types/react-dom": "~18.3.1",
+    "@xyflow/react": "^12.8.0",
+    "esbuild": "^0.28.2",
+    "lightningcss": "^1.33.0",
+    "playwright-core": "^1.64.1",
+    "react": "^18.3.1",
+    "react-dom": "~18.3.1"
+  },
+  "engines": {
+    "node": ">=22.19.0",
+    "dsh": ">=0.2.1-rc.1 <0.3.0-0"
+  },
+  "homepage": "https://github.com/HanYu-me/dsh-talk-pages#readme",
+  "bugs": {
+    "url": "https://github.com/HanYu-me/dsh-talk-pages/issues"
+  }
+}

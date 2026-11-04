@@ -1,0 +1,2568 @@
+/* All colors come from the shell's --dsw-alias-* semantic tokens (ui-theme
+ * design-platform.css), so light/dark follow the app theme automatically. */
+
+.toggleButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border: none;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--dsw-alias-label-secondary);
+  cursor: pointer;
+}
+
+.toggleButton:hover {
+  background: var(--dsw-alias-interactive-bg-hover);
+  color: var(--dsw-alias-label-primary);
+}
+
+.toggleButtonActive {
+  background: var(--dsw-alias-interactive-bg-active);
+  color: var(--dsw-alias-brand-primary);
+}
+
+/* Sidebar expanded: a labeled row matching the Settings trigger's footprint. */
+.toggleRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 6px 10px;
+  border: none;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--dsw-alias-label-secondary);
+  font-size: calc(13px + var(--tm-font-step, 0px));
+  cursor: pointer;
+  text-align: left;
+}
+
+.toggleRow:hover {
+  background: var(--dsw-alias-interactive-bg-hover);
+  color: var(--dsw-alias-label-primary);
+}
+
+.toggleLabel {
+  white-space: nowrap;
+}
+
+.toggleIcon {
+  width: 18px;
+  height: 18px;
+  flex: none;
+}
+
+/* The map is a `main` panel: an ordinary centre-column page, so it fills the
+ * column it is given instead of covering the frame. */
+.panel {
+  height: 100%;
+  min-height: 0;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  background: var(--dsw-alias-bg-base);
+  color: var(--dsw-alias-label-primary);
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  /* No frame-overlay inset here: this is a panel inside the column, not a layer
+   * under the floating title bar — that offset only left a dead band on top. */
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--dsw-alias-border-l1);
+  background: var(--dsw-alias-bg-layer-1);
+  flex: none;
+}
+
+/* Leftmost header control: leave the map and go back to the conversation. */
+.backButton {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  flex: none;
+  height: 38px;
+  padding: 0 18px 0 12px;
+  border: 1px solid var(--dsw-alias-border-l2);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--dsw-alias-label-secondary);
+  font-size: calc(14px + var(--tm-font-step, 0px));
+  font-weight: 600;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.backButton:hover {
+  background: var(--dsw-alias-interactive-bg-hover);
+  color: var(--dsw-alias-label-primary);
+}
+
+/* ---- global search (header) --------------------------------------------- */
+.globalSearch {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-right: 8px;
+}
+
+.globalSearchInput {
+  width: 200px;
+  font: inherit;
+  font-size: calc(12px + var(--tm-font-step, 0px));
+  color: var(--dsw-alias-label-primary);
+  background: var(--dsw-alias-bg-layer-2, rgba(255, 255, 255, 0.06));
+  border: 1px solid var(--dsw-alias-border-l2);
+  border-radius: 8px;
+  padding: 5px 9px;
+  outline: none;
+}
+
+.globalSearchInput:focus {
+  border-color: var(--dsw-alias-border-l3, rgba(255, 255, 255, 0.3));
+}
+
+.globalSearchButton {
+  font: inherit;
+  font-size: calc(11.5px + var(--tm-font-step, 0px));
+  color: var(--dsw-alias-label-secondary);
+  background: transparent;
+  border: 1px solid var(--dsw-alias-border-l2);
+  border-radius: 8px;
+  padding: 5px 10px;
+  cursor: pointer;
+}
+
+.globalSearchButton:hover {
+  color: var(--dsw-alias-label-primary);
+}
+
+.globalSearchBackdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 70;
+  background: rgba(0, 0, 0, 0.45);
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding-top: 9vh;
+}
+
+.globalSearchPanel {
+  width: min(980px, 92vw);
+  max-height: 76vh;
+  display: flex;
+  flex-direction: column;
+  border-radius: 14px;
+  border: 1px solid var(--dsw-alias-border-l2);
+  background: var(--dsw-alias-bg-layer-1);
+  box-shadow: 0 22px 60px rgba(0, 0, 0, 0.5);
+  overflow: hidden;
+}
+
+.globalSearchHead {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--dsw-alias-border-l2);
+}
+
+.globalSearchTitle {
+  font-size: calc(13px + var(--tm-font-step, 0px));
+  font-weight: 600;
+  color: var(--dsw-alias-label-primary);
+}
+
+.globalSearchBody {
+  padding: 0 16px 14px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+/* Invisible node used to notice scrolling inside a results list. */
+/* Inline shimmer while a conversation's other hits are still loading. */
+.searchInlineLoading {
+  display: flex;
+  align-items: center;
+  padding: 4px 0 2px 10px;
+}
+
+.searchInlineLoading > span {
+  width: 62%;
+}
+
+.drawerScrollSensor {
+  width: 100%;
+  height: 1px;
+  opacity: 0;
+}
+
+/* ---- text size controls -------------------------------------------------- */
+.fontGroup {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-right: 6px;
+}
+
+.fontButton {
+  /* Both buttons must be the same box with the text optically centred: the
+   * A and the sign are two spans of different sizes, so centre them as a pair
+   * (baseline alignment made the two buttons sit at different heights). */
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  min-width: 46px;
+  height: 28px;
+  padding: 0 8px;
+  line-height: 1;
+  border: 1px solid var(--dsw-alias-border-l2);
+  border-radius: 8px;
+  background: transparent;
+  color: var(--dsw-alias-label-secondary);
+  font: inherit;
+  font-size: calc(12px + var(--tm-font-step, 0px));
+  cursor: pointer;
+}
+
+.fontButton:hover:not(:disabled) {
+  color: var(--dsw-alias-label-primary);
+  border-color: var(--dsw-alias-border-l3, rgba(255, 255, 255, 0.3));
+}
+
+.fontButton:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+.fontGlyphSmall,
+.fontGlyphLarge {
+  display: inline-block;
+  /* Same advance width for both, so the two buttons are symmetric. */
+  width: calc(9px + 0px);
+  text-align: center;
+  line-height: 1;
+}
+
+/* Both glyphs the same size: the − / + sign alone tells the two buttons apart,
+ * so the pair reads as one control instead of two mismatched ones. */
+.fontGlyphSmall,
+.fontGlyphLarge {
+  font-size: calc(13px + var(--tm-font-step, 0px));
+}
+
+.fontSign {
+  display: inline-block;
+  font-size: calc(10px + var(--tm-font-step, 0px));
+  line-height: 1;
+  /* Reads as a superscript rather than a trailing character. */
+  transform: translateY(-3px);
+}
+
+.fontReset {
+  min-width: 50px;
+}
+
+.fontReset {
+  min-width: 44px;
+}
+
+.headerSpace {
+  flex: 1;
+}
+
+/* Same pill as the hotkey button; min-width keeps the header from jumping
+   as the label cycles 自动 / 中文 / English. */
+.langButton {
+  flex: none;
+  min-width: 72px;
+  height: 34px;
+  padding: 0 14px;
+  border: 1px solid var(--dsw-alias-border-l2);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--dsw-alias-label-secondary);
+  font-size: calc(13px + var(--tm-font-step, 0px));
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.langButton:hover {
+  background: var(--dsw-alias-interactive-bg-hover);
+  color: var(--dsw-alias-label-primary);
+}
+
+/* Right corner: the same "leave the map" action as the back button. */
+.closeButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  width: 38px;
+  height: 38px;
+  padding: 0;
+  border: 1px solid var(--dsw-alias-border-l2);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--dsw-alias-label-secondary);
+  cursor: pointer;
+}
+
+.closeButton:hover {
+  background: var(--dsw-alias-interactive-bg-hover);
+  color: var(--dsw-alias-label-primary);
+}
+
+.zoomResetLabel {
+  font-size: calc(9px + var(--tm-font-step, 0px));
+  font-weight: 700;
+  letter-spacing: -0.5px;
+}
+
+/* ---- page tabs (one page per workspace) --------------------------------- */
+/* A rail under the header: the map's workspace switcher. It scrolls
+ * horizontally instead of wrapping — the canvas keeps its full height. */
+.pageTabs {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: none;
+  min-height: 40px;
+  padding: 6px 14px;
+  border-bottom: 1px solid var(--dsw-alias-border-l1);
+  background: var(--dsw-alias-bg-base);
+  overflow: hidden;
+}
+
+.pageTabScroll {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scrollbar-width: thin;
+}
+
+.pageTab {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  flex: none;
+  max-width: 220px;
+  height: 28px;
+  padding: 0 10px;
+  border: 1px solid transparent;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--dsw-alias-label-secondary);
+  font-size: calc(12px + var(--tm-font-step, 0px));
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.pageTab:hover {
+  background: var(--dsw-alias-interactive-bg-hover);
+  color: var(--dsw-alias-label-primary);
+}
+
+/* The active page is the map's current subject: solid, branded, unmissable. */
+.pageTabActive {
+  border-color: var(--dsw-alias-border-l2);
+  background: var(--dsw-alias-bg-layer-1);
+  color: var(--dsw-alias-label-primary);
+}
+
+.pageTabTitle {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.pageTabCount {
+  flex: none;
+  min-width: 18px;
+  padding: 0 5px;
+  border-radius: 999px;
+  background: var(--dsw-alias-interactive-bg-hover);
+  color: var(--dsw-alias-label-tertiary);
+  font-size: calc(10px + var(--tm-font-step, 0px));
+  font-weight: 600;
+  line-height: 16px;
+  text-align: center;
+}
+
+.pageTabsSpace {
+  flex: 1;
+  min-width: 8px;
+}
+
+/* 吸附/Snap + ＋ 新建框: the page model's two actions, at the rail's right end. */
+.pageAction {
+  flex: none;
+  height: 28px;
+  padding: 0 12px;
+  border: 1px solid var(--dsw-alias-border-l2);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--dsw-alias-label-secondary);
+  font-size: calc(12px + var(--tm-font-step, 0px));
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.pageAction:hover {
+  background: var(--dsw-alias-interactive-bg-hover);
+  color: var(--dsw-alias-label-primary);
+}
+
+/* Snap is a switch: the on state is filled, like a pressed toggle. */
+.pageActionOn {
+  border-color: var(--dsw-alias-brand-primary);
+  color: var(--dsw-alias-brand-primary);
+}
+
+.canvas {
+  flex: 1;
+  min-height: 0;
+  position: relative;
+}
+
+/* Slot layout: a card that gets pushed aside or fills a gap glides to its new
+ * slot. The card under the pointer is exempt — it has to track the drag 1:1. */
+/* ---- edges: 两种样子 ------------------------------------------------
+   未同步 = 灰白静态虚线；同步中 = 灰白静态实线 + 一枚软光点沿曲线跑过去。
+   线体和光点都由 TalkMapEdge 组件画（光点是 animateMotion 跟随路径的径向
+   渐变圆），样式表在这里只保留一个兜底：动效受限时让光点停住但仍在。 */
+@media (prefers-reduced-motion: reduce) {
+  .canvas :global(.react-flow__edge) circle {
+    opacity: 0.28;
+  }
+}
+.canvas :global(.react-flow__node) {
+  transition: transform 200ms cubic-bezier(0.2, 0.8, 0.25, 1);
+}
+
+.canvas :global(.react-flow__node.dragging),
+.canvas :global(.react-flow__node.tmDragging) {
+  transition: none;
+}
+
+/* React Flow draws a huge translucent bounding rect over the whole selected
+ * set after a rubber-band select; spanning distant cards it covers half the
+ * board, LOOKS like select-all, and swallows every click underneath. Kill
+ * it — dragging any selected card still moves the whole selection. */
+.canvas :global(.react-flow__nodesselection),
+.canvas :global(.react-flow__nodesselection-rect) {
+  display: none !important;
+  pointer-events: none !important;
+}
+
+.card {
+  position: relative;
+  width: 224px;
+  min-height: 104px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 10px 12px;
+  border: 1px solid var(--dsw-alias-border-l2);
+  border-radius: 10px;
+  background: var(--dsw-alias-bg-layer-1);
+  color: var(--dsw-alias-label-primary);
+  box-shadow: 0 1px 3px var(--dsw-alias-bg-mask-1);
+  font-size: calc(13px + var(--tm-font-step, 0px));
+}
+
+.cardSelected {
+  border-color: var(--dsw-alias-brand-primary);
+}
+
+.cardGhost {
+  opacity: 0.55;
+  border-style: dashed;
+}
+
+.cardTop {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+}
+
+.cardTitle {
+  font-weight: 600;
+  font-size: calc(13px + var(--tm-font-step, 0px));
+  line-height: 1.3;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  word-break: break-word;
+}
+
+.runningDot {
+  flex: none;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #ffffff;
+  animation: talkmap-pulse 1.6s ease-in-out infinite;
+}
+
+@keyframes talkmap-pulse {
+  50% { opacity: 0.35; }
+}
+
+.cardNext {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  font-size: calc(12px + var(--tm-font-step, 0px));
+  color: var(--dsw-alias-label-secondary);
+  min-width: 0;
+}
+
+.cardNextLabel {
+  flex: none;
+  font-size: calc(11px + var(--tm-font-step, 0px));
+  color: var(--dsw-alias-brand-primary);
+  font-weight: 600;
+}
+
+.cardNextText {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.cardStale {
+  flex: none;
+  color: var(--dsw-alias-state-warn-primary);
+  font-size: calc(12px + var(--tm-font-step, 0px));
+}
+
+/* pinned footer: time always bottom-left, status badge bottom-right */
+.cardFooter {
+  margin-top: auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  font-size: calc(11px + var(--tm-font-step, 0px));
+  color: var(--dsw-alias-label-tertiary);
+}
+
+.cardTime {
+  flex: none;
+}
+
+/* Status chip: text and colour follow the lamp exactly — running = white,
+ * waiting = amber, done = green, error = red. The white running dot lives in
+ * the running chip only. */
+.cardChip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 1px 8px;
+  border-radius: 999px;
+  font-size: calc(10px + var(--tm-font-step, 0px));
+  font-weight: 600;
+  white-space: nowrap;
+  border: 1px solid transparent;
+}
+
+.cardChipRunning {
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.14);
+  border-color: rgba(255, 255, 255, 0.35);
+}
+
+.cardChipWaiting {
+  color: rgb(245, 178, 46);
+  background: rgba(245, 178, 46, 0.14);
+  border-color: rgba(245, 178, 46, 0.42);
+}
+
+.cardChipDone {
+  color: rgb(52, 199, 89);
+  background: rgba(52, 199, 89, 0.14);
+  border-color: rgba(52, 199, 89, 0.42);
+}
+
+.cardChipError {
+  color: rgb(242, 78, 78);
+  background: rgba(242, 78, 78, 0.14);
+  border-color: rgba(242, 78, 78, 0.45);
+}
+
+/* Unsent composer text: deliberately neutral grey — a note, not a state the
+ * user has to react to. */
+.cardChipDraft {
+  color: rgb(255, 197, 61);
+  background: rgba(255, 197, 61, 0.18);
+  border-color: rgba(255, 197, 61, 0.5);
+}
+
+/* A run cut off by closing the app: muted amber, no lamp — it is history, not
+ * something still happening. */
+.cardChipInterrupted {
+  color: rgb(214, 158, 92);
+  background: rgba(214, 158, 92, 0.14);
+  border-color: rgba(214, 158, 92, 0.42);
+}
+
+.cardSummary {
+  font-size: calc(12px + var(--tm-font-step, 0px));
+  line-height: 1.45;
+  color: var(--dsw-alias-label-secondary);
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  word-break: break-word;
+}
+
+.cardBadgeWaiting {
+  padding: 1px 7px;
+  border-radius: 999px;
+  font-size: calc(10px + var(--tm-font-step, 0px));
+  color: var(--dsw-alias-state-warn-label);
+  background: var(--dsw-alias-state-warn-tertiary);
+}
+
+.cardBadgeDone {
+  padding: 1px 7px;
+  border-radius: 999px;
+  font-size: calc(10px + var(--tm-font-step, 0px));
+  color: var(--dsw-alias-state-success-primary);
+  background: var(--dsw-alias-state-success-tertiary);
+}
+
+/* ---- the lamp ------------------------------------------------------------
+ * running  = a faint, STEADY white halo + a highlight travelling around the
+ *            card's border (a loading sweep, not a pulse — the card is busy,
+ *            not asking for attention)
+ * waiting  = amber breathing   · error = red breathing   · done = green breathing
+ * The breathing lights are the ones that want the user to look.
+ */
+.cardLampRunning {
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 255, 255, 0.34),
+    0 0 16px 2px rgba(255, 255, 255, 0.2),
+    0 0 40px 9px rgba(255, 255, 255, 0.1);
+}
+
+/* ---- rename dialog ------------------------------------------------------ */
+/* ---- 查看摘要：read-only view of what a card would push --------------- */
+.dialogBackdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 80;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.45);
+  backdrop-filter: blur(2px);
+  animation: tmFadeIn 140ms ease-out;
+}
+
+.digestDialog {
+  width: min(720px, 86vw);
+  max-height: 82vh;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 16px 18px 14px;
+  border-radius: 14px;
+  background: var(--dsw-alias-bg-elevated, #232323);
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.45);
+  animation: tmRiseIn 200ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.digestDialogHead {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  min-width: 0;
+}
+
+.digestDialogTitle {
+  font-size: calc(13px + var(--tm-font-step, 0px));
+  font-weight: 600;
+  color: var(--dsw-alias-label-primary);
+}
+
+.digestDialogFrom {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: calc(11px + var(--tm-font-step, 0px));
+  color: var(--dsw-alias-label-secondary);
+}
+
+.digestLabel {
+  margin-top: 4px;
+  font-size: calc(10.5px + var(--tm-font-step, 0px));
+  color: var(--dsw-alias-label-tertiary, rgba(255, 255, 255, 0.5));
+}
+
+.digestText {
+  width: 100%;
+  min-height: 96px;
+  max-height: 30vh;
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--dsw-alias-label-primary);
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: calc(11.5px + var(--tm-font-step, 0px));
+  line-height: 1.62;
+  resize: none;
+}
+
+.digestEmpty {
+  padding: 18px 4px;
+  font-size: calc(12px + var(--tm-font-step, 0px));
+  color: var(--dsw-alias-label-secondary);
+}
+
+.digestActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 4px;
+}
+
+.renameBackdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  background: rgba(0, 0, 0, 0.42);
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding-top: 22vh;
+}
+
+.renameDialog {
+  width: min(420px, 90vw);
+  background: var(--dsw-alias-bg-layer-1);
+  border: 1px solid var(--dsw-alias-border-l2);
+  border-radius: 12px;
+  box-shadow: 0 18px 42px rgba(0, 0, 0, 0.42);
+  padding: 16px 16px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.renameHeading {
+  font-size: calc(13px + var(--tm-font-step, 0px));
+  font-weight: 600;
+  color: var(--dsw-alias-label-primary);
+}
+
+.renameInput {
+  width: 100%;
+  box-sizing: border-box;
+  font: inherit;
+  font-size: calc(13px + var(--tm-font-step, 0px));
+  color: var(--dsw-alias-label-primary);
+  background: var(--dsw-alias-bg-layer-2, rgba(255, 255, 255, 0.06));
+  border: 1px solid var(--dsw-alias-border-l2);
+  border-radius: 8px;
+  padding: 8px 10px;
+  outline: none;
+}
+
+.renameInput:focus {
+  border-color: var(--dsw-alias-border-l3, rgba(255, 255, 255, 0.35));
+}
+
+.renameError {
+  font-size: calc(12px + var(--tm-font-step, 0px));
+  color: rgb(242, 78, 78);
+}
+
+.renameActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.renameButton {
+  font: inherit;
+  font-size: calc(12.5px + var(--tm-font-step, 0px));
+  color: var(--dsw-alias-label-secondary);
+  background: transparent;
+  border: 1px solid var(--dsw-alias-border-l2);
+  border-radius: 8px;
+  padding: 6px 12px;
+  cursor: pointer;
+}
+
+.renameButton:hover {
+  color: var(--dsw-alias-label-primary);
+}
+
+.renamePrimary {
+  color: #0b0b0c;
+  background: rgb(255, 214, 106);
+  border-color: rgb(255, 214, 106);
+}
+
+.renamePrimary:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+/* Pinned in the sidebar: a small mark before the title, lit so it reads at a
+ * glance. The card keeps its full strength (pinning is a deliberate choice, not
+ * something to fade out). */
+.cardPin {
+  display: inline-flex;
+  align-items: center;
+  flex: none;
+  color: rgb(255, 214, 106);
+  filter: drop-shadow(0 0 5px rgba(255, 214, 106, 0.85));
+  animation: talkmap-pin-glow 2.6s ease-in-out infinite;
+}
+
+@keyframes talkmap-pin-glow {
+  0%, 100% {
+    filter: drop-shadow(0 0 4px rgba(255, 214, 106, 0.6));
+    opacity: 0.92;
+  }
+  50% {
+    filter: drop-shadow(0 0 9px rgba(255, 214, 106, 1));
+    opacity: 1;
+  }
+}
+
+/* The conversation you came from: corner brackets, not a full frame. */
+.cardReticle {
+  position: absolute;
+  inset: -5px;
+  pointer-events: none;
+  filter: drop-shadow(0 0 5px rgba(255, 255, 255, 0.45));
+}
+
+.cardReticle i {
+  position: absolute;
+  width: 13px;
+  height: 13px;
+  border: 2px solid rgba(255, 255, 255, 0.9);
+}
+
+.cardReticle i:nth-child(1) { left: 0; top: 0; border-right: 0; border-bottom: 0; border-top-left-radius: 4px; }
+.cardReticle i:nth-child(2) { right: 0; top: 0; border-left: 0; border-bottom: 0; border-top-right-radius: 4px; }
+.cardReticle i:nth-child(3) { left: 0; bottom: 0; border-right: 0; border-top: 0; border-bottom-left-radius: 4px; }
+.cardReticle i:nth-child(4) { right: 0; bottom: 0; border-left: 0; border-top: 0; border-bottom-right-radius: 4px; }
+
+/* Nothing to report? The card recedes until you point at it. */
+.cardQuiet {
+  opacity: 0.62;
+  transition: opacity 140ms ease;
+}
+
+.cardQuiet:hover {
+  opacity: 1;
+}
+
+/* The stack cell dims like any idle card; a tinted count still says "something
+ * in here has news" without lighting the whole cell up. */
+.stackBadgeBusy {
+  color: rgb(255, 197, 61);
+  border-color: rgba(255, 197, 61, 0.5);
+}
+
+/* The travelling highlight: a conic gradient masked down to a 2px ring. The
+ * RING stays put — only the gradient's start angle is animated (registered
+ * custom property), which is what makes it read as light flowing around the
+ * card instead of a box spinning. */
+@property --tm-ring-angle {
+  syntax: "<angle>";
+  initial-value: 0deg;
+  inherits: false;
+}
+
+.cardLampRunning::after {
+  content: '';
+  position: absolute;
+  inset: -2px;
+  border-radius: 12px;
+  padding: 2px;
+  background: conic-gradient(
+    from var(--tm-ring-angle),
+    rgba(255, 255, 255, 0) 0deg,
+    rgba(255, 255, 255, 0) 190deg,
+    rgba(255, 255, 255, 0.18) 250deg,
+    rgba(255, 255, 255, 0.55) 292deg,
+    rgba(255, 255, 255, 1) 325deg,
+    rgba(255, 255, 255, 0.4) 352deg,
+    rgba(255, 255, 255, 0) 360deg
+  );
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  animation: talkmap-ring-sweep 1.8s linear infinite;
+  pointer-events: none;
+}
+
+@keyframes talkmap-ring-sweep {
+  to { --tm-ring-angle: 360deg; }
+}
+
+.cardLampDone {
+  animation: talkmap-lamp-green 2.8s ease-in-out infinite;
+}
+
+.cardLampError {
+  animation: talkmap-lamp-red 1.9s ease-in-out infinite;
+}
+
+.cardLampWaiting {
+  animation: talkmap-lamp-amber 3.4s ease-in-out infinite;
+}
+
+@keyframes talkmap-lamp-green {
+  0%, 100% {
+    box-shadow:
+      inset 0 0 0 1px rgba(52, 199, 89, 0.40),
+      0 0 14px 1px rgba(52, 199, 89, 0.26),
+      0 0 34px 8px rgba(52, 199, 89, 0.11);
+  }
+  50% {
+    box-shadow:
+      inset 0 0 0 1px rgba(52, 199, 89, 0.72),
+      0 0 24px 5px rgba(52, 199, 89, 0.46),
+      0 0 62px 20px rgba(52, 199, 89, 0.22);
+  }
+}
+
+@keyframes talkmap-lamp-amber {
+  0%, 100% {
+    box-shadow:
+      inset 0 0 0 1px rgba(245, 178, 46, 0.42),
+      0 0 14px 1px rgba(245, 178, 46, 0.24),
+      0 0 34px 8px rgba(245, 178, 46, 0.11);
+  }
+  50% {
+    box-shadow:
+      inset 0 0 0 1px rgba(245, 178, 46, 0.72),
+      0 0 24px 5px rgba(245, 178, 46, 0.44),
+      0 0 60px 19px rgba(245, 178, 46, 0.20);
+  }
+}
+
+@keyframes talkmap-lamp-red {
+  0%, 100% {
+    box-shadow:
+      inset 0 0 0 1px rgba(242, 78, 78, 0.46),
+      0 0 14px 1px rgba(242, 78, 78, 0.28),
+      0 0 34px 8px rgba(242, 78, 78, 0.12);
+  }
+  50% {
+    box-shadow:
+      inset 0 0 0 1px rgba(242, 78, 78, 0.80),
+      0 0 26px 6px rgba(242, 78, 78, 0.52),
+      0 0 66px 22px rgba(242, 78, 78, 0.26);
+  }
+}
+
+.cardRemove {
+  align-self: flex-start;
+  padding: 3px 8px;
+  border: 1px solid var(--dsw-alias-border-l2);
+  border-radius: 6px;
+  background: transparent;
+  color: var(--dsw-alias-label-secondary);
+  font-size: calc(12px + var(--tm-font-step, 0px));
+  cursor: pointer;
+}
+
+.cardRemove:hover {
+  background: var(--dsw-alias-interactive-bg-hover-danger);
+  color: var(--dsw-alias-state-error-primary);
+}
+
+/* Connection points: fully invisible at rest (still hit-testable — opacity
+ * keeps pointer events), revealed on card hover or while a drag is live.
+ * Deliberately NOT transitioned: a transition rides the animation clock,
+ * which throttled/background tabs freeze — the handles would then stay
+ * stuck invisible mid-drag. Instant toggle is timing-independent. */
+.cardHandle {
+  width: 10px;
+  height: 10px;
+  background: var(--dsw-alias-border-l3);
+  border: 2px solid var(--dsw-alias-bg-layer-1);
+  opacity: 0;
+}
+
+.card:hover .cardHandle,
+.canvasConnecting .cardHandle {
+  opacity: 1;
+}
+
+.cardHandle:hover {
+  background: var(--dsw-alias-brand-primary);
+}
+
+.cardRefresh {
+  flex: none;
+  margin-left: auto;
+  width: 22px;
+  height: 22px;
+  padding: 0;
+  border: none;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--dsw-alias-label-tertiary);
+  font-size: calc(13px + var(--tm-font-step, 0px));
+  line-height: 1;
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity 120ms ease;
+}
+
+.card:hover .cardRefresh {
+  opacity: 1;
+}
+
+.cardRefresh:hover {
+  background: var(--dsw-alias-interactive-bg-hover);
+  color: var(--dsw-alias-label-primary);
+}
+
+.cardRefreshBusy {
+  opacity: 1;
+  animation: talkmap-spin 1s linear infinite;
+}
+
+@keyframes talkmap-spin {
+  to { transform: rotate(360deg); }
+}
+
+.spawnPanel {
+  position: absolute;
+  right: 24px;
+  top: 24px;
+  z-index: 6;
+  width: 420px;
+  max-width: calc(100% - 48px);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 16px;
+  border: 1px solid var(--dsw-alias-border-l2);
+  border-radius: 12px;
+  background: var(--dsw-alias-bg-layer-1);
+  box-shadow: 0 8px 30px var(--dsw-alias-bg-mask-2);
+}
+
+.spawnHeading {
+  font-size: calc(14px + var(--tm-font-step, 0px));
+  font-weight: 600;
+  color: var(--dsw-alias-label-primary);
+}
+
+.spawnFrom {
+  font-size: calc(12px + var(--tm-font-step, 0px));
+  color: var(--dsw-alias-label-secondary);
+}
+
+.spawnModes {
+  display: flex;
+  gap: 6px;
+}
+
+.spawnModeBtn {
+  flex: 1;
+  padding: 5px 0;
+  border: 1px solid var(--dsw-alias-border-l2);
+  border-radius: 8px;
+  background: transparent;
+  color: var(--dsw-alias-label-secondary);
+  font-size: calc(12px + var(--tm-font-step, 0px));
+  cursor: pointer;
+}
+
+.spawnModeBtn:hover {
+  background: var(--dsw-alias-interactive-bg-hover);
+}
+
+.spawnModeActive {
+  border-color: var(--dsw-alias-brand-primary);
+  color: var(--dsw-alias-brand-primary);
+  background: var(--dsw-alias-interactive-bg-active);
+}
+
+.spawnHint {
+  font-size: calc(12px + var(--tm-font-step, 0px));
+  color: var(--dsw-alias-label-tertiary);
+}
+
+.spawnTextarea {
+  width: 100%;
+  resize: vertical;
+  min-height: 140px;
+  padding: 10px;
+  border: 1px solid var(--dsw-alias-border-l2);
+  border-radius: 8px;
+  background: var(--dsw-alias-bg-base);
+  color: var(--dsw-alias-label-primary);
+  font-size: calc(13px + var(--tm-font-step, 0px));
+  line-height: 1.5;
+  font-family: inherit;
+}
+
+.spawnError {
+  font-size: calc(12px + var(--tm-font-step, 0px));
+  color: var(--dsw-alias-state-error-primary);
+  word-break: break-all;
+}
+
+.spawnActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.spawnBtnPrimary {
+  padding: 6px 16px;
+  border: none;
+  border-radius: 8px;
+  background: var(--dsw-alias-button-primary-fill);
+  color: var(--dsw-alias-label-primary-foreground);
+  font-size: calc(13px + var(--tm-font-step, 0px));
+  cursor: pointer;
+}
+
+.spawnBtnPrimary:hover {
+  background: var(--dsw-alias-button-primary-hover);
+}
+
+.spawnBtnPrimary:disabled {
+  background: var(--dsw-alias-button-primary-dimmed);
+  cursor: default;
+}
+
+.spawnBtnGhost {
+  padding: 6px 16px;
+  border: 1px solid var(--dsw-alias-border-l2);
+  border-radius: 8px;
+  background: transparent;
+  color: var(--dsw-alias-label-secondary);
+  font-size: calc(13px + var(--tm-font-step, 0px));
+  cursor: pointer;
+}
+
+.spawnBtnGhost:hover {
+  background: var(--dsw-alias-interactive-bg-hover);
+}
+
+.wsFrame {
+  position: relative;
+  border: 1.5px dashed var(--dsw-alias-border-l2);
+  border-radius: 16px;
+  background: transparent;
+}
+
+/* Mid-drag over a neighbour: the drop will bounce, so say so before release. */
+.wsFrameBlocked {
+  border-color: rgb(242, 78, 78) !important;
+  box-shadow: 0 0 0 1px rgba(242, 78, 78, 0.45) inset;
+}
+
+.wsFrameSelected {
+  border-style: solid;
+  border-color: var(--dsw-alias-brand-primary);
+}
+
+.wsFrameLabel {
+  position: absolute;
+  top: -12px;
+  left: 14px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 2px 10px;
+  border-radius: 999px;
+  border: 1px solid var(--dsw-alias-border-l1);
+  background: var(--dsw-alias-bg-layer-1);
+  font-size: calc(12px + var(--tm-font-step, 0px));
+  font-weight: 600;
+  color: var(--dsw-alias-label-secondary);
+  white-space: nowrap;
+  /* the frame body is click-through; the chip is the physical handle */
+  pointer-events: auto;
+  cursor: grab;
+  /* Above the resize strips: the title bar is the folder's primary drag
+   * surface, so it has to win wherever it overlaps the top-edge handle. */
+  z-index: 5;
+}
+
+.wsFrameLabel:active {
+  cursor: grabbing;
+}
+
+/* invisible strips along the dashed edge: click to select, drag to move */
+.wsFrameEdge {
+  position: absolute;
+  pointer-events: auto;
+  cursor: grab;
+}
+
+.wsFrameEdge:active {
+  cursor: grabbing;
+}
+
+/* Resize handles: the folder's own edges, like a desktop folder. The east and
+ * south strips sit on the border, the corner keeps the classic diagonal. */
+
+.wsFrameCount {
+  font-weight: 400;
+  color: var(--dsw-alias-label-tertiary);
+}
+
+/* Mode picker (标准模式 / 创造模式) — the same choice the shell's own new-task
+ * composer offers, kept as two chips so it reads at a glance. */
+
+.menu {
+  position: absolute;
+  /* Above the stack drawer (30): a card menu opened from inside the drawer
+   * has to float over it, not behind it. */
+  z-index: 60;
+  min-width: 200px;
+  max-width: 280px;
+  max-height: 380px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  padding: 6px;
+  border: 1px solid var(--dsw-alias-border-l1);
+  border-radius: 10px;
+  background: var(--dsw-alias-bg-layer-1);
+  box-shadow: 0 8px 30px var(--dsw-alias-bg-mask-2);
+}
+
+.menuTitle {
+  flex: none;
+  padding: 4px 10px 6px;
+  font-size: calc(11px + var(--tm-font-step, 0px));
+  color: var(--dsw-alias-label-tertiary);
+}
+
+.menuSearch {
+  flex: none;
+  box-sizing: border-box;
+  width: calc(100% - 8px);
+  margin: 2px 4px 6px;
+  padding: 5px 8px;
+  border: 1px solid var(--dsw-alias-border-l2);
+  border-radius: 7px;
+  background: var(--dsw-alias-bg-base);
+  color: var(--dsw-alias-label-primary);
+  font-size: calc(12px + var(--tm-font-step, 0px));
+  font-family: inherit;
+}
+
+.menuHint {
+  font-size: calc(11px + var(--tm-font-step, 0px));
+  color: var(--dsw-alias-label-dimmed);
+}
+
+.menuPreview {
+  flex: none;
+  padding: 0 10px 4px;
+  font-size: calc(11px + var(--tm-font-step, 0px));
+  color: var(--dsw-alias-label-tertiary);
+  word-break: break-all;
+}
+
+.menuError {
+  flex: none;
+  padding: 0 10px 4px;
+  font-size: calc(11px + var(--tm-font-step, 0px));
+  color: var(--dsw-alias-state-error-primary);
+  word-break: break-all;
+}
+
+.menuEmpty {
+  padding: 8px 10px;
+  font-size: calc(12px + var(--tm-font-step, 0px));
+  color: var(--dsw-alias-label-tertiary);
+}
+
+.menuItem {
+  /* .menu is a flex column with max-height: without flex:none a long list
+   * SHRINKS every row and clips the text vertically */
+  flex: none;
+  /* Leading 14px glyph + label on one baseline. */
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  text-align: left;
+  padding: 6px 10px;
+  border: none;
+  border-radius: 7px;
+  background: transparent;
+  color: var(--dsw-alias-label-primary);
+  font-size: calc(13px + var(--tm-font-step, 0px));
+  cursor: pointer;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.menuIcon {
+  flex: none;
+  width: 14px;
+  height: 14px;
+  color: var(--dsw-alias-label-secondary);
+}
+
+/* Destructive rows read red end to end: label plus glyph. */
+.menuItemDanger {
+  color: rgb(242, 78, 78);
+}
+
+.menuItemDanger .menuIcon {
+  color: rgb(242, 78, 78);
+}
+
+.menuItem:hover:not(:disabled) {
+  background: var(--dsw-alias-interactive-bg-hover);
+}
+
+.menuItem:disabled {
+  color: var(--dsw-alias-label-dimmed);
+  cursor: default;
+}
+
+.wsFrameHidden {
+  font-weight: 400;
+  color: var(--dsw-alias-state-warn-primary);
+}
+
+.emptyHint {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  font-size: calc(13px + var(--tm-font-step, 0px));
+  color: var(--dsw-alias-label-tertiary);
+  pointer-events: none;
+  z-index: 4;
+}
+
+.toast {
+  position: absolute;
+  left: 50%;
+  bottom: 28px;
+  transform: translateX(-50%);
+  z-index: 8;
+  max-width: 70%;
+  padding: 7px 16px;
+  border: 1px solid var(--dsw-alias-border-l1);
+  border-radius: 999px;
+  background: var(--dsw-alias-bg-layer-1);
+  box-shadow: 0 4px 16px var(--dsw-alias-bg-mask-2);
+  font-size: calc(12px + var(--tm-font-step, 0px));
+  color: var(--dsw-alias-label-primary);
+  pointer-events: none;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ---- overflow stack cell ------------------------------------------------
+ * When a folder is too small for its cards, the last visible slot becomes a
+ * pile: two offset sheets behind a face that names the newest folded card and
+ * counts the rest. Clicking it opens the drawer. */
+.stackCell {
+  position: relative;
+  width: 224px;
+  height: 104px;
+  cursor: pointer;
+}
+
+.stackSheetBack,
+.stackSheetMid {
+  position: absolute;
+  inset: 0;
+  border-radius: 12px;
+  border: 1px solid var(--dsw-alias-border-l2);
+  background: var(--dsw-alias-bg-layer-1);
+}
+
+.stackSheetBack {
+  transform: translate(11px, 11px) scale(0.95);
+  opacity: 0.35;
+}
+
+.stackSheetMid {
+  transform: translate(5px, 5px) scale(0.977);
+  opacity: 0.6;
+}
+
+.stackFace {
+  position: absolute;
+  inset: 0;
+  box-sizing: border-box;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 12px;
+  border: 1px solid var(--dsw-alias-border-l2);
+  border-radius: 12px;
+  background: var(--dsw-alias-bg-layer-1);
+  transition: border-color 140ms ease, transform 140ms ease;
+}
+
+.stackCell:hover .stackFace {
+  border-color: var(--dsw-alias-brand-primary);
+  transform: translateY(-1px);
+}
+
+.stackFaceTitle {
+  font-size: calc(13px + var(--tm-font-step, 0px));
+  font-weight: 600;
+  color: var(--dsw-alias-label-primary);
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+}
+
+.stackBadge {
+  flex: none;
+  padding: 1px 8px;
+  border-radius: 999px;
+  border: 1px solid var(--dsw-alias-border-l2);
+  color: var(--dsw-alias-label-secondary);
+  font-size: calc(11px + var(--tm-font-step, 0px));
+  font-variant-numeric: tabular-nums;
+}
+
+/* ---- the drawer behind that cell ---------------------------------------- */
+.drawerBackdrop {
+  position: absolute;
+  inset: 0;
+  z-index: 30;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--dsw-alias-bg-mask-2);
+}
+
+.drawer {
+  /* Wide enough for several columns: the drawer is a browser, not a list. */
+  width: min(1120px, 94%);
+  max-height: 84%;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--dsw-alias-border-l1);
+  border-radius: 16px;
+  background: var(--dsw-alias-bg-layer-1);
+  box-shadow: 0 18px 48px var(--dsw-alias-bg-mask-2);
+  overflow: hidden;
+}
+
+.drawerHead {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: none;
+  padding: 12px 14px;
+  border-bottom: 1px solid var(--dsw-alias-border-l1);
+}
+
+.drawerTitle {
+  font-size: calc(14px + var(--tm-font-step, 0px));
+  font-weight: 600;
+  color: var(--dsw-alias-label-primary);
+}
+
+.drawerCount {
+  font-size: calc(12px + var(--tm-font-step, 0px));
+  color: var(--dsw-alias-label-tertiary);
+}
+
+.drawerSpace {
+  flex: 1;
+}
+
+.drawerHint {
+  font-size: calc(11px + var(--tm-font-step, 0px));
+  color: var(--dsw-alias-label-tertiary);
+}
+
+.drawerClose {
+  flex: none;
+  width: 30px;
+  height: 30px;
+  padding: 0;
+  border: 1px solid var(--dsw-alias-border-l2);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--dsw-alias-label-secondary);
+  font-size: calc(16px + var(--tm-font-step, 0px));
+  line-height: 1;
+  cursor: pointer;
+}
+
+.drawerClose:hover {
+  background: var(--dsw-alias-interactive-bg-hover);
+  color: var(--dsw-alias-label-primary);
+}
+
+/* Multi-column grid of 224px cards; one wheel notch = one row. */
+/* Rows settle in one after another: 14ms apart, capped, so a long list still
+ * feels immediate. */
+.drawerHits > .drawerHit {
+  animation: tmPopIn 240ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.drawerHits > .drawerHit:nth-child(1) { animation-delay: 20ms; }
+.drawerHits > .drawerHit:nth-child(2) { animation-delay: 34ms; }
+.drawerHits > .drawerHit:nth-child(3) { animation-delay: 48ms; }
+.drawerHits > .drawerHit:nth-child(4) { animation-delay: 62ms; }
+.drawerHits > .drawerHit:nth-child(5) { animation-delay: 76ms; }
+.drawerHits > .drawerHit:nth-child(n+6) { animation-delay: 90ms; }
+
+/* ---- search loading ------------------------------------------------------ */
+.searchLoading {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 6px 0 2px;
+}
+
+.searchLoadingBar {
+  position: relative;
+  height: 2px;
+  border-radius: 2px;
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.07);
+}
+
+.searchLoadingBar > i {
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 34%;
+  border-radius: 2px;
+  background: linear-gradient(90deg, transparent, var(--dsw-alias-brand-primary), transparent);
+  animation: tmSlideBar 1150ms cubic-bezier(0.4, 0, 0.2, 1) infinite;
+}
+
+@keyframes tmSlideBar {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(320%); }
+}
+
+.searchSkeletonRow {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 9px 10px;
+  border: 1px solid var(--dsw-alias-border-l2);
+  border-radius: 9px;
+}
+
+.searchSkeletonTitle,
+.searchSkeletonLine {
+  display: block;
+  height: 9px;
+  border-radius: 4px;
+  background: linear-gradient(90deg, rgba(255,255,255,0.05), rgba(255,255,255,0.12), rgba(255,255,255,0.05));
+  background-size: 220% 100%;
+  animation: tmShimmer 1300ms ease-in-out infinite;
+}
+
+.searchSkeletonTitle { width: 38%; }
+.searchSkeletonLine { width: 78%; }
+
+@keyframes tmShimmer {
+  0% { background-position: 120% 0; }
+  100% { background-position: -60% 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .drawerHits > .drawerHit,
+  .searchLoadingBar > i,
+  .searchSkeletonTitle,
+  .searchSkeletonLine {
+    animation: none;
+  }
+}
+/* ---- motion ---------------------------------------------------------------
+ * One vocabulary for the whole map: short, eased, no bounce. Everything here is
+ * optional decoration — every rule is disabled under prefers-reduced-motion.
+ */
+@keyframes tmFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes tmFadeOut {
+  from { opacity: 1; }
+  to { opacity: 0; }
+}
+
+@keyframes tmRiseIn {
+  from { opacity: 0; transform: translateY(26px) scale(0.94); }
+  60% { opacity: 1; }
+  to { opacity: 1; transform: none; }
+}
+
+@keyframes tmRiseOut {
+  from { opacity: 1; transform: none; }
+  to { opacity: 0; transform: translateY(10px) scale(0.985); }
+}
+
+@keyframes tmPopIn {
+  from { opacity: 0; transform: translateY(6px) scale(0.97); }
+  to { opacity: 1; transform: none; }
+}
+
+@keyframes tmCardIn {
+  from { opacity: 0; transform: translateY(6px) scale(0.99); }
+  to { opacity: 1; transform: none; }
+}
+
+/* Drawer: fast, smooth, and it leaves the same way it arrived. */
+.drawerBackdrop {
+  animation: tmFadeIn 180ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.drawerBackdropOut {
+  animation: tmFadeOut 130ms ease-in both;
+}
+
+.drawer {
+  /* Spring-ish: quick out of the gate, long soft settle, no bounce. */
+  animation: tmRiseIn 260ms cubic-bezier(0.16, 1, 0.3, 1) both;
+  will-change: transform, opacity;
+}
+
+.drawerOut {
+  animation: tmRiseOut 150ms cubic-bezier(0.4, 0, 0.7, 0.2) both;
+}
+
+/* The global search panel shares the vocab. */
+.globalSearchBackdrop {
+  animation: tmFadeIn 130ms ease-out both;
+}
+
+.globalSearchPanel {
+  animation: tmRiseIn 240ms cubic-bezier(0.16, 1, 0.3, 1) both;
+  will-change: transform, opacity;
+}
+
+/* Context menu pops from its corner. */
+.menu {
+  animation: tmPopIn 120ms cubic-bezier(0.2, 0.9, 0.25, 1) both;
+}
+
+/* Cards: a hair of lift on hover, and a soft entrance for new ones. */
+.card {
+  transition: transform 120ms ease-out, box-shadow 160ms ease-out, opacity 160ms ease-out;
+}
+
+.card:hover {
+  transform: translateY(-1px);
+}
+
+.reactFlowNodeEnter {
+  animation: tmCardIn 170ms cubic-bezier(0.2, 0.9, 0.25, 1) both;
+}
+
+/* Stack cell lifts like a card. */
+.stackCell {
+  transition: transform 120ms ease-out, box-shadow 160ms ease-out;
+}
+
+.stackCell:hover {
+  transform: translateY(-2px);
+}
+
+/* Folder label brightens on hover (and it is the drag handle, so it hints). */
+.wsFrameLabel {
+  transition: color 120ms ease-out, background 120ms ease-out, box-shadow 120ms ease-out;
+}
+
+.wsFrameLabel:hover {
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.35);
+}
+
+/* Toast rises instead of appearing. */
+.toast {
+  animation: tmRiseIn 160ms cubic-bezier(0.2, 0.9, 0.25, 1) both;
+}
+
+/* Snippet formatting: Markdown shown as it reads, not as its source. */
+.snippetCode {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.94em;
+  padding: 0 3px;
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.snippetLink {
+  color: var(--dsw-alias-brand-primary);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .drawerBackdrop,
+  .drawerBackdropOut,
+  .drawer,
+  .drawerOut,
+  .globalSearchBackdrop,
+  .globalSearchPanel,
+  .menu,
+  .toast,
+  .reactFlowNodeEnter {
+    animation: none;
+  }
+  .card,
+  .stackCell,
+  .wsFrameLabel {
+    transition: none;
+  }
+  .card:hover,
+  .stackCell:hover {
+    transform: none;
+  }
+}
+
+/* ---- drawer search ------------------------------------------------------ */
+.drawerSearchRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 14px 8px;
+}
+
+.drawerSearch {
+  flex: 1;
+  min-width: 0;
+  font: inherit;
+  font-size: calc(12.5px + var(--tm-font-step, 0px));
+  color: var(--dsw-alias-label-primary);
+  background: var(--dsw-alias-bg-layer-2, rgba(255, 255, 255, 0.06));
+  border: 1px solid var(--dsw-alias-border-l2);
+  border-radius: 8px;
+  padding: 6px 10px;
+  outline: none;
+}
+
+.drawerSearch:focus {
+  border-color: var(--dsw-alias-border-l3, rgba(255, 255, 255, 0.3));
+}
+
+.drawerSearchGo {
+  flex: none;
+  font: inherit;
+  font-size: calc(11.5px + var(--tm-font-step, 0px));
+  color: var(--dsw-alias-label-secondary);
+  background: transparent;
+  border: 1px solid var(--dsw-alias-border-l2);
+  border-radius: 8px;
+  padding: 5px 10px;
+  cursor: pointer;
+}
+
+.drawerSearchGo:hover {
+  color: var(--dsw-alias-label-primary);
+}
+
+.drawerSearchState {
+  font-size: calc(11px + var(--tm-font-step, 0px));
+  color: var(--dsw-alias-label-secondary);
+  flex: none;
+}
+
+.drawerSearchError {
+  flex: none;
+  max-width: 52%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: calc(11px + var(--tm-font-step, 0px));
+  color: rgb(242, 78, 78);
+}
+
+.drawerEmpty {
+  grid-column: 1 / -1;
+  padding: 10px 4px;
+  font-size: calc(12px + var(--tm-font-step, 0px));
+  color: var(--dsw-alias-label-secondary);
+}
+
+.drawerHits {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 6px;
+  padding-top: 10px;
+  border-top: 1px solid var(--dsw-alias-border-l2);
+}
+
+.drawerHitsHead {
+  font-size: calc(11px + var(--tm-font-step, 0px));
+  color: var(--dsw-alias-label-secondary);
+  letter-spacing: 0.04em;
+}
+
+.drawerHit {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  text-align: left;
+  padding: 8px 10px;
+  border: 1px solid var(--dsw-alias-border-l2);
+  border-radius: 9px;
+  background: transparent;
+  color: var(--dsw-alias-label-primary);
+  font: inherit;
+  cursor: pointer;
+}
+
+.drawerHit:hover {
+  border-color: var(--dsw-alias-border-l3, rgba(255, 255, 255, 0.3));
+}
+
+/* Who said it:你的消息 / agent 的回答 */
+.drawerRoleChip {
+  flex: none;
+  margin-right: 6px;
+  padding: 0 5px;
+  border-radius: 4px;
+  font-size: calc(9.5px + var(--tm-font-step, 0px));
+  line-height: 1.6;
+  color: var(--dsw-alias-label-secondary);
+  background: rgba(255, 255, 255, 0.07);
+}
+
+.drawerRoleChip[data-talkmap-role="user"] {
+  color: rgba(160, 210, 255, 0.95);
+  background: rgba(90, 160, 255, 0.14);
+}
+
+/* Search term inside a result line. */
+.hitMark {
+  color: #0b0b0c;
+  background: rgb(255, 214, 106);
+  border-radius: 3px;
+  padding: 0 2px;
+}
+
+/* Agent badge next to a hit's title. */
+.drawerHitHead {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+}
+
+.drawerAgentChip {
+  flex: none;
+  padding: 1px 6px;
+  border-radius: 999px;
+  border: 1px solid var(--dsw-alias-border-l2);
+  font-size: calc(10px + var(--tm-font-step, 0px));
+  line-height: 1.5;
+  color: var(--dsw-alias-label-secondary);
+  letter-spacing: 0.02em;
+}
+
+/* Sub-agent sessions are easy to mistake for your own conversation: tint it. */
+.drawerAgentChipSub {
+  color: rgb(255, 214, 106);
+  border-color: rgba(255, 214, 106, 0.5);
+  background: rgba(255, 214, 106, 0.1);
+}
+
+.drawerHitTitle {
+  /* It is a <button> (click = open that conversation), so reset the furniture. */
+  display: block;
+  width: 100%;
+  text-align: left;
+  font: inherit;
+  font-size: calc(12.5px + var(--tm-font-step, 0px));
+  font-weight: 600;
+  color: var(--dsw-alias-label-primary);
+  background: transparent;
+  border: none;
+  padding: 0 0 2px;
+  cursor: pointer;
+}
+
+.drawerHitTitle:hover {
+  color: var(--dsw-alias-brand-primary);
+}
+
+/* Hover "peek": the whole matched passage, floating above the list. */
+.peek {
+  position: fixed;
+  z-index: 80;
+  width: min(500px, 88vw);
+  max-height: 42vh;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px solid var(--dsw-alias-border-l2);
+  background: var(--dsw-alias-bg-layer-1);
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.55);
+}
+
+.peekTitle {
+  font-size: calc(11.5px + var(--tm-font-step, 0px));
+  font-weight: 600;
+  color: var(--dsw-alias-label-secondary);
+  padding-bottom: 4px;
+  margin-bottom: 2px;
+  border-bottom: 1px solid var(--dsw-alias-border-l2);
+}
+
+.peekLine {
+  font-size: calc(12px + var(--tm-font-step, 0px));
+  line-height: 1.55;
+  color: var(--dsw-alias-label-primary);
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.peekHint {
+  margin-top: 6px;
+  font-size: calc(10.5px + var(--tm-font-step, 0px));
+  color: var(--dsw-alias-label-secondary);
+  opacity: 0.7;
+}
+
+/* "More hits in this conversation" — the heavy part is behind this button. */
+.drawerHitMore {
+  align-self: flex-start;
+  margin-top: 2px;
+  font: inherit;
+  font-size: calc(11px + var(--tm-font-step, 0px));
+  color: var(--dsw-alias-label-secondary);
+  background: transparent;
+  border: none;
+  padding: 2px 0 2px 10px;
+  cursor: pointer;
+}
+
+.drawerHitMore:hover {
+  color: var(--dsw-alias-brand-primary);
+}
+
+/* One match, as a group of context lines. */
+.drawerHitBlock {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  margin-top: 4px;
+  padding-left: 2px;
+}
+
+/* One matched line inside a conversation block. */
+.drawerHitLine {
+  display: block;
+  width: 100%;
+  text-align: left;
+  font: inherit;
+  font-size: calc(11.5px + var(--tm-font-step, 0px));
+  color: var(--dsw-alias-label-secondary);
+  background: transparent;
+  border: none;
+  padding: 2px 0 2px 10px;
+  border-left: 2px solid var(--dsw-alias-border-l2);
+  cursor: pointer;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.drawerHitLine:hover {
+  color: var(--dsw-alias-label-primary);
+  border-left-color: var(--dsw-alias-brand-primary);
+}
+
+.drawerScroll {
+  /* Native wheel/trackpad scrolling, contained in the panel. */
+  overscroll-behavior: contain;
+  scroll-behavior: auto;
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+
+  display: grid;
+  grid-template-columns: repeat(auto-fill, 224px);
+  justify-content: center;
+  align-content: start;
+  gap: 12px;
+  padding: 16px;
+}
+
+/* Drag-to-reorder inside the drawer: the card under the pointer is lifted. */
+.drawerCard[draggable="true"] {
+  cursor: grab;
+}
+
+.drawerCard[data-talkmap-drag="1"] {
+  cursor: grabbing;
+  opacity: 0.55;
+  transform: scale(0.98);
+}
+
+/* Connections from this card to other cards in the same folder. */
+.cardLinks {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin: 2px 0 4px;
+}
+
+.cardLinkChip {
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  padding: 0 6px;
+  border-radius: 4px;
+  font-size: calc(9.5px + var(--tm-font-step, 0px));
+  line-height: 1.7;
+  color: var(--dsw-alias-label-secondary);
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.cardLinkChip[data-talkmap-link="out"] {
+  color: rgba(255, 214, 106, 0.9);
+  background: rgba(255, 214, 106, 0.12);
+}
+
+/* Cards render at 1:1 — 224px wide, exactly what the map shows at 100%. */
+.drawerCard {
+  width: 224px;
+  box-sizing: border-box;
+
+  text-align: left;
+  font: inherit;
+  cursor: pointer;
+  background: var(--dsw-alias-bg-layer-1);
+}
+
+.drawerCard:hover {
+  border-color: var(--dsw-alias-brand-primary);
+}
+
+/* ---- eight resize handles (4 edges + 4 corners) ------------------------- */
+.wsFrameResize {
+  position: absolute;
+  z-index: 2;
+  pointer-events: auto;
+  opacity: 0.5;
+}
+
+.wsFrameResize:hover {
+  opacity: 1;
+  border-color: var(--dsw-alias-brand-primary);
+}
+
+.wsFrameResizeN {
+  cursor: ns-resize;
+  border-top: 3px solid var(--dsw-alias-border-l3);
+  border-radius: 14px 14px 0 0;
+}
+
+.wsFrameResizeS {
+  cursor: ns-resize;
+  border-bottom: 3px solid var(--dsw-alias-border-l3);
+  border-radius: 0 0 14px 14px;
+}
+
+.wsFrameResizeW {
+  cursor: ew-resize;
+  border-left: 3px solid var(--dsw-alias-border-l3);
+  border-radius: 14px 0 0 14px;
+}
+
+.wsFrameResizeE {
+  cursor: ew-resize;
+  border-right: 3px solid var(--dsw-alias-border-l3);
+  border-radius: 0 14px 14px 0;
+}
+
+.wsFrameResizeNw,
+.wsFrameResizeNe,
+.wsFrameResizeSw,
+.wsFrameResizeSe {
+  width: 26px;
+  height: 26px;
+  z-index: 3;
+}
+
+.wsFrameResizeNw {
+  cursor: nwse-resize;
+  border-left: 3px solid var(--dsw-alias-border-l3);
+  border-top: 3px solid var(--dsw-alias-border-l3);
+  border-top-left-radius: 14px;
+}
+
+.wsFrameResizeNe {
+  cursor: nesw-resize;
+  border-right: 3px solid var(--dsw-alias-border-l3);
+  border-top: 3px solid var(--dsw-alias-border-l3);
+  border-top-right-radius: 14px;
+}
+
+.wsFrameResizeSw {
+  cursor: nesw-resize;
+  border-left: 3px solid var(--dsw-alias-border-l3);
+  border-bottom: 3px solid var(--dsw-alias-border-l3);
+  border-bottom-left-radius: 14px;
+}
+
+.wsFrameResizeSe {
+  cursor: nwse-resize;
+  border-right: 3px solid var(--dsw-alias-border-l3);
+  border-bottom: 3px solid var(--dsw-alias-border-l3);
+  border-bottom-right-radius: 14px;
+}
+
+/* ---- batch bar ---------------------------------------------------------- */
+.batchBar {
+  position: absolute;
+  left: 50%;
+  bottom: 18px;
+  transform: translateX(-50%);
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 14px;
+  border: 1px solid var(--dsw-alias-border-l1);
+  border-radius: 999px;
+  background: var(--dsw-alias-bg-layer-1);
+  box-shadow: 0 8px 24px var(--dsw-alias-bg-mask-2);
+}
+
+.batchCount {
+  font-size: calc(12px + var(--tm-font-step, 0px));
+  color: var(--dsw-alias-label-secondary);
+  white-space: nowrap;
+}
+
+.batchSpace {
+  width: 6px;
+}
+
+.batchAction {
+  padding: 5px 14px;
+  border: 1px solid var(--dsw-alias-border-l2);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--dsw-alias-label-primary);
+  font-size: calc(12px + var(--tm-font-step, 0px));
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.batchAction:hover:not(:disabled) {
+  background: var(--dsw-alias-interactive-bg-hover);
+}
+
+.batchAction:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.batchDanger {
+  color: var(--dsw-alias-state-error-primary);
+}
+
+/* ---- batch pick tick box ------------------------------------------------- */
+.pickBox {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  width: 16px;
+  height: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1.5px solid var(--dsw-alias-border-l3);
+  border-radius: 4px;
+  background: var(--dsw-alias-bg-base);
+  color: transparent;
+  font-size: calc(11px + var(--tm-font-step, 0px));
+  line-height: 1;
+  pointer-events: none;
+}
+
+.pickBoxChecked {
+  border-color: var(--dsw-alias-brand-primary);
+  background: var(--dsw-alias-brand-primary);
+  color: #fff;
+}
+
+/* ---- workspace colour toolbar ------------------------------------------- */
+.colorToolbar {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 10px;
+  border: 1px solid var(--dsw-alias-border-l1);
+  border-radius: 999px;
+  background: var(--dsw-alias-bg-layer-1);
+  box-shadow: 0 6px 20px var(--dsw-alias-bg-mask-2);
+}
+
+.colorToolbarLabel {
+  font-size: calc(11px + var(--tm-font-step, 0px));
+  color: var(--dsw-alias-label-tertiary);
+  margin-right: 2px;
+  white-space: nowrap;
+}
+
+.colorSwatch {
+  width: 16px;
+  height: 16px;
+  padding: 0;
+  border: 1px solid var(--dsw-alias-border-l2);
+  border-radius: 50%;
+  cursor: pointer;
+}
+
+.colorSwatch:hover {
+  transform: scale(1.15);
+}
+
+.colorSwatchClear {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  color: var(--dsw-alias-label-secondary);
+  font-size: calc(12px + var(--tm-font-step, 0px));
+  line-height: 1;
+}
+
+.colorSwatchClear:hover {
+  color: var(--dsw-alias-label-primary);
+  background: var(--dsw-alias-interactive-bg-hover);
+}
+
+/* ---------------------------------------------------------------- drawer wires
+   Lines between drawer cards. Measured in scroller coordinates, so the layer
+   spans the whole scroll area and the cards sit above it. */
+.drawerWires {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 0;
+  overflow: visible;
+}
+
+.drawerScroll {
+  position: relative;
+}
+
+.drawerScroll > .card,
+.drawerScroll > [data-stack-card] {
+  position: relative;
+  z-index: 1;
+}
+
+/* 连线永远在卡片下面：万一某条线路径压到卡片，它会被卡片挡住，而不是浮在卡片上 */
+.canvas :global(.react-flow__edges) {
+  z-index: 0 !important;
+}
+.canvas :global(.react-flow__nodes) {
+  z-index: 1 !important;
+}
+
+/* ── status rail: a column of real cards at the left edge ───────────────── */
+.statusRail {
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  z-index: 6;
+  pointer-events: none;
+  --rail-card-w: 224px;
+  --rail-pad: 10px;
+  /* .card is content-box: 224 content + 13px padding each side paints 250 wide. */
+  --rail-card-outer: calc(var(--rail-card-w) + 26px);
+  /* +2px: the card's own 1px border on each side must not be clipped */
+  --rail-w: calc(var(--rail-card-outer) + var(--rail-pad) * 2 + 2px);
+}
+
+.statusRailPanel {
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: var(--rail-w);
+  box-sizing: border-box;
+  padding: var(--rail-pad);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  background: var(--dsw-alias-bg-elevated, rgba(18, 20, 26, 0.94));
+  border-right: 1px solid var(--dsw-alias-border-secondary);
+  box-shadow: 6px 0 26px rgba(0, 0, 0, 0.32);
+  backdrop-filter: blur(10px);
+  transform: translateX(-101%);
+  transition: transform 320ms cubic-bezier(0.22, 0.61, 0.36, 1), box-shadow 320ms ease;
+  pointer-events: none;
+}
+
+.statusRail[data-open="1"] .statusRailPanel {
+  transform: translateX(0);
+  pointer-events: auto;
+}
+
+.statusRailHead {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  padding: 2px 4px 0;
+}
+
+.statusRailTitle {
+  flex: 1;
+  font-size: 12px;
+  letter-spacing: 0.02em;
+  color: var(--dsw-alias-label-secondary);
+}
+
+.statusRailCount {
+  font-size: 11px;
+  color: var(--dsw-alias-label-tertiary, #6b7280);
+  font-variant-numeric: tabular-nums;
+}
+
+.statusRailList {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 2px 0 14px;
+}
+
+.statusRailEmpty {
+  padding: 8px 4px;
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--dsw-alias-label-secondary);
+}
+
+.statusRailSlot {
+  position: relative;
+}
+
+.statusRailSlot[draggable="true"] {
+  cursor: grab;
+}
+
+.statusRailSlot[draggable="true"]:active {
+  cursor: grabbing;
+}
+
+/* A rail card is a board card: same width, same faces, same lamp. */
+.statusRailCard {
+  width: var(--rail-card-w);
+  min-height: 84px;
+  cursor: grab;
+  transition: transform 120ms ease, box-shadow 120ms ease;
+}
+
+.statusRailCard:active {
+  cursor: grabbing;
+}
+
+/* The card being dragged floats under the pointer; the rest glide out of its way. */
+.statusRailSlotFloating {
+  pointer-events: none;
+}
+
+.statusRailCardDragging {
+  cursor: grabbing;
+  transform: scale(1.02) rotate(-0.3deg);
+  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.55);
+  opacity: 0.97;
+}
+
+.statusRailCard:hover {
+  transform: translateY(-1px);
+}
+
+.statusRailTab {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  transform: translateY(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+  min-width: 30px;
+  padding: 13px 7px;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-left: none;
+  border-radius: 0 11px 11px 0;
+  /* Frosted glass: the canvas behind is dark, so a solid chip disappeared into it. */
+  background: rgba(38, 42, 52, 0.42);
+  backdrop-filter: blur(16px) saturate(1.5);
+  -webkit-backdrop-filter: blur(16px) saturate(1.5);
+  box-shadow: 3px 0 14px rgba(0, 0, 0, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  color: var(--dsw-alias-label-primary);
+  cursor: pointer;
+  font: inherit;
+  pointer-events: auto;
+  transition: left 320ms cubic-bezier(0.22, 0.61, 0.36, 1), color 140ms ease, background 140ms ease;
+}
+
+/* Open: the tab rides the panel's right edge, half over it. */
+.statusRail[data-open="1"] .statusRailTab {
+  /* flush against the panel edge: a step here read as a misaligned seam */
+  left: calc(var(--rail-w) - 1px);
+}
+
+.statusRailTab:hover {
+  color: #ffffff;
+  background: rgba(58, 64, 78, 0.55);
+}
+
+.statusRailTabCount {
+  font-size: 10px;
+  line-height: 1;
+  padding: 2px 4px;
+  border-radius: 999px;
+  background: var(--dsw-alias-brand-primary);
+  color: #0b0d12;
+  font-variant-numeric: tabular-nums;
+}
+
+
+/* ── destructive confirmation ────────────────────────────────────────────── */
+.dangerBackdrop {
+  position: absolute;
+  inset: 0;
+  z-index: 40;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(8, 10, 14, 0.55);
+  backdrop-filter: blur(2px);
+}
+
+.dangerDialog {
+  width: min(420px, calc(100% - 48px));
+  padding: 18px 18px 14px;
+  border: 1px solid var(--dsw-alias-border-secondary);
+  border-radius: 14px;
+  background: var(--dsw-alias-bg-elevated, #16181f);
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.55);
+}
+
+.dangerTitle {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--dsw-alias-label-primary);
+}
+
+.dangerBody {
+  margin-top: 8px;
+  font-size: 12.5px;
+  line-height: 1.6;
+  color: var(--dsw-alias-label-secondary);
+}
+
+.dangerActions {
+  margin-top: 16px;
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.dangerCancel,
+.dangerOk {
+  padding: 6px 14px;
+  border-radius: 8px;
+  font: inherit;
+  font-size: 12.5px;
+  cursor: pointer;
+}
+
+.dangerCancel {
+  border: 1px solid var(--dsw-alias-border-secondary);
+  background: transparent;
+  color: var(--dsw-alias-label-secondary);
+}
+
+.dangerCancel:hover {
+  color: var(--dsw-alias-label-primary);
+  background: var(--dsw-alias-interactive-bg-hover);
+}
+
+.dangerOk {
+  border: 1px solid rgba(242, 78, 78, 0.55);
+  background: rgba(242, 78, 78, 0.16);
+  color: #ff6b6b;
+}
+
+.dangerOk:hover {
+  background: rgba(242, 78, 78, 0.28);
+  color: #ff8a8a;
+}
+
+
+/* The picked card keeps its slot (hidden) so the column cannot collapse, while a copy
+   follows the pointer — that is what lets the gap open in both directions. */
+.statusRailGhost {
+  visibility: hidden;
+}
+
+.statusRailFloating {
+  position: fixed;
+  z-index: 20;
+  pointer-events: none;
+}
